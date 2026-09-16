@@ -6,9 +6,9 @@ export async function GET(context) {
     (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
   );
   return rss({
-    title: '체크포인트',
+    title: '견문록',
     description:
-      '뉴스가 아니라 흐름을 추적합니다 — 테크·시장·지정학·부동산·에너지의 연결 기록',
+      '체크포인트 — 뉴스가 아니라 흐름을 추적합니다. 테크·시장·지정학·부동산·에너지의 연결 기록',
     site: context.site,
     items: posts.map((post) => ({
       title: post.data.title,

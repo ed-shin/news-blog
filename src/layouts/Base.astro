@@ -6,15 +6,16 @@ interface Props {
   description?: string;
 }
 
-const { title, description = '뉴스가 아니라 흐름을 추적합니다 — 테크·시장·지정학·부동산·에너지의 연결을 기록하는 블로그' } = Astro.props;
-const siteTitle = '체크포인트';
+const { title, description = '견문록 · 체크포인트 — 뉴스가 아니라 흐름을 추적합니다. 테크·시장·지정학·부동산·에너지의 연결을 기록합니다' } = Astro.props;
+const siteTitle = '견문록';
+const siteSubtitle = '체크포인트';
 ---
 <!doctype html>
 <html lang="ko">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title === siteTitle ? title : `${title} — ${siteTitle}`}</title>
+    <title>{title === siteTitle ? `${siteTitle} — ${siteSubtitle}` : `${title} — ${siteTitle}`}</title>
     <meta name="description" content={description} />
     <link rel="alternate" type="application/rss+xml" title={siteTitle} href="/rss.xml" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📍</text></svg>" />
@@ -23,7 +24,10 @@ const siteTitle = '체크포인트';
   <body>
     <header class="site">
       <div class="wrap">
-        <a class="site-title" href="/"><span>📍</span> 체크포인트</a>
+        <div class="brand">
+          <a class="site-title" href="/"><span>📍</span> {siteTitle}</a>
+          <span class="site-subtitle">{siteSubtitle}</span>
+        </div>
         <nav class="site-nav">
           <a href="/">글</a>
           <a href="/about/">소개</a>
@@ -36,7 +40,7 @@ const siteTitle = '체크포인트';
     </main>
     <footer class="site">
       <div class="wrap">
-        © {new Date().getFullYear()} 체크포인트 · 이 블로그의 모든 내용은 정보 제공 목적이며 투자 권유가 아닙니다.
+        © {new Date().getFullYear()} {siteTitle} ·이 블로그의 모든 내용은 정보 제공 목적이며 투자 권유가 아닙니다.
       </div>
     </footer>
   </body>
