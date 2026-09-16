@@ -1,0 +1,8 @@
+// Cloudflare Workers 정적 사이트 설정 — Worker 스크립트 없이 dist/만 서빙
+{
+  "name": "gyeonmunrok",
+  "compatibility_date": "2026-09-16",
+  "assets": {
+    "directory": "./dist/"
+  }
+}
