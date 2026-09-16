@@ -1,0 +1,33 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+<Base title={post.data.title} description={post.data.description}>
+  <article class="prose">
+    <h1>{post.data.title}</h1>
+    <div class="post-meta">
+      {fmt(post.data.pubDate)}
+      {post.data.updatedDate && <> · 업데이트 {fmt(post.data.updatedDate)}</>}
+      {post.data.tags.map((t) => <span class="tag">{t}</span>)}
+    </div>
+    <Content />
+    <div class="disclaimer">
+      이 글은 공개 뉴스를 수집·요약·분석한 것으로, 정보 제공 목적이며 투자 권유가 아닙니다.
+      모든 사실 항목의 출처는 본문 링크를 참고하세요. 해석·분석은 "분석:"으로 구분해 표기합니다.
+    </div>
+  </article>
+</Base>

@@ -1,0 +1,30 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+<Base title="체크포인트">
+  <p style="color: var(--text-muted); margin-bottom: 2.5em;">
+    뉴스가 아니라 <strong style="color: var(--text);">흐름</strong>을 추적합니다.
+    테크·시장·지정학·부동산·에너지가 교차하는 지점을 기록하고,
+    미리 걸어둔 체크포인트를 공개적으로 채점합니다.
+  </p>
+  <ul class="post-list">
+    {posts.map((post) => (
+      <li>
+        <a class="post-title" href={`/blog/${post.id}/`}>{post.data.title}</a>
+        <div class="post-meta">
+          {fmt(post.data.pubDate)}
+          {post.data.tags.map((t) => <span class="tag">{t}</span>)}
+        </div>
+        <p class="post-desc">{post.data.description}</p>
+      </li>
+    ))}
+  </ul>
+</Base>
