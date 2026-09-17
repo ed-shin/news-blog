@@ -10,11 +10,6 @@ const fmt = (d: Date) =>
   d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
 ---
 <Base title="견문록">
-  <p style="color: var(--text-muted); margin-bottom: 2.5em;">
-    뉴스가 아니라 <strong style="color: var(--text);">흐름</strong>을 추적합니다.
-    테크·시장·지정학·부동산·에너지가 교차하는 지점을 기록하고,
-    미리 걸어둔 체크포인트를 공개적으로 채점합니다.
-  </p>
   <ul class="post-list">
     {posts.map((post) => (
       <li>

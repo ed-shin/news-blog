@@ -7,8 +7,7 @@ export async function GET(context) {
   );
   return rss({
     title: '견문록',
-    description:
-      '체크포인트 — 뉴스가 아니라 흐름을 추적합니다. 테크·시장·지정학·부동산·에너지의 연결 기록',
+    description: '보고 들은 것을 기록하는 블로그',
     site: context.site,
     items: posts.map((post) => ({
       title: post.data.title,
