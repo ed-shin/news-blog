@@ -1,25 +1,79 @@
 ---
 import Base from '../layouts/Base.astro';
-import { getCollection } from 'astro:content';
+import {
+  getPosts, getJoganPosts, kindOf, postUrl, headlineOf, firstSentence,
+  fmtFull, fmtShort, fmtPeriod, DESK_NAME, KIND_LABEL,
+} from '../lib/posts';
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
-);
-
-const fmt = (d: Date) =>
-  d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+const today = (await getJoganPosts()).find((p) => kindOf(p) === 'daily' && p.data.front);
+const front = today?.data.front;
+const recent = (await getPosts()).filter((p) => p !== today).slice(0, 5);
 ---
-<Base title="견문록">
-  <ul class="post-list">
-    {posts.map((post) => (
-      <li>
-        <a class="post-title" href={`/blog/${post.id}/`}>{post.data.title}</a>
-        <div class="post-meta">
-          {fmt(post.data.pubDate)}
-          {post.data.tags.map((t) => <span class="tag">{t}</span>)}
-        </div>
-        <p class="post-desc">{post.data.description}</p>
-      </li>
-    ))}
-  </ul>
+<Base>
+  {today && front && (
+    <section class="corner">
+      <div class="corner-head">
+        <a class="corner-name" href="/jogan/">조간<i>.</i></a>
+        <span class="date">{fmtFull(today.data.pubDate)}</span>
+      </div>
+      <h1><a href="/jogan/">{front.headline}</a></h1>
+      <dl class="desklines">
+        {front.desks.map((desk) => (
+          <>
+            <dt>{DESK_NAME[desk.key]}</dt>
+            <dd>{desk.items[0].title}. {firstSentence(desk.items[0].text)}</dd>
+          </>
+        ))}
+      </dl>
+      <a class="enter" href="/jogan/">오늘의 1면 보기 →</a>
+    </section>
+  )}
+
+  {recent.length > 0 && (
+    <section class="recent">
+      <h2>최근 글</h2>
+      {recent.map((p) => {
+        const d = fmtShort(p.data.pubDate);
+        const kind = kindOf(p);
+        return (
+          <a class="item" href={postUrl(p)}>
+            <time>{d.md} {d.w}</time>
+            {kind && <span class="kind">{KIND_LABEL[kind]}{p.data.period && <span class="period">{fmtPeriod(p.data.period)}</span>}</span>}
+            <span class="title">{headlineOf(p)}</span>
+          </a>
+        );
+      })}
+    </section>
+  )}
+
+  <p class="about"><a href="/about/">견문록 소개 →</a></p>
 </Base>
+
+<style>
+  .corner { max-width: 760px; padding: 34px 0 0; }
+  .corner-head { display: flex; align-items: baseline; gap: 12px; }
+  .corner-name { font-family: var(--serif); font-weight: 800; font-size: 1.3rem; }
+  .corner-name i { font-style: normal; color: var(--accent); }
+  .date { font-size: 0.84rem; color: var(--muted); }
+  h1 { margin: 12px 0 0; font-family: var(--serif); font-weight: 800; font-size: clamp(1.4rem, 3.6vw, 1.9rem); line-height: 1.4; letter-spacing: -0.02em; }
+  h1 a:hover { color: var(--accent); }
+  .desklines { margin-top: 20px; }
+  .enter { display: inline-block; margin-top: 16px; font-weight: 700; font-size: 0.92rem; color: var(--accent); }
+
+  .recent { max-width: 760px; margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--accent); }
+  .recent h2 { margin: 0 0 6px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; color: var(--muted); }
+  .item { display: flex; align-items: baseline; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .item time { flex: none; width: 58px; font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .item .kind { flex: none; font-size: 0.76rem; font-weight: 800; color: var(--accent); letter-spacing: 0.04em; }
+  .item .period { margin-left: 8px; font-weight: 600; color: var(--text); letter-spacing: 0.02em; }
+  .item .title { font-family: var(--serif); font-weight: 700; font-size: 1.02rem; line-height: 1.45; }
+  .item:hover .title { color: var(--accent); }
+  .about { margin: 28px 0 0; font-size: 0.9rem; font-weight: 700; }
+  .about a:hover { color: var(--accent); }
+
+  @media (max-width: 620px) {
+    .corner { padding-top: 26px; }
+    .item { flex-wrap: wrap; gap: 2px 10px; }
+    .item .title { flex-basis: 100%; }
+  }
+</style>

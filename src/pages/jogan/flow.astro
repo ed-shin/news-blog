@@ -1,0 +1,126 @@
+---
+import Base from '../../layouts/Base.astro';
+import tracking from '../../data/tracking.json';
+import {
+  getJoganPosts, kindOf, postUrl, headlineOf, direction, firstSentence,
+  fmtMonthDay, fmtWeekday, fmtPeriod, DESK_NAME, KIND_LABEL, KINDS,
+} from '../../lib/posts';
+
+const posts = await getJoganPosts();
+const asOf = new Date(`${tracking.asOf}T00:00:00Z`);
+---
+<Base title="흐름 — 조간" corner="jogan" active="flow">
+  <h1 class="sr-only">흐름</h1>
+
+  <div class="layout">
+    <div class="main-col">
+      <div class="filters" role="group" aria-label="기록 종류">
+        <button type="button" class="on" data-f="all">전체</button>
+        {KINDS.map((k) => <button type="button" data-f={k}>{KIND_LABEL[k]}</button>)}
+      </div>
+
+      <section class="timeline">
+        {posts.map((post) => {
+          const kind = kindOf(post)!;
+          const front = post.data.front;
+          const url = postUrl(post);
+          return (
+            <article class="entry" data-type={kind}>
+              <div class="when"><span>{fmtMonthDay(post.data.pubDate)}</span><span>{fmtWeekday(post.data.pubDate)}</span></div>
+              <span class="type">{KIND_LABEL[kind]}{post.data.period && <span class="period">{fmtPeriod(post.data.period)}</span>}</span>
+              <h2><a href={url}>{headlineOf(post)}</a></h2>
+              {front ? (
+                <>
+                  <dl class="desklines">
+                    {front.desks.map((desk) => (
+                      <>
+                        <dt>{DESK_NAME[desk.key]}</dt>
+                        <dd>{desk.items[0].title}. {firstSentence(desk.items[0].text)}</dd>
+                      </>
+                    ))}
+                  </dl>
+                  <div class="nums">
+                    {front.markets.rows.map((r) => {
+                      const d = direction(r.change);
+                      return <div class="num"><span>{r.name}</span><b>{r.value}</b><i class={d.cls}>{r.change}</i></div>;
+                    })}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p class="dek">{post.data.description}</p>
+                  {post.data.highlights && (
+                    <div class="nums">
+                      {post.data.highlights.map((h) => (
+                        <div class="num"><span>{h.label}</span><b>{h.value}</b>{h.note && <i class="note">{h.note}</i>}</div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </article>
+          );
+        })}
+      </section>
+    </div>
+
+    <aside class="side" aria-label="추적 중인 흐름">
+      <p class="side-label">추적 중인 흐름<small>{fmtMonthDay(asOf)} 기준</small></p>
+      {tracking.topics.map((t) => (
+        <div class="topic">
+          <span class="tname"><i class={t.trend}></i>{t.name}</span>
+          <em>{t.status}</em>
+          <small>{t.note}</small>
+        </div>
+      ))}
+    </aside>
+  </div>
+</Base>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>('.filters button');
+  buttons.forEach((b) =>
+    b.addEventListener('click', () => {
+      buttons.forEach((x) => x.classList.toggle('on', x === b));
+      document.querySelectorAll<HTMLElement>('.timeline .entry').forEach((en) => {
+        en.hidden = !(b.dataset.f === 'all' || en.dataset.type === b.dataset.f);
+      });
+    })
+  );
+</script>
+
+<style>
+  .timeline { position: relative; padding: 18px 0 40px; }
+  .timeline::before { content: ''; position: absolute; top: 0; bottom: 0; left: 7px; width: 2px; background: var(--border); }
+  .entry { position: relative; padding-left: 36px; margin-bottom: 44px; }
+  .entry[hidden] { display: none; }
+  .entry::before { content: ''; position: absolute; left: 0; top: 6px; width: 16px; height: 16px; border-radius: 50%; background: var(--bg); border: 3px solid var(--accent); }
+  .when { display: flex; align-items: center; gap: 8px; font-size: 0.84rem; color: var(--muted); }
+  .type { font-size: 0.74rem; font-weight: 700; color: var(--accent); letter-spacing: 0.04em; }
+  .type .period { margin-left: 8px; color: var(--text); letter-spacing: 0.02em; }
+  .entry h2 { font-family: var(--serif); font-weight: 800; font-size: clamp(1.35rem, 5vw, 1.65rem); line-height: 1.4; letter-spacing: -0.02em; margin: 8px 0 10px; }
+  .entry h2 a:hover { color: var(--accent); }
+  .dek { margin: 0; color: var(--muted); font-size: 0.95rem; line-height: 1.7; }
+  /* 칸 너비는 글 종류와 상관없이 같게 (숫자가 적어도 늘어나지 않음) */
+  .nums { display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 8px; margin: 16px 0 0; }
+  .num { padding: 9px 12px; border-radius: 10px; background: var(--surface); font-variant-numeric: tabular-nums; }
+  .num span { display: block; font-size: 0.72rem; color: var(--muted); }
+  .num b { font-size: 0.98rem; white-space: nowrap; }
+  .num i { display: block; font-style: normal; font-size: 0.76rem; font-weight: 700; white-space: nowrap; }
+  .num i.note { font-weight: 600; color: var(--muted); }
+
+  .topic { display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; padding: 12px 0; border-top: 1px solid var(--border); }
+  .side-label + .topic { border-top: 1.5px solid var(--muted); }
+  .tname { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.95rem; }
+  .tname i { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--up); }
+  .tname i.cool { background: var(--down); }
+  .tname i.flat { background: var(--strong); }
+  .topic em { align-self: center; padding: 1px 9px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); font-style: normal; font-size: 0.74rem; font-weight: 700; white-space: nowrap; }
+  .topic small { grid-column: 1 / -1; font-size: 0.84rem; line-height: 1.55; color: var(--muted); }
+
+  @media (max-width: 620px) {
+    .topic { padding: 9px 0; }
+    .topic small { display: none; }
+    .nums { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>

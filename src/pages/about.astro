@@ -1,19 +1,24 @@
 ---
 import Base from '../layouts/Base.astro';
 ---
-<Base title="소개">
-  <article class="prose">
+<Base title="소개" active="about">
+  <article class="post prose">
     <h1>견문록이란</h1>
     <p>
-      보고 들은 것을 기록하는 블로그입니다. 지금은 <strong>체크포인트</strong>라는 이름으로,
+      보고 들은 것을 기록하는 블로그입니다. 지금은 <strong>조간</strong>이라는 이름으로,
       뉴스를 토픽 단위의 흐름으로 추적하는 글을 싣고 있습니다.
     </p>
-    <h2>체크포인트</h2>
+    <h2>조간</h2>
     <p>
       매일 아침 테크·시장·지정학·부동산·에너지 다섯 분야의 뉴스를 수집하고,
       단발성 기사가 아니라 <strong>토픽 단위의 흐름</strong>으로 추적하는 개인 뉴스 파이프라인의
-      공개 기록입니다.
+      공개 기록입니다. 글은 세 종류입니다.
     </p>
+    <ul>
+      <li><strong>일일</strong> — 매일 아침, 전날 일어난 일을 분야별로 정리합니다.</li>
+      <li><strong>주간 흐름</strong> — 토요일 오후, 그 주 월~금요일의 흐름을 묶습니다.</li>
+      <li><strong>기획</strong> — 한 주제를 기간에 얽매이지 않고 따라갑니다.</li>
+    </ul>
     <p>다른 뉴스 요약과 다른 점 두 가지:</p>
     <p>
       <strong>1. 시계열 기억.</strong> 사건이 터진 날 하루가 아니라, 토픽이 시작된 날부터
@@ -25,7 +30,7 @@ import Base from '../layouts/Base.astro';
     </p>
     <p>
       수집·선별·작성은 AI 파이프라인이 수행하고, 기준과 소스 구성은 사람이 관리합니다.
-      모든 사실 항목에는 출처 링크를 달고, 해석은 "분석:"으로 구분합니다.
+      모든 사실 항목에는 출처 링크를 달고, 해석은 "해설"로 구분합니다.
       사실 오류가 확인되면 본문을 고치고 수정 날짜를 함께 표시합니다.
     </p>
     <div class="disclaimer">
@@ -33,3 +38,7 @@ import Base from '../layouts/Base.astro';
     </div>
   </article>
 </Base>
+
+<style>
+  .disclaimer { margin-top: 2em; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; }
+</style>

@@ -1,0 +1,126 @@
+---
+import Base from '../../layouts/Base.astro';
+import {
+  getJoganPosts, kindOf, topicsOf, topicLabel, postUrl, headlineOf,
+  fmtShort, fmtMonth, fmtPeriod, KIND_LABEL, KINDS,
+} from '../../lib/posts';
+
+const posts = await getJoganPosts();
+
+const months = new Map<string, typeof posts>();
+for (const post of posts) {
+  const key = fmtMonth(post.data.pubDate);
+  months.set(key, [...(months.get(key) ?? []), post]);
+}
+
+const kindCount = (k: string) => posts.filter((p) => kindOf(p) === k).length;
+
+const tagCounts = new Map<string, number>();
+for (const post of posts) for (const t of topicsOf(post)) tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1);
+const tags = [...tagCounts].sort((a, b) => b[1] - a[1]);
+---
+<Base title="전체 — 조간" corner="jogan" active="all">
+  <h1 class="sr-only">전체</h1>
+  <div class="layout">
+    <div class="main-col">
+      <div class="filters" role="group" aria-label="글 종류">
+        <button type="button" class="on" data-f="all">전체 <small>{posts.length}</small></button>
+        {KINDS.map((k) => <button type="button" data-f={k}>{KIND_LABEL[k]} <small>{kindCount(k)}</small></button>)}
+      </div>
+
+      {[...months].map(([month, list]) => (
+        <section class="month-block">
+          <div class="month">{month} <small class="count">{list.length}편</small></div>
+          <div class="list">
+            {list.map((post) => {
+              const d = fmtShort(post.data.pubDate);
+              const kind = kindOf(post)!;
+              return (
+                <a class="row" href={postUrl(post)} data-type={kind} data-tags={topicsOf(post).join(' ')}>
+                  <time datetime={post.data.pubDate.toISOString().slice(0, 10)}><b>{d.md}</b> {d.w}</time>
+                  <div class="body">
+                    <span class="kind">{KIND_LABEL[kind]}{post.data.period && <span class="period">{fmtPeriod(post.data.period)}</span>}</span>
+                    <h3>{headlineOf(post)}</h3>
+                    <p>{post.data.description}</p>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </section>
+      ))}
+      <p class="empty" hidden>조건에 맞는 글이 아직 없습니다.</p>
+    </div>
+
+    <aside class="side" aria-label="주제별 모아보기">
+      <p class="side-label">주제</p>
+      <div class="tags">
+        {tags.map(([tag, n]) => <button type="button" class="tag" data-tag={tag}>{topicLabel(tag)}<small>{n}</small></button>)}
+      </div>
+    </aside>
+  </div>
+</Base>
+
+<script>
+  // ?type=daily, ?tag=금리 로 필터를 지정해 들어올 수 있다
+  const params = new URLSearchParams(location.search);
+  const state = { type: params.get('type') || 'all', tag: params.get('tag') };
+
+  function apply() {
+    document.querySelectorAll<HTMLButtonElement>('.filters button').forEach((b) => b.classList.toggle('on', b.dataset.f === state.type));
+    document.querySelectorAll<HTMLButtonElement>('.tag').forEach((b) => b.classList.toggle('on', b.dataset.tag === state.tag));
+    let shown = 0;
+    document.querySelectorAll<HTMLElement>('.month-block').forEach((block) => {
+      let inBlock = 0;
+      block.querySelectorAll<HTMLElement>('.row').forEach((r) => {
+        const okType = state.type === 'all' || r.dataset.type === state.type;
+        const okTag = !state.tag || (r.dataset.tags ?? '').split(' ').includes(state.tag);
+        r.hidden = !(okType && okTag);
+        if (!r.hidden) inBlock++;
+      });
+      block.hidden = inBlock === 0;
+      block.querySelector('.count')!.textContent = `${inBlock}편`;
+      shown += inBlock;
+    });
+    document.querySelector<HTMLElement>('.empty')!.hidden = shown > 0;
+    const q = new URLSearchParams();
+    if (state.type !== 'all') q.set('type', state.type);
+    if (state.tag) q.set('tag', state.tag);
+    history.replaceState(null, '', q.size ? `?${q}` : location.pathname);
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('.filters button').forEach((b) =>
+    b.addEventListener('click', () => { state.type = b.dataset.f ?? 'all'; apply(); })
+  );
+  document.querySelectorAll<HTMLButtonElement>('.tag').forEach((b) =>
+    b.addEventListener('click', () => { state.tag = state.tag === b.dataset.tag ? null : (b.dataset.tag ?? null); apply(); })
+  );
+  apply();
+</script>
+
+<style>
+  .month { display: flex; justify-content: space-between; align-items: baseline; margin: 26px 0 0; padding-bottom: 8px; border-bottom: 1.5px solid var(--muted); font-family: var(--serif); font-weight: 800; font-size: 1.05rem; }
+  .month small { font: 600 0.8rem var(--sans); color: var(--muted); }
+  .month-block[hidden], .row[hidden] { display: none; }
+  .row { display: grid; grid-template-columns: 78px minmax(0, 1fr); gap: 0 18px; padding: 18px 0; border-bottom: 1px solid var(--border); }
+  .row time { font-size: 0.84rem; color: var(--muted); padding-top: 2px; }
+  .row time b { display: block; font-size: 1rem; color: var(--text); font-variant-numeric: tabular-nums; }
+  .row .kind { font-size: 0.76rem; font-weight: 800; color: var(--accent); letter-spacing: 0.04em; }
+  .row .period { margin-left: 8px; font-weight: 600; color: var(--text); letter-spacing: 0.02em; }
+  .row h3 { margin: 3px 0 0; font-family: var(--serif); font-weight: 700; font-size: 1.12rem; line-height: 1.45; letter-spacing: -0.01em; }
+  .row p { margin: 6px 0 0; font-size: 0.9rem; line-height: 1.65; color: var(--muted); }
+  .row:hover h3 { color: var(--accent); }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { display: inline-flex; align-items: baseline; gap: 6px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 99px; background: var(--surface); color: var(--text); font: 600 0.86rem var(--sans); cursor: pointer; }
+  .tag small { font-size: 0.74rem; color: var(--accent); }
+  .tag.on { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .tag.on small { color: var(--bg); }
+  .empty { padding: 26px 0; color: var(--muted); font-size: 0.92rem; }
+
+  @media (max-width: 620px) {
+    .row { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+    .row time { display: flex; gap: 6px; align-items: baseline; }
+    .row time b { display: inline; font-size: 0.9rem; }
+  }
+</style>

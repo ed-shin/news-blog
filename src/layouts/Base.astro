@@ -2,47 +2,77 @@
 import '../styles/global.css';
 
 interface Props {
-  title: string;
+  title?: string;
   description?: string;
+  // 조간 코너 페이지면 제호가 "견문록 › 조간."으로 바뀌고 조간 메뉴가 나온다
+  corner?: 'jogan';
+  active?: 'today' | 'flow' | 'all' | 'jogan' | 'about';
 }
 
-const { title, description = '견문록 — 보고 들은 것을 기록하는 블로그' } = Astro.props;
+const { title, description = '견문록 — 보고 들은 것을 기록하는 블로그', corner, active } = Astro.props;
 const siteTitle = '견문록';
-const siteSubtitle = '체크포인트';
+const pageTitle = title ? `${title} — ${siteTitle}` : siteTitle;
+
+const nav = corner === 'jogan'
+  ? [
+      { href: '/jogan/', label: '오늘', key: 'today' },
+      { href: '/jogan/flow/', label: '흐름', key: 'flow' },
+      { href: '/jogan/all/', label: '전체', key: 'all' },
+    ]
+  : [
+      { href: '/jogan/', label: '조간', key: 'jogan' },
+      { href: '/about/', label: '소개', key: 'about' },
+    ];
+// 조간 안의 오늘·흐름·전체는 제호 뒤에 현재 위치로 붙인다
+const crumb = corner === 'jogan' ? nav.find((item) => item.key === active)?.label : undefined;
 ---
 <!doctype html>
 <html lang="ko">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title === siteTitle ? `${siteTitle} — ${siteSubtitle}` : `${title} — ${siteTitle}`}</title>
+    <title>{pageTitle}</title>
     <meta name="description" content={description} />
+    <meta name="theme-color" content="#141414" />
     <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
     <link rel="alternate" type="application/rss+xml" title={siteTitle} href="/rss.xml" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📍</text></svg>" />
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><rect width=%2264%22 height=%2264%22 rx=%2210%22 fill=%22%23141414%22/><text x=%2232%22 y=%2245%22 font-size=%2238%22 text-anchor=%22middle%22 fill=%22%23e2b457%22 font-family=%22serif%22 font-weight=%22800%22>견</text></svg>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@600;700;800;900&display=swap" />
+    <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
   </head>
   <body>
-    <header class="site">
-      <div class="wrap">
-        <div class="brand">
-          <a class="site-title" href="/"><span>📍</span> {siteTitle}</a>
-          <span class="site-subtitle">{siteSubtitle}</span>
-        </div>
-        <nav class="site-nav">
-          <a href="/">글</a>
-          <a href="/about/">소개</a>
-          <a href="/rss.xml">RSS</a>
+    <div class="wrap">
+      <header class="site">
+        {corner === 'jogan' ? (
+          <div class="brand">
+            <a class="parent" href="/">견문록</a>
+            <span class="sep" aria-hidden="true">›</span>
+            <a class="name" href="/jogan/">조간<i>.</i></a>
+            {crumb && (
+              <>
+                <span class="sep" aria-hidden="true">›</span>
+                <span class="crumb" aria-current="page">{crumb}</span>
+              </>
+            )}
+          </div>
+        ) : (
+          <div class="brand"><a class="name" href="/">견문록</a></div>
+        )}
+        <nav aria-label="주요 메뉴">
+          {nav.map((item) => (
+            <a href={item.href} aria-current={item.key === active ? 'page' : undefined}>{item.label}</a>
+          ))}
         </nav>
-      </div>
-    </header>
-    <main class="wrap">
-      <slot />
-    </main>
-    <footer class="site">
-      <div class="wrap">
-        © {new Date().getFullYear()} {siteTitle} ·이 블로그의 모든 내용은 정보 제공 목적이며 투자 권유가 아닙니다.
-      </div>
-    </footer>
+      </header>
+      <main>
+        <slot />
+      </main>
+      <footer class="site-foot">
+        <a href="/">견문록</a> · <a href="/about/">소개</a> · <a href="/rss.xml">RSS</a> ·
+        이 블로그의 모든 내용은 정보 제공 목적이며 투자 권유가 아닙니다.
+      </footer>
+    </div>
   </body>
 </html>
