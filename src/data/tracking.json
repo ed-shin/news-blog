@@ -1,9 +1,11 @@
 {
-  "asOf": "2026-09-17",
+  "asOf": "2026-09-18",
   "topics": [
-    { "name": "미국 장기금리", "trend": "up", "status": "가속", "note": "연준 인상과 유가 급락에도 10년물 5% 위" },
-    { "name": "미·이란 확전", "trend": "cool", "status": "완화 신호", "note": "사우디 해상 환적, 하원 종전 결의안" },
-    { "name": "코스피 외국인", "trend": "up", "status": "반등", "note": "반도체·기관이 이끈 반등, 외국인은 매도" },
-    { "name": "AI 감속 논쟁", "trend": "up", "status": "반격 지속", "note": "감속론 반박 글과 신제품 출시가 이어짐" }
+    { "name": "미국 장기금리", "trend": "cool", "status": "되돌림", "note": "10년물 4.939%로 다시 5% 아래, 추세 판단은 이름" },
+    { "name": "미·이란 확전", "trend": "cool", "status": "완화 신호 확대", "note": "송유관 재가동 전망, 중국의 후티 자제 압박" },
+    { "name": "코스피 외국인", "trend": "up", "status": "매도 확대", "note": "7거래일 연속 순매도, 하루 2조 4,606억 원" },
+    { "name": "AI 정렬 사고 공개", "trend": "up", "status": "공개 확대", "note": "OpenAI 6건 공개, Anthropic은 7월에 3건" },
+    { "name": "서울 집값", "trend": "flat", "status": "지역 이동", "note": "강남3구 하락, 서울 전체는 84주 연속 상승" },
+    { "name": "AI 감속 논쟁", "trend": "flat", "status": "반격 지속", "note": "감속론 반박 글과 신제품 출시가 이어짐" }
   ]
 }
