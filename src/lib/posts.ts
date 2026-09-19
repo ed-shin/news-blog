@@ -14,7 +14,6 @@ const TOPIC_LABEL: Record<string, string> = { 테크: 'IT · 테크' };
 export const kindOf = (post: Post): Kind | undefined => post.data.tags.map((t) => KIND_TAGS[t]).find(Boolean);
 export const topicsOf = (post: Post) => post.data.tags.filter((t) => !KIND_TAGS[t]);
 export const topicLabel = (tag: string) => TOPIC_LABEL[tag] ?? tag;
-export const postUrl = (post: Post) => `/blog/${post.id}/`;
 export const headlineOf = (post: Post) => post.data.front?.headline ?? post.data.title;
 
 export async function getPosts() {
@@ -57,3 +56,19 @@ export function direction(change: string) {
 }
 
 export const firstSentence = (text: string) => text.match(/^.*?\.(?=\s|$)/)?.[0] ?? text;
+
+// 글 주소. 조간 글은 종류별로 나눈다.
+//   일일      /jogan/daily/2026-09-19/      (게시일)
+//   주간 흐름  /jogan/weekly/2026-09-14/     (다루는 주의 첫날 period.from)
+//   기획      /jogan/feature/iran-oil-100/  (파일 이름에서 앞 날짜를 뺀 것)
+// 종류 태그가 없는 글은 /blog/파일이름/
+export function postUrl(post: Post) {
+  const kind = kindOf(post);
+  if (kind === 'daily') return `/jogan/daily/${isoDate(post.data.pubDate)}/`;
+  if (kind === 'weekly') return `/jogan/weekly/${isoDate(post.data.period?.from ?? post.data.pubDate)}/`;
+  if (kind === 'feature') return `/jogan/feature/${post.id.replace(/^\d{4}-\d{2}-\d{2}-/, '')}/`;
+  return `/blog/${post.id}/`;
+}
+
+// 그날 1면의 고정 주소 (일일 글에 front가 있을 때)
+export const frontUrl = (post: Post) => `/jogan/today/${isoDate(post.data.pubDate)}/`;

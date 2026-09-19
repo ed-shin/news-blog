@@ -1,0 +1,12 @@
+# 옛 /blog/ 주소를 조간 새 주소로 영구 이동 (2026-09-19 주소 체계 변경)
+/blog/2026-09-16-iran-oil-100/ /jogan/feature/iran-oil-100/ 301
+/blog/2026-09-16-iran-oil-100 /jogan/feature/iran-oil-100/ 301
+/blog/2026-09-17-daily/ /jogan/daily/2026-09-17/ 301
+/blog/2026-09-17-daily /jogan/daily/2026-09-17/ 301
+/blog/2026-09-18-daily/ /jogan/daily/2026-09-18/ 301
+/blog/2026-09-18-daily /jogan/daily/2026-09-18/ 301
+/blog/2026-09-19-daily/ /jogan/daily/2026-09-19/ 301
+/blog/2026-09-19-daily /jogan/daily/2026-09-19/ 301
+# 날짜 없는 /jogan/today/ 는 오늘의 1면으로
+/jogan/today/ /jogan/ 302
+/jogan/today /jogan/ 302

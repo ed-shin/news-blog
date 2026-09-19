@@ -7,9 +7,11 @@ interface Props {
   // 조간 코너 페이지면 제호가 "견문록 › 조간."으로 바뀌고 조간 메뉴가 나온다
   corner?: 'jogan';
   active?: 'today' | 'flow' | 'all' | 'jogan' | 'about';
+  // 제호 옆 현재 위치를 직접 줄 때(예: 날짜별 1면의 "9월 18일자")
+  crumb?: string;
 }
 
-const { title, description = '견문록 — 보고 들은 것을 기록하는 블로그', corner, active } = Astro.props;
+const { title, description = '견문록 — 보고 들은 것을 기록하는 블로그', corner, active, crumb: crumbProp } = Astro.props;
 const siteTitle = '견문록';
 const pageTitle = title ? `${title} — ${siteTitle}` : siteTitle;
 
@@ -24,7 +26,7 @@ const nav = corner === 'jogan'
       { href: '/about/', label: '소개', key: 'about' },
     ];
 // 조간 안의 오늘·흐름·전체는 제호 뒤에 현재 위치로 붙인다
-const crumb = corner === 'jogan' ? nav.find((item) => item.key === active)?.label : undefined;
+const crumb = crumbProp ?? (corner === 'jogan' ? nav.find((item) => item.key === active)?.label : undefined);
 ---
 <!doctype html>
 <html lang="ko">

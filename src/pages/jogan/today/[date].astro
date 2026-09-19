@@ -1,0 +1,15 @@
+---
+import FrontPage from '../../../components/FrontPage.astro';
+import { getJoganPosts, kindOf, isoDate } from '../../../lib/posts';
+
+// 날짜별 1면 보존: /jogan/today/2026-09-19/
+export async function getStaticPaths() {
+  const posts = await getJoganPosts();
+  return posts
+    .filter((p) => kindOf(p) === 'daily' && p.data.front)
+    .map((p) => ({ params: { date: isoDate(p.data.pubDate) } }));
+}
+
+const { date } = Astro.params;
+---
+<FrontPage date={date} />

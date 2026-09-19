@@ -1,0 +1,20 @@
+---
+import PostView from '../../../components/PostView.astro';
+import { getJoganPosts, postUrl } from '../../../lib/posts';
+
+// /jogan/daily/2026-09-19/, /jogan/weekly/2026-09-14/, /jogan/feature/iran-oil-100/
+export async function getStaticPaths() {
+  const posts = await getJoganPosts();
+  const seen = new Map<string, string>();
+  return posts.map((post) => {
+    const url = postUrl(post);
+    if (seen.has(url)) throw new Error(`주소가 겹친다: ${url} (${seen.get(url)}, ${post.id})`);
+    seen.set(url, post.id);
+    const [, , kind, slug] = url.split('/');
+    return { params: { kind, slug }, props: { post } };
+  });
+}
+
+const { post } = Astro.props;
+---
+<PostView post={post} />

@@ -1,96 +1,13 @@
 ---
-import Base from '../../layouts/Base.astro';
-import { render } from 'astro:content';
-import {
-  getPosts, kindOf, topicsOf, topicLabel, headlineOf, fmtFull, fmtPeriod, KIND_LABEL,
-} from '../../lib/posts';
+import PostView from '../../components/PostView.astro';
+import { getPosts, kindOf } from '../../lib/posts';
 
+// 조간 밖의 글(종류 태그가 없는 글)만 /blog/ 아래에 둔다. 조간 글은 /jogan/[kind]/[slug]
 export async function getStaticPaths() {
-  const posts = await getPosts();
+  const posts = (await getPosts()).filter((post) => !kindOf(post));
   return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
 }
 
 const { post } = Astro.props;
-const { Content, headings } = await render(post);
-const kind = kindOf(post);
-const topics = topicsOf(post);
-
-// 차례: "금리 — 연준이 …" → 라벨 "금리" + 부제
-const toc = headings
-  .filter((h) => h.depth === 2)
-  .map((h) => {
-    const [label, ...rest] = h.text.split(' — ');
-    return { id: h.slug, label: label.trim(), sub: rest.join(' — ').trim() };
-  });
-const withToc = Boolean(kind) && toc.length > 1;
-const period = post.data.period;
-const showPubDate = !kind || Boolean(period);
 ---
-<Base title={post.data.title} description={post.data.description} corner={kind ? 'jogan' : undefined}>
-  <div class:list={['post-layout', { layout: withToc }]}>
-    <article class="post">
-      <header class="post-head">
-        {kind && <p class="blabel">{KIND_LABEL[kind]}<span class:list={['dl', { period }]}>{period ? fmtPeriod(period) : fmtFull(post.data.pubDate)}</span></p>}
-        <h1><span class:list={{ marker: kind }}>{kind ? headlineOf(post) : post.data.title}</span></h1>
-        <p class="dek">{post.data.description}</p>
-        {(showPubDate || post.data.updatedDate) && (
-          <p class="byline">
-            {showPubDate && <time datetime={post.data.pubDate.toISOString().slice(0, 10)}>{fmtFull(post.data.pubDate)}</time>}
-            {post.data.updatedDate && <span>수정 {fmtFull(post.data.updatedDate)}</span>}
-          </p>
-        )}
-      </header>
-
-      {withToc && (
-        <nav class="toc-chips" aria-label="차례">
-          {toc.map((t) => <a href={`#${t.id}`}>{t.label}</a>)}
-        </nav>
-      )}
-
-      <div class="prose">
-        <Content />
-      </div>
-
-      <footer class="post-foot">
-        {kind && topics.length > 0 && (
-          <p class="tags">
-            {topics.map((t) => <a href={`/jogan/all/?tag=${encodeURIComponent(t)}`}>{topicLabel(t)}</a>)}
-          </p>
-        )}
-        <p class="disclaimer">
-          이 글은 공개 뉴스를 수집·요약·분석한 것으로, 정보 제공 목적이며 투자 권유가 아닙니다.
-          사실 항목의 출처는 본문 링크를 참고하세요.
-        </p>
-        {kind ? <a class="back" href="/jogan/all/">← 조간 전체 보기</a> : <a class="back" href="/">← 견문록 홈</a>}
-      </footer>
-    </article>
-
-    {withToc && (
-      <aside class="side toc" aria-label="차례">
-        <p class="side-label">차례</p>
-        <ol>
-          {toc.map((t) => (
-            <li><a href={`#${t.id}`}><b>{t.label}</b>{t.sub && <small>{t.sub}</small>}</a></li>
-          ))}
-        </ol>
-      </aside>
-    )}
-  </div>
-</Base>
-
-<script>
-  // 읽고 있는 섹션을 차례에 표시
-  const links = [...document.querySelectorAll<HTMLAnchorElement>('.toc a')];
-  const heads = links
-    .map((a) => document.getElementById(decodeURIComponent(a.getAttribute('href')!.slice(1))))
-    .filter((h): h is HTMLElement => h !== null);
-  function update() {
-    let current = -1;
-    heads.forEach((h, i) => { if (h.getBoundingClientRect().top < 140) current = i; });
-    links.forEach((a, i) => a.classList.toggle('on', i === current));
-  }
-  if (links.length) {
-    addEventListener('scroll', () => requestAnimationFrame(update), { passive: true });
-    update();
-  }
-</script>
+<PostView post={post} />

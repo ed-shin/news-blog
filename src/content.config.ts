@@ -39,6 +39,9 @@ const blog = defineCollection({
     if (data.tags.includes('기획') && !data.period) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['period'], message: '기획 글은 period: { from, to }로 다루는 기간을 적어야 합니다' });
     }
+    if ((data.tags.includes('주간') || data.tags.includes('주간 흐름')) && !data.period) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['period'], message: '주간 흐름은 period: { from, to }가 있어야 합니다(주소가 from 날짜로 정해짐)' });
+    }
   }),
 });
 

@@ -134,6 +134,8 @@ main { min-height: 60vh; }
 .post-head { padding-bottom: 24px; margin-bottom: 30px; border-bottom: 1px solid var(--border); }
 .post-head .blabel { margin-bottom: 10px; }
 .post-head .blabel .period { color: var(--text); }
+.post-head .blabel .to-front { margin-left: auto; font-size: 0.8rem; font-weight: 700; letter-spacing: 0; color: var(--accent); }
+.post-head .blabel .to-front:hover { text-decoration: underline; text-underline-offset: 3px; }
 .post-head h1 {
   margin: 0;
   font-family: var(--serif);
