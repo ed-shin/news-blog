@@ -24,7 +24,7 @@ const withToc = Boolean(kind) && toc.length > 1;
 const period = post.data.period;
 const showPubDate = !kind || Boolean(period);
 ---
-<Base title={post.data.title} description={post.data.description} corner={kind ? 'jogan' : undefined}>
+<Base title={post.data.title} description={post.data.description} ogType="article" corner={kind ? 'jogan' : undefined}>
   <div class:list={['post-layout', { layout: withToc }]}>
     <article class="post">
       <header class="post-head">
