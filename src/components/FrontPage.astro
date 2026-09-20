@@ -18,6 +18,8 @@ const latest = withFront[0];
 const today = date ? withFront.find((p) => isoDate(p.data.pubDate) === date) : latest;
 const front = today?.data.front;
 const todayUrl = today ? postUrl(today) : '';
+// 일요일·월요일판처럼 새 마감이 없는 날은 등락을 비워 둔다. 그때는 등락 칸 자체를 없앤다
+const showChange = Boolean(front?.markets.rows.some((r) => r.change));
 const isArchive = Boolean(date) && today !== latest;
 
 // 그날 시점에서 본 목록: 지난 일일은 그날보다 앞선 글, 기획·주간 흐름은 그날까지 나온 글
@@ -54,11 +56,11 @@ const dayLabel = today ? `${fmtMonthDay(today.data.pubDate)}자` : '';
         </div>
         <table class="market">
           <caption>주요 지표<span>{front.markets.asOf}</span></caption>
-          <thead><tr><th>지표</th><th>값</th><th>등락</th></tr></thead>
+          <thead><tr><th>지표</th><th>값</th>{showChange && <th>등락</th>}</tr></thead>
           <tbody>
             {front.markets.rows.map((r) => {
               const d = direction(r.change);
-              return <tr><td>{r.name}</td><td>{r.value}</td><td class={d.cls}>{d.arrow}{d.abs}</td></tr>;
+              return <tr><td>{r.name}</td><td>{r.value}</td>{showChange && <td class={d.cls}>{d.arrow}{d.abs}</td>}</tr>;
             })}
           </tbody>
         </table>
