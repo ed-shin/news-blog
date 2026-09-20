@@ -1,0 +1,38 @@
+---
+import Base from '../layouts/Base.astro';
+import { getJoganPosts, postUrl, headlineOf, fmtFull, KIND_LABEL, kindOf } from '../lib/posts';
+
+// 최근 글 몇 개를 길 잃은 사람에게 보여 준다
+const recent = (await getJoganPosts()).slice(0, 3);
+---
+<Base title="없는 주소입니다" description="찾는 글이 없습니다. 조간 1면과 최근 글로 안내합니다.">
+  <article class="post prose notfound">
+    <h1>없는 주소입니다</h1>
+    <p>
+      찾으시는 글이 여기에 없습니다. 주소를 잘못 입력했거나, 글이 옮겨졌을 수 있습니다.
+      2026년 9월 19일에 글 주소 체계를 종류별로 나눴는데, 그때 옮긴 옛 주소는 새 주소로 자동 연결됩니다.
+    </p>
+    <p>
+      <a href="/jogan/">오늘의 1면 보기 →</a>
+    </p>
+    <h2>최근 글</h2>
+    <ul>
+      {recent.map((post) => (
+        <li>
+          <a href={postUrl(post)}>{headlineOf(post)}</a>
+          <small>{KIND_LABEL[kindOf(post)!]} · {fmtFull(post.data.pubDate)}</small>
+        </li>
+      ))}
+    </ul>
+    <p>
+      <a href="/jogan/all/">조간 전체 보기</a> · <a href="/jogan/flow/">흐름</a> · <a href="/">견문록 홈</a>
+    </p>
+  </article>
+</Base>
+
+<style>
+  .notfound ul { list-style: none; padding: 0; }
+  .notfound li { margin: 0 0 0.9rem; }
+  .notfound li a { display: block; }
+  .notfound small { display: block; margin-top: 0.15rem; opacity: 0.6; font-size: 0.85rem; }
+</style>

@@ -2,7 +2,7 @@
 // 글 한 편의 화면. 조간 글(/jogan/종류/주소/)과 그 밖의 글(/blog/주소/)이 함께 쓴다.
 import Base from '../layouts/Base.astro';
 import { render } from 'astro:content';
-import { kindOf, topicsOf, topicLabel, headlineOf, fmtFull, fmtPeriod, frontUrl, KIND_LABEL, type Post } from '../lib/posts';
+import { kindOf, topicsOf, topicLabel, headlineOf, fmtFull, fmtPeriod, frontUrl, isoDate, KIND_LABEL, type Post } from '../lib/posts';
 
 interface Props {
   post: Post;
@@ -23,8 +23,39 @@ const toc = headings
 const withToc = Boolean(kind) && toc.length > 1;
 const period = post.data.period;
 const showPubDate = !kind || Boolean(period);
+
+// 검색엔진용 구조화 데이터. 글 한 편(BlogPosting)과 현재 위치(BreadcrumbList).
+// 글쓴이는 개인 이름 대신 발행 주체인 견문록으로 둔다(소개 페이지에 방식과 책임을 적어 뒀다).
+const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
+const publisher = { '@type': 'Organization', name: '견문록', url: new URL('/', Astro.site).href };
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: kind ? headlineOf(post) : post.data.title,
+    description: post.data.description,
+    inLanguage: 'ko-KR',
+    datePublished: isoDate(post.data.pubDate),
+    dateModified: isoDate(post.data.updatedDate ?? post.data.pubDate),
+    mainEntityOfPage: pageUrl,
+    url: pageUrl,
+    image: new URL('/og.png', Astro.site).href,
+    author: publisher,
+    publisher,
+    ...(topics.length > 0 && { keywords: topics.map(topicLabel).join(', ') }),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: '견문록', item: new URL('/', Astro.site).href },
+      ...(kind ? [{ '@type': 'ListItem', position: 2, name: '조간', item: new URL('/jogan/', Astro.site).href }] : []),
+      { '@type': 'ListItem', position: kind ? 3 : 2, name: kind ? headlineOf(post) : post.data.title, item: pageUrl },
+    ],
+  },
+];
 ---
-<Base title={post.data.title} description={post.data.description} ogType="article" corner={kind ? 'jogan' : undefined}>
+<Base title={post.data.title} description={post.data.description} ogType="article" jsonLd={jsonLd} corner={kind ? 'jogan' : undefined}>
   <div class:list={['post-layout', { layout: withToc }]}>
     <article class="post">
       <header class="post-head">

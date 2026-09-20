@@ -3,6 +3,8 @@
   "name": "gyeonmunrok",
   "compatibility_date": "2026-09-16",
   "assets": {
-    "directory": "./dist/"
+    "directory": "./dist/",
+    // 없는 주소는 직접 만든 404 페이지로 (기본값은 밋밋한 기본 404)
+    "not_found_handling": "404-page"
   }
 }

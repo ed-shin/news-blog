@@ -6,6 +6,8 @@ interface Props {
   description?: string;
   // 공유 미리보기 종류. 글이면 'article'
   ogType?: 'website' | 'article';
+  // 검색엔진용 구조화 데이터(JSON-LD). 객체 하나 또는 여러 개
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   // 조간 코너 페이지면 제호가 "견문록 › 조간."으로 바뀌고 조간 메뉴가 나온다
   corner?: 'jogan';
   active?: 'today' | 'flow' | 'all' | 'jogan' | 'about';
@@ -13,7 +15,7 @@ interface Props {
   crumb?: string;
 }
 
-const { title, description = '견문록 — 보고 들은 것을 기록하는 블로그', ogType = 'website', corner, active, crumb: crumbProp } = Astro.props;
+const { title, description = '견문록 — 보고 들은 것을 기록하는 블로그', ogType = 'website', jsonLd, corner, active, crumb: crumbProp } = Astro.props;
 const siteTitle = '견문록';
 const pageTitle = title ? `${title} — ${siteTitle}` : siteTitle;
 const canonical = new URL(Astro.url.pathname, Astro.site);
@@ -57,6 +59,7 @@ const crumb = crumbProp ?? (corner === 'jogan' ? nav.find((item) => item.key ===
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
     <link rel="alternate" type="application/rss+xml" title={siteTitle} href="/rss.xml" />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
