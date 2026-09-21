@@ -83,6 +83,10 @@ main { min-height: 60vh; }
 }
 .site-foot a { color: var(--text); }
 .site-foot a:hover { color: var(--accent); }
+.site-foot p { margin: 0 0 8px; max-width: 62ch; line-height: 1.7; }
+.site-foot p:last-child { margin-bottom: 0; }
+.site-foot .made strong { color: var(--text); font-weight: 700; }
+.site-foot .note { color: var(--strong); }
 
 /* 화면에는 숨기고 스크린리더에만 읽히는 제목 (페이지 이름은 제호 옆 현재 위치로 보인다) */
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
