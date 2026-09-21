@@ -45,6 +45,24 @@ Astro 정적 블로그. 글은 `src/content/blog/YYYY-MM-DD-슬러그.md`, main�
 - 섹션 제목은 `## 라벨 — 제목` 형식이면 금색 라벨과 제목으로 나뉘어 보이고, 차례(오른쪽, 작은 화면은 칩)에도 라벨로 나온다. 표에서 `+`/`-`로 시작하는 숫자 칸은 등락 색이 입혀진다.
 - 흐름 페이지의 "추적 중인 흐름"은 `src/data/tracking.json`. 실린 글로 뒷받침되는 토픽만 올린다.
 
+## 매일 아침 자동 발행
+
+수집기(08:30)와 편집자(09:00)가 Google Drive `/뉴스파이프라인/daily/D/`에 `post.md`, `desk-report.md`, `tracking.json`을 만들어 둔다. 그 뒤 데스크가 검증해서 싣는 일까지 예약 작업으로 돈다. 순서는 이렇다.
+
+1. Drive에서 그날 폴더를 찾는다. `post.md`가 없으면 멈추고 보고한다. 이미 `src/content/blog/D-daily.md`가 있으면 덮어쓰지 않는다.
+2. **원문 대조.** 본문에 실린 외부 링크를 전부 열어 숫자·따옴표 안 인용문·날짜·출처를 기사와 맞춰 본다. 링크가 많으므로 분야별로 나눠 병렬로 돌린다. 도구가 요약을 돌려주므로 "해당 문장을 원문 그대로 인용해 달라"고 요청해 대조한다.
+3. 위의 편집 원칙대로 고친다. 근거 없는 서술은 빼고, 사진 캡션·메타 설명처럼 본문이 아닌 곳에서 온 사실은 싣지 않는다. 기사에 없는 선후 관계나 시점을 지어내지 않는다.
+4. 지난 글로 거는 내부 링크는 앵커까지 실제로 있는지 확인한다. 지난 글을 고치면 `#numbers` 같은 자리가 사라질 수 있다.
+5. `src/content/blog/D-daily.md`와 `src/data/tracking.json`에 반영하고 검사한다.
+   ```bash
+   python3 scripts/check_post.py src/content/blog/D-daily.md src/data/tracking.json
+   npm run build && python3 scripts/linkcheck.py
+   ```
+   오류는 모두 고치고 경고는 읽어 보고 판단한다.
+6. 작성자 `barney <jp.shin.kor@gmail.com>`로 커밋하고 main에 푸시한다. 커밋 메시지에 무엇을 왜 고쳤는지 적는다.
+7. 배포를 확인한다. **이번에 바뀐 문구로 확인한다.** 주소가 200을 준다는 것만으로는 옛 페이지일 수 있고, 엣지 캐시 때문에 이전 내용이 잠시 더 보인다.
+8. 무엇을 고쳤는지, 무엇을 싣지 않았는지 보고한다. 이해 충돌(Anthropic·Claude)에 해당하는 항목은 실었든 뺐든 보고에 밝힌다.
+
 ## 개발 메모
 
 - `astro.config.mjs`의 마크다운 변환 규칙(remark/rehype)을 바꾼 뒤에는 `rm -rf node_modules/.astro .astro/data-store.json` 후 빌드한다. 변환 결과가 캐시돼 있어 그냥 빌드하면 반영되지 않는다.
