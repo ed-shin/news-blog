@@ -31,6 +31,7 @@ const asOf = new Date(`${tracking.asOf}T00:00:00Z`);
               <h2><a href={url}>{headlineOf(post)}</a></h2>
               {front ? (
                 <>
+                  <p class="lead">{front.analysis[0].lead}</p>
                   <dl class="desklines">
                     {front.desks.map((desk) => (
                       <>
@@ -101,6 +102,8 @@ const asOf = new Date(`${tracking.asOf}T00:00:00Z`);
   .entry h2 { font-family: var(--serif); font-weight: 800; font-size: clamp(1.35rem, 5vw, 1.65rem); line-height: 1.4; letter-spacing: -0.02em; margin: 8px 0 10px; }
   .entry h2 a:hover { color: var(--accent); }
   .dek { margin: 0; color: var(--muted); font-size: 0.95rem; line-height: 1.7; }
+  /* 그날 1면 해설의 첫 갈래 — 흐름에서는 사실 나열보다 이쪽이 먼저 읽혀야 한다 */
+  .lead { margin: 0 0 14px; font-family: var(--serif); font-weight: 700; font-size: 1.02rem; line-height: 1.6; color: var(--bright); }
   /* 칸 너비는 글 종류와 상관없이 같게 (숫자가 적어도 늘어나지 않음) */
   .nums { display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 8px; margin: 16px 0 0; }
   .num { padding: 9px 12px; border-radius: 10px; background: var(--surface); font-variant-numeric: tabular-nums; }
