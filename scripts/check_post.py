@@ -17,7 +17,7 @@ from urllib.parse import urlparse
 DESK_ORDER = ["rates", "energy", "geo", "tech", "etc"]
 # 데스크 → 본문 섹션 제목 머리 (사이트가 이 머리로 섹션 id를 붙인다)
 DESK_SECTION = {"rates": "금리", "energy": "에너지", "geo": "지정학", "tech": "IT", "etc": "그 외"}
-SECTION_ORDER = ["3줄 요약", "오늘의 숫자", "금리", "시장", "에너지", "지정학", "IT", "그 외"]
+SECTION_ORDER = ["3줄 요약", "오늘의 숫자", "금리", "시장", "에너지", "지정학", "IT", "그 외", "다음에 볼 것"]
 MARKET_ROWS = ["코스피", "원/달러", "S&P 500", "미 10년물", "브렌트", "금"]
 TOPIC_TAGS = {"금리", "시장", "에너지", "지정학", "테크", "부동산"}
 TRENDS = {"up", "cool", "flat"}

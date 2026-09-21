@@ -7,7 +7,7 @@ import { join } from 'node:path';
 // 1면 데스크 이름이 가리키는 브리핑 전문의 섹션 고정 주소 (제목 앞 단어 → id)
 const SECTION_IDS = [
   ['3줄 요약', 'summary'], ['오늘의 숫자', 'numbers'], ['금리', 'rates'], ['에너지', 'energy'],
-  ['시장', 'market'], ['지정학', 'geo'], ['IT', 'tech'], ['그 외', 'etc'],
+  ['시장', 'market'], ['지정학', 'geo'], ['IT', 'tech'], ['그 외', 'etc'], ['다음에 볼 것', 'next'],
 ];
 
 // 본문 후처리: "**해설:**"로 시작하는 단락에 .analysis, 표는 가로 스크롤용 .table-wrap으로 감싸고,
