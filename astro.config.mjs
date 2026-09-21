@@ -1,6 +1,8 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import remarkGfm from 'remark-gfm';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 // 1면 데스크 이름이 가리키는 브리핑 전문의 섹션 고정 주소 (제목 앞 단어 → id)
 const SECTION_IDS = [
@@ -65,9 +67,53 @@ function rehypeEditorial() {
   return (tree) => visit(tree);
 }
 
+// 사이트맵의 lastmod — 글 파일에서 발행일(수정일이 있으면 수정일)을 읽어 주소별로 모은다.
+// 검색엔진이 사이트맵만 보고도 무엇이 새로 생겼는지 알 수 있게 하는 값이다.
+// 주소 규칙은 src/lib/posts.ts의 postUrl과 같게 유지해야 한다. 어긋나면 그 글만 lastmod 없이 나간다.
+function postLastmod() {
+  const dir = 'src/content/blog';
+  const map = new Map();
+  let newest = '';
+  for (const name of readdirSync(dir).filter((f) => f.endsWith('.md'))) {
+    const fm = readFileSync(join(dir, name), 'utf8').split('---')[1] ?? '';
+    const field = (key) => fm.match(new RegExp(`^${key}:\\s*(\\S+)`, 'm'))?.[1];
+    const pubDate = field('pubDate');
+    if (!pubDate) continue;
+    const last = field('updatedDate') ?? pubDate;
+    const tags = fm.match(/^tags:\s*\[(.*)\]/m)?.[1] ?? '';
+    const slug = name.replace(/\.md$/, '');
+
+    if (tags.includes('일일')) {
+      map.set(`/jogan/daily/${pubDate}/`, last);
+      map.set(`/jogan/today/${pubDate}/`, last); // 그날의 1면도 같은 글에서 나온다
+    } else if (tags.includes('주간')) {
+      // period는 { from: 2026-09-14, to: ... } 한 줄 형식이라 날짜만 끊어 읽는다
+      map.set(`/jogan/weekly/${fm.match(/from:\s*([\d-]+)/)?.[1] ?? pubDate}/`, last);
+    } else if (tags.includes('기획')) {
+      map.set(`/jogan/feature/${slug.replace(/^\d{4}-\d{2}-\d{2}-/, '')}/`, last);
+    } else {
+      map.set(`/blog/${slug}/`, last);
+    }
+    if (last > newest) newest = last;
+  }
+  // 새 글이 올라오면 함께 바뀌는 페이지들
+  for (const url of ['/', '/jogan/', '/jogan/all/', '/jogan/flow/']) map.set(url, newest);
+  return map;
+}
+
+const lastmod = postLastmod();
+
 export default defineConfig({
   site: 'https://gyeonmunrok.com',
-  integrations: [sitemap()],
+  integrations: [
+    sitemap({
+      serialize(item) {
+        const date = lastmod.get(new URL(item.url).pathname);
+        if (date) item.lastmod = date;
+        return item;
+      },
+    }),
+  ],
   markdown: {
     // "3.50~3.75%"처럼 범위에 쓰는 물결표가 취소선이 되지 않도록 ~~두 개~~만 취소선으로 인정
     gfm: false,
