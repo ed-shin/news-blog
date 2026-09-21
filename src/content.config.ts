@@ -33,6 +33,8 @@ const blog = defineCollection({
     front: front.optional(),
     // 글이 다루는 기간. 기획은 필수, 주간 흐름도 적어두면 함께 표시된다
     period: z.object({ from: z.coerce.date(), to: z.coerce.date() }).optional(),
+    // 공개 뒤 고친 내역. updatedDate와 함께 쓰고 /jogan/corrections/ 에 모인다
+    corrections: z.array(z.object({ date: z.coerce.date(), text: z.string() })).optional(),
     // 흐름 페이지에서 기획·주간 글 아래 숫자 칸으로 보인다 (라벨 / 값 / 메모). 3개 안팎
     highlights: z.array(z.object({ label: z.string(), value: z.string(), note: z.string().optional() })).optional(),
   }).superRefine((data, ctx) => {

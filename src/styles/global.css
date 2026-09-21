@@ -331,3 +331,11 @@ main { min-height: 60vh; }
   .prose { font-size: 1rem; }
   .prose .analysis { padding: 14px 16px 16px; }
 }
+
+/* 글 끝 정정 블록 — 무엇을 언제 고쳤는지 드러낸다 */
+.corrections { margin: 2.5rem 0 0; padding: 18px 20px; border: 1px solid var(--border); border-radius: 4px; }
+.corrections .ct { margin: 0 0 10px; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; color: var(--accent); }
+.corrections ul { list-style: none; margin: 0; padding: 0; }
+.corrections li { margin: 0 0 10px; font-size: 0.9rem; line-height: 1.7; color: var(--muted); }
+.corrections li time { display: block; font-size: 0.76rem; letter-spacing: 0.03em; }
+.corrections .all { display: inline-block; margin-top: 4px; font-size: 0.8rem; color: var(--muted); }

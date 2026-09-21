@@ -25,9 +25,10 @@ const period = post.data.period;
 const showPubDate = !kind || Boolean(period);
 
 // 검색엔진용 구조화 데이터. 글 한 편(BlogPosting)과 현재 위치(BreadcrumbList).
-// 글쓴이는 개인 이름 대신 발행 주체인 견문록으로 둔다(소개 페이지에 방식과 책임을 적어 뒀다).
+// 글쓴이는 필명 barney(사람), 발행 주체는 견문록. 만드는 방식과 책임은 소개 페이지에 적어 뒀다.
 const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
 const publisher = { '@type': 'Organization', name: '견문록', url: new URL('/', Astro.site).href };
+const author = { '@type': 'Person', name: 'barney', url: 'https://github.com/ed-shin' };
 const jsonLd = [
   {
     '@context': 'https://schema.org',
@@ -40,7 +41,7 @@ const jsonLd = [
     mainEntityOfPage: pageUrl,
     url: pageUrl,
     image: new URL('/og.png', Astro.site).href,
-    author: publisher,
+    author,
     publisher,
     ...(topics.length > 0 && { keywords: topics.map(topicLabel).join(', ') }),
   },
@@ -84,6 +85,21 @@ const jsonLd = [
       <div class="prose">
         <Content />
       </div>
+
+      {post.data.corrections && post.data.corrections.length > 0 && (
+        <section class="corrections">
+          <p class="ct">정정</p>
+          <ul>
+            {post.data.corrections.map((c) => (
+              <li>
+                <time datetime={isoDate(c.date)}>{fmtFull(c.date)}</time>
+                <span>{c.text}</span>
+              </li>
+            ))}
+          </ul>
+          <a class="all" href="/jogan/corrections/">정정 기록 전체 보기 →</a>
+        </section>
+      )}
 
       <footer class="post-foot">
         {kind && topics.length > 0 && (
