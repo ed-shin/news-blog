@@ -119,6 +119,36 @@ def spread(points, ticks, caption, alt, zero_note=''):
     return _figure(out, caption, alt)
 
 
+def decomp(bars, caption, alt):
+    """명목금리를 실질금리와 기대인플레이션으로 나눠 막대로 쌓는다.
+    bars = [(라벨, 실질, 기대인플레)] — 둘의 합이 명목금리다."""
+    top = max(r + b for _, r, b in bars) * 1.18
+    h = H - PAD['t'] - PAD['b']
+    y_of = _scale(0, top, h, PAD['t'], invert=True)
+    bw = 96
+    gap = (W - PAD['l'] - PAD['r'] - bw * len(bars)) / (len(bars) + 1)
+    out = _axis([0, 2, 4], y_of, lambda t: f'{t:.0f}%')
+
+    for i, (label, real, be) in enumerate(bars):
+        x = round(PAD['l'] + gap * (i + 1) + bw * i, 1)
+        y_real, y_top = round(y_of(real), 1), round(y_of(real + be), 1)
+        base = round(y_of(0), 1)
+        out.append(f'<rect class="seg real" x="{x}" y="{y_real}" width="{bw}" height="{round(base - y_real, 1)}"/>')
+        out.append(f'<rect class="seg be" x="{x}" y="{y_top}" width="{bw}" height="{round(y_real - y_top, 1)}"/>')
+        mid = round(x + bw / 2, 1)
+        out.append(f'<text class="seglab" x="{mid}" y="{round((y_real + base) / 2 + 4, 1)}" text-anchor="middle">{real:.2f}</text>')
+        out.append(f'<text class="seglab" x="{mid}" y="{round((y_top + y_real) / 2 + 4, 1)}" text-anchor="middle">{be:.2f}</text>')
+        out.append(f'<text class="val now" x="{mid}" y="{round(y_top - 10, 1)}" text-anchor="middle">{real + be:.2f}</text>')
+        out.append(f'<text class="tick" x="{mid}" y="{H - PAD["b"] + 22}" text-anchor="middle">{label}</text>')
+
+    lx = W - PAD['r'] - 150
+    out.append(f'<rect class="seg be" x="{lx}" y="{PAD["t"]}" width="12" height="12"/>')
+    out.append(f'<text class="note" x="{lx + 18}" y="{PAD["t"] + 11}">기대인플레이션</text>')
+    out.append(f'<rect class="seg real" x="{lx}" y="{PAD["t"] + 20}" width="12" height="12"/>')
+    out.append(f'<text class="note" x="{lx + 18}" y="{PAD["t"] + 31}">실질금리</text>')
+    return _figure(out, caption, alt)
+
+
 def _figure(body, caption, alt):
     inner = '\n    '.join(body)
     return f'''<figure class="chart">
@@ -144,6 +174,11 @@ CHARTS = {
         '미 국채 2년물과 10년물의 금리차(월평균, %p). 0 아래가 역전이다. 2022년 7월부터 2024년 8월까지 26개월간 역전이었고, 그 뒤 침체는 선언되지 않았다. 미 재무부 일일 수익률 원자료로 계산했다.',
         '2022년 1월부터 2026년 9월까지 미 국채 2년-10년 금리차 추이. 2022년 7월부터 2024년 8월까지 0 아래로 내려갔다가 이후 양수로 올라와 2026년 9월 +0.34%p다.',
         zero_note='역전 구간 26개월'),
+    # 연준이 올린 9월 16일 전후. 명목금리는 그대로인데 구성이 바뀌었다.
+    'decomp': lambda: decomp(
+        [('9월 15일', 2.62, 2.38), ('9월 18일', 2.68, 2.33)],
+        '미 10년물 명목금리를 실질금리와 기대인플레이션으로 나눈 것. 연준이 금리를 올린 9월 16일 전후로 명목금리는 5.00%에서 5.01%로 거의 그대로인데, 실질금리가 오르고 기대인플레이션이 내렸다. 세인트루이스 연은 FRED 자료(2026년 9월 22일 조회).',
+        '9월 15일과 18일의 미 10년물 구성 비교. 명목금리는 5.00%와 5.01%로 비슷하지만 실질금리는 2.62%에서 2.68%로 오르고 기대인플레이션은 2.38%에서 2.33%로 내렸다.'),
     'series': lambda: series_chart(
         [('9/17', 4.939), ('9/18', 4.998), ('9/21', 4.949)],
         [4.94, 4.98],

@@ -371,3 +371,6 @@ main { min-height: 60vh; }
 .prose .chart figcaption { margin-top: 10px; font-size: 0.85rem; line-height: 1.6; color: var(--muted); }
 .prose .chart .zero { stroke: var(--muted); stroke-width: 1.5; }
 .prose .chart .band { fill: var(--accent); opacity: 0.09; }
+.prose .chart .seg.real { fill: var(--accent); opacity: 0.85; }
+.prose .chart .seg.be { fill: var(--muted); opacity: 0.55; }
+.prose .chart .seglab { font-size: 13px; font-weight: 700; fill: var(--bg); }
