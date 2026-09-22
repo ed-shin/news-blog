@@ -191,15 +191,17 @@ def check_frontmatter(fm):
     pub_s = pub.isoformat() if isinstance(pub, date) else str(pub or "")
     if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", pub_s):
         err(f"pubDate가 YYYY-MM-DD가 아니다 → {pub}")
-    if not isinstance(tags, list) or not tags or tags[0] != "일일":
-        err('tags는 목록이고 첫 태그가 "일일"이어야 한다')
+    if not isinstance(tags, list) or not tags or tags[0] not in ("일일", "주간", "기획"):
+        err('tags는 목록이고 첫 태그가 종류("일일"·"주간"·"기획") 중 하나여야 한다')
     else:
         for t in tags[1:]:
             if t not in TOPIC_TAGS:
                 warn(f"새 주제 태그 '{t}' — 필요하면 desk-report에 적는다")
-    for k in ("updatedDate", "period", "highlights"):
-        if k in fm:
-            warn(f"일일 글에는 보통 {k}를 쓰지 않는다")
+    # period와 highlights는 주간·기획의 몫이다. 일일 글에 있으면 알린다
+    if isinstance(tags, list) and tags[:1] == ["일일"]:
+        for k in ("updatedDate", "period", "highlights"):
+            if k in fm:
+                warn(f"일일 글에는 보통 {k}를 쓰지 않는다")
     for text in (title or "", desc or ""):
         if "브리핑" in text:
             warn('화면 용어는 "브리핑" 대신 "일일"')
@@ -287,6 +289,14 @@ def check_front(fm, body):
         prefix = DESK_SECTION.get(key)
         if prefix and not any(h.startswith(prefix) for h in headings):
             err(f"데스크 {key}의 1면 링크가 갈 본문 섹션('## {prefix}…')이 없다")
+
+
+def check_links_only(body):
+    """주간·기획처럼 섹션이 자유로운 글에 쓰는 검사. 링크 규칙만 본다."""
+    for m in re.finditer(r"\[[^\]]+\]\((https?://[^)]+)\)", body):
+        check_url(m.group(1), "본문")
+    for m in re.finditer(r"\]\((/blog/[^)]+)\)", body):
+        err(f"옛 주소를 쓰고 있다 → {m.group(1)}")
 
 
 def check_body(body, pub):
@@ -404,8 +414,17 @@ def main():
     fm, body = load_frontmatter(text)
     if fm:
         pub = check_frontmatter(fm)
-        check_front(fm, body)
-        check_body(body, pub)
+        tags = fm.get("tags")
+        kind = tags[0] if isinstance(tags, list) and tags else ""
+        # 1면 데이터와 고정 섹션 순서는 일일 글의 규칙이다.
+        # 주간 흐름과 기획은 제목을 자유롭게 달고 front도 두지 않는다.
+        if kind == "일일":
+            check_front(fm, body)
+            check_body(body, pub)
+        else:
+            check_links_only(body)
+            if not fm.get("period"):
+                err(f"{kind} 글은 period: {{ from, to }}로 다루는 기간을 적어야 한다")
         if len(sys.argv) > 2:
             check_tracking(sys.argv[2], pub)
     for m in errors:

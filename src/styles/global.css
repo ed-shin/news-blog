@@ -343,3 +343,31 @@ main { min-height: 60vh; }
 .corrections li { margin: 0 0 10px; font-size: 0.9rem; line-height: 1.7; color: var(--muted); }
 .corrections li time { display: block; font-size: 0.76rem; letter-spacing: 0.03em; }
 .corrections .all { display: inline-block; margin-top: 4px; font-size: 0.8rem; color: var(--muted); }
+
+/* 본문 차트 — scripts/chart.py가 만든 SVG. 어두운 화면 기준, 좁은 화면에서 가로로 줄어든다 */
+.prose .chart { margin: 1.8em 0; padding: 0; }
+.prose .chart svg { width: 100%; height: auto; display: block; }
+/* 좁은 화면에서는 그림을 줄이면 축 글씨가 안 읽힌다. 표와 같게 가로로 밀어 본다 */
+@media (max-width: 660px) {
+  .prose .chart { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .prose .chart svg { width: 620px; max-width: none; }
+}
+.prose .chart .grid { stroke: var(--border); stroke-width: 1; }
+.prose .chart .line { fill: none; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.prose .chart .line.now { stroke: var(--accent); }
+.prose .chart .line.prev { stroke: var(--muted); stroke-width: 2; stroke-dasharray: 5 4; }
+.prose .chart .dot.now { fill: var(--accent); }
+.prose .chart .dot.prev { fill: var(--muted); }
+.prose .chart .mark { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.prose .chart text { font-family: var(--sans); font-variant-numeric: tabular-nums; }
+.prose .chart .tick { font-size: 12px; fill: var(--muted); }
+.prose .chart .val { font-size: 13px; font-weight: 700; }
+.prose .chart .val.now { fill: var(--bright); }
+.prose .chart .val.prev { fill: var(--muted); }
+.prose .chart .name { font-size: 12px; font-weight: 700; }
+.prose .chart .name.now { fill: var(--accent); }
+.prose .chart .name.prev { fill: var(--muted); }
+.prose .chart .note { font-size: 12px; fill: var(--muted); }
+.prose .chart figcaption { margin-top: 10px; font-size: 0.85rem; line-height: 1.6; color: var(--muted); }
+.prose .chart .zero { stroke: var(--muted); stroke-width: 1.5; }
+.prose .chart .band { fill: var(--accent); opacity: 0.09; }
