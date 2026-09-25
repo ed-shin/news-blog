@@ -36,6 +36,7 @@ const dayLabel = today ? `${fmtMonthDay(today.data.pubDate)}자` : '';
   corner="jogan"
   active={date ? undefined : 'today'}
   crumb={date ? dayLabel : undefined}
+  noindex={Boolean(date)}
 >
   {isArchive && (
     <p class="archive-note">{dayLabel} 1면입니다. <a href="/jogan/">오늘의 1면 보기 →</a></p>

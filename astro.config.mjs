@@ -85,7 +85,6 @@ function postLastmod() {
 
     if (tags.includes('일일')) {
       map.set(`/jogan/daily/${pubDate}/`, last);
-      map.set(`/jogan/today/${pubDate}/`, last); // 그날의 1면도 같은 글에서 나온다
     } else if (tags.includes('주간')) {
       // period는 { from: 2026-09-14, to: ... } 한 줄 형식이라 날짜만 끊어 읽는다
       map.set(`/jogan/weekly/${fm.match(/from:\s*([\d-]+)/)?.[1] ?? pubDate}/`, last);
@@ -107,6 +106,9 @@ export default defineConfig({
   site: 'https://gyeonmunrok.com',
   integrations: [
     sitemap({
+      // 날짜별 1면(/jogan/today/날짜/)은 같은 날 일일 글과 내용이 겹쳐
+      // 검색엔진이 색인하지 않는다. 사람이 보는 페이지로만 두고 사이트맵에서 뺀다.
+      filter: (page) => !new URL(page).pathname.startsWith('/jogan/today/'),
       serialize(item) {
         const date = lastmod.get(new URL(item.url).pathname);
         if (date) item.lastmod = date;

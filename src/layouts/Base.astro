@@ -13,9 +13,12 @@ interface Props {
   active?: 'today' | 'flow' | 'all' | 'jogan' | 'about';
   // 제호 옆 현재 위치를 직접 줄 때(예: 날짜별 1면의 "9월 18일자")
   crumb?: string;
+  // 검색엔진에 싣지 않을 페이지(내용이 다른 페이지와 겹치는 날짜별 1면 등).
+  // 링크는 따라가게 두어 본문 글로 크롤러가 넘어가도록 follow는 남긴다
+  noindex?: boolean;
 }
 
-const { title, description = '견문록 — 보고 들은 것을 기록하는 블로그', ogType = 'website', jsonLd, corner, active, crumb: crumbProp } = Astro.props;
+const { title, description = '견문록 — 보고 들은 것을 기록하는 블로그', ogType = 'website', jsonLd, corner, active, crumb: crumbProp, noindex = false } = Astro.props;
 const siteTitle = '견문록';
 const pageTitle = title ? `${title} — ${siteTitle}` : siteTitle;
 const canonical = new URL(Astro.url.pathname, Astro.site);
@@ -46,6 +49,7 @@ const crumb = crumbProp ?? (corner === 'jogan' ? nav.find((item) => item.key ===
     <!-- 네이버 서치어드바이저 소유 확인 -->
     <meta name="naver-site-verification" content="ac78a0a6fb0dc88dc0e3e59102240f7311333da4" />
     <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
     <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={siteTitle} />
     <meta property="og:locale" content="ko_KR" />
