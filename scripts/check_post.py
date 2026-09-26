@@ -30,6 +30,18 @@ LIVE_PAGE_PATTERNS = [
     (r"^news\.ycombinator\.com$", r"^/(?!item)"),
 ]
 
+# 읽기 쉬운 길이. 넘으면 할 말이 둘인지, 결론을 받치지 않는 사실이 섞였는지 본다
+PARA_MAX = 350          # 본문 단락
+LIST_LINE_MAX = 350     # 목록 항목의 한 줄 (다음에 볼 것은 세 갈래를 줄 나눠 쓴다)
+LIST_ITEM_MAX = 700     # 목록 항목 하나 전체
+ANALYSIS_MIN, ANALYSIS_MAX = 100, 180   # 1면 해설 text (결론은 lead에 있다)
+# 검증 과정이 본문에 새어 나온 문구. 과정은 desk-report에, 본문에는 결과만 쓴다.
+# "라고 적었다"(발언 인용)와 "입장은 확인되지 않았다"(편집 원칙 8)는 걸지 않는다.
+PROCESS_PATTERNS = re.compile(
+    r"기사마다|보도마다|매체마다|기사에 따라|기사별로|(?<!라)고?로 적었|적혔다"
+    r"|종가라고 밝|밝힌 기사|기사도 없|기사에서도 나오지|확인하지 못했|이 글이 (?:물은|확인하자고|짚은)"
+)
+
 errors, warnings = [], []
 
 
@@ -228,8 +240,15 @@ def check_front(fm, body):
         for n, a in enumerate(analysis, 1):
             if not (isinstance(a, dict) and is_str(a.get("lead")) and is_str(a.get("text"))):
                 err(f"front.analysis[{n}]에 lead와 text가 모두 있어야 한다")
-            elif len(a["text"]) < 120:
-                warn(f"front.analysis[{n}] 해설이 짧다 — 사용자는 짧고 얕은 해설을 싫어한다")
+            elif len(a["text"]) < ANALYSIS_MIN:
+                warn(f"front.analysis[{n}] 해설이 짧다({len(a['text'])}자) — lead의 결론을 받칠 사실과 그 뜻이 있는지 본다")
+            elif len(a["text"]) > ANALYSIS_MAX:
+                warn(f"front.analysis[{n}] 해설이 길다({len(a['text'])}자, {ANALYSIS_MAX}자 안) — lead가 결론이다. "
+                     "text는 그 결론을 받치는 사실과 뜻만 두세 문장으로. 검증 과정과 곁가지는 뺀다")
+
+        for n, a in enumerate(analysis, 1):
+            if isinstance(a, dict) and is_str(a.get("text")) and PROCESS_PATTERNS.search(a["text"]):
+                warn(f"front.analysis[{n}]에 검증 과정 문구가 있다('{PROCESS_PATTERNS.search(a['text']).group(0)}') — 1면에는 결과만 쓴다")
 
     markets = front.get("markets")
     if not isinstance(markets, dict) or not is_str(markets.get("asOf")) or not isinstance(markets.get("rows"), list):
@@ -240,22 +259,31 @@ def check_front(fm, body):
         expected = (["기준금리"] if names[:1] == ["기준금리"] else []) + MARKET_ROWS
         if names != expected:
             err(f"1면 지표는 {MARKET_ROWS} 순서로 고정(기준금리가 바뀐 날만 맨 앞에 추가) → 지금: {names}")
+        asof = markets["asOf"]
+        # 휴장이면 직전 거래일 값을 이어 싣는다. 그 값은 그날 일일 글에 있고 오늘 본문에는 없다
+        carried = bool(re.search(r"휴장|직전 거래일", asof))
         for r in rows:
             if not isinstance(r, dict):
                 continue
+            name = r.get("name")
             value, change = str(r.get("value", "")), str(r.get("change") or "")
             if value == "—":
                 continue
             if weekend:
                 # 등락은 비우는 것이 맞고, 마감 수치를 본문에 다시 쓰지도 않는다
                 if change:
-                    warn(f"지표 '{r.get('name')}'에 등락이 있다 — 일요일·월요일판은 비운다")
+                    warn(f"지표 '{name}'에 등락이 있다 — 일요일·월요일판은 비운다")
                 continue
-            if not re.match(r"^[+-]", change):
-                err(f"지표 '{r.get('name')}' 등락 '{change}'에 +/- 부호가 없다")
-            core = re.sub(r"^\$", "", value).split()[0]
-            if core and core not in body:
-                warn(f"지표 '{r.get('name')}' 값 {value}가 본문에 없다 — 본문 링크로 뒷받침되는지 확인")
+            if change and not re.match(r"^[+-]", change):
+                err(f"지표 '{name}' 등락 '{change}'에 +/- 부호가 없다")
+            # 등락이 빈 것은 휴장(직전 거래일 값)이거나 종가가 아닌 값(장중·범위)일 때다. 까닭은 asOf에 밝힌다
+            if not change and not re.search(r"휴장|직전 거래일|장중|범위|종가.{0,6}(확인|없)", asof):
+                warn(f"지표 '{name}' 등락이 비었다 — 휴장·장중값·범위라면 asOf에 그 까닭을 밝힌다")
+            # "장중 5.22%", "5.16~5.20%"처럼 말이 붙은 값도 숫자만 떼어 본문과 맞춘다
+            num = re.search(r"\d[\d,.~]*\d|\d", value)
+            core = num.group(0) if num else ""
+            if core and core not in body and not (carried and not change):
+                warn(f"지표 '{name}' 값 {value}가 본문에 없다 — 본문 링크로 뒷받침되는지 확인")
 
     desks = front.get("desks")
     if not isinstance(desks, list) or not desks:
@@ -383,6 +411,50 @@ def check_body(body, pub):
             if not nested:
                 parent_has_link = has_link
         prev_has_link = "](" in block
+
+    check_readability(body)
+
+
+def check_readability(body):
+    """긴 단락과 검증 과정 문구. 모두 경고이고, 원칙대로 고칠지는 읽고 판단한다."""
+    section = ""
+    # 빈 줄 없이 단락 바로 아래 목록이 붙으면 둘을 따로 센다
+    blocks = []
+    for chunk in re.split(r"\n\s*\n", body):
+        if chunk.lstrip().startswith("- ") or "\n- " not in chunk:
+            blocks.append(chunk)
+        else:
+            head, rest = chunk.split("\n- ", 1)
+            blocks += [head, "- " + rest]
+    for block in blocks:
+        text = block.strip()
+        first = text.split("\n")[0]
+        if first.startswith("## "):
+            section = first[3:]
+            continue
+        if (section.startswith(("3줄 요약", "오늘의 숫자")) or not text
+                or first.startswith(("|", ">", "<", "#")) or (first.startswith("*") and not first.startswith("**"))):
+            continue
+        where = section or "처음"
+        if text.startswith("- "):
+            for item in re.split(r"\n(?=- )", text):
+                head = item.strip()[:30]
+                if len(item) > LIST_ITEM_MAX:
+                    warn(f"목록 항목이 길다({where}, {len(item)}자): {head}… — 세 갈래를 줄 나눠 쓰고 갈래마다 한두 문장으로")
+                else:
+                    for line in item.split("\n"):
+                        if len(line.strip()) > LIST_LINE_MAX:
+                            warn(f"목록 항목의 한 줄이 길다({where}, {len(line.strip())}자): {head}… — 줄을 나눈다")
+                            break
+        elif len(text) > PARA_MAX:
+            warn(f"단락이 길다({where}, {len(text)}자): {text[:30]}… — 할 말이 둘이면 나누고, 첫 문장을 받치지 않는 사실은 뺀다")
+
+    hits = [(m.start(), m.group(0)) for m in PROCESS_PATTERNS.finditer(body)]
+    if hits:
+        clean = lambda t: re.sub(r"\s+", " ", re.sub(r"\*\*|\[|\]\([^)]*\)?", "", t)).strip()
+        samples = ", ".join(f"'…{clean(body[max(0, i - 15):i + len(w) + 10])}…'" for i, w in hits[:4])
+        warn(f"본문에 검증 과정 문구가 {len(hits)}곳 있다 — 과정은 desk-report로, 본문에는 결과만(값이 갈리면 범위, 종가가 아니면 '장중'). "
+             f"보도가 갈린 것 자체가 뉴스일 때만 둔다. 예: {samples}")
 
 
 def check_tracking(path, pub):
