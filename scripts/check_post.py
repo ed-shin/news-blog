@@ -415,8 +415,14 @@ def check_body(body, pub):
     check_readability(body)
 
 
+def visible_len(text):
+    """화면에 읽히는 글자 수. 링크 주소 "(https://…)"와 굵게 표시 "**"는 세지 않는다."""
+    return len(re.sub(r"\*\*", "", re.sub(r"\]\([^)\s]*\)", "]", text)))
+
+
 def check_readability(body):
-    """긴 단락과 검증 과정 문구. 모두 경고이고, 원칙대로 고칠지는 읽고 판단한다."""
+    """긴 단락과 검증 과정 문구. 모두 경고이고, 원칙대로 고칠지는 읽고 판단한다.
+    길이는 링크 주소를 뺀, 화면에 읽히는 글자로 잰다."""
     section = ""
     # 빈 줄 없이 단락 바로 아래 목록이 붙으면 둘을 따로 센다
     blocks = []
@@ -439,15 +445,15 @@ def check_readability(body):
         if text.startswith("- "):
             for item in re.split(r"\n(?=- )", text):
                 head = item.strip()[:30]
-                if len(item) > LIST_ITEM_MAX:
-                    warn(f"목록 항목이 길다({where}, {len(item)}자): {head}… — 세 갈래를 줄 나눠 쓰고 갈래마다 한두 문장으로")
+                if visible_len(item) > LIST_ITEM_MAX:
+                    warn(f"목록 항목이 길다({where}, {visible_len(item)}자): {head}… — 세 갈래를 줄 나눠 쓰고 갈래마다 한두 문장으로")
                 else:
                     for line in item.split("\n"):
-                        if len(line.strip()) > LIST_LINE_MAX:
-                            warn(f"목록 항목의 한 줄이 길다({where}, {len(line.strip())}자): {head}… — 줄을 나눈다")
+                        if visible_len(line.strip()) > LIST_LINE_MAX:
+                            warn(f"목록 항목의 한 줄이 길다({where}, {visible_len(line.strip())}자): {head}… — 줄을 나눈다")
                             break
-        elif len(text) > PARA_MAX:
-            warn(f"단락이 길다({where}, {len(text)}자): {text[:30]}… — 할 말이 둘이면 나누고, 첫 문장을 받치지 않는 사실은 뺀다")
+        elif visible_len(text) > PARA_MAX:
+            warn(f"단락이 길다({where}, {visible_len(text)}자): {text[:30]}… — 할 말이 둘이면 나누고, 첫 문장을 받치지 않는 사실은 뺀다")
 
     hits = [(m.start(), m.group(0)) for m in PROCESS_PATTERNS.finditer(body)]
     if hits:
