@@ -196,6 +196,12 @@ def check_frontmatter(fm):
     title, desc, pub, tags = fm.get("title"), fm.get("description"), fm.get("pubDate"), fm.get("tags")
     if not is_str(title):
         err("title이 비었다")
+    elif isinstance(tags, list) and tags[:1] == ["주간"]:
+        # 주간 흐름: "9월 21~25일 주간 흐름 — …", 달이 걸치면 "9월 28일~10월 2일 주간 흐름 — …"
+        if not re.match(r"^\d{1,2}월 \d{1,2}(일)?~(\d{1,2}월 )?\d{1,2}일 주간 흐름 — .+", title):
+            warn('주간 흐름 title은 "M월 D~D일 주간 흐름 — 헤드라인" 형식이다')
+    elif isinstance(tags, list) and tags[:1] == ["기획"]:
+        pass  # 기획 제목은 자유
     elif not re.match(r"^\d{1,2}월 \d{1,2}일 — .+", title):
         warn('title은 "M월 D일 — 헤드라인" 형식이 기본이다')
     if not is_str(desc):
@@ -339,6 +345,54 @@ def check_schedule(schedule):
         text = it["title"] + " " + str(it.get("prev") or "")
         if re.search(r"예상|컨센서스|전망|확률|추정치", text):
             warn(f"{where}: 예상치·확률은 싣지 않는다. 지난번 값을 붙인다 → {text[:40]}")
+
+
+def check_weekly(fm, body):
+    """주간 흐름. 예약 작업이 혼자 쓰므로 빠지기 쉬운 자리를 본다."""
+    period = fm.get("period")
+    if isinstance(period, dict):
+        try:
+            a, b = date.fromisoformat(str(period.get("from"))), date.fromisoformat(str(period.get("to")))
+            if a.weekday() != 0 or b.weekday() != 4 or (b - a).days != 4:
+                warn(f"주간 흐름 period는 그 주 월요일~금요일이다 → {a} ~ {b}")
+            pub = date.fromisoformat(str(fm.get("pubDate")))
+            if pub <= b:
+                err(f"pubDate({pub})가 다루는 기간의 끝({b})보다 앞선다")
+        except ValueError:
+            pass
+    headings = re.findall(r"^## (.+)$", body, re.M)
+    for need in ("3줄 요약", "한눈에 보는 한 주", "앞으로 볼 일정"):
+        if not any(h.startswith(need) for h in headings):
+            err(f"주간 흐름에 '## {need}' 섹션이 없다")
+    summary = re.search(r"^## 3줄 요약\n(.*?)(?=^## )", body, re.M | re.S)
+    if summary and len(re.findall(r"^\d+\. ", summary.group(1), re.M)) != 3:
+        warn("3줄 요약이 세 줄이 아니다")
+    figs = len(re.findall(r'<figure class="chart', body))
+    if figs == 0:
+        warn("차트가 없다. 네 지표의 한 주 차트(scripts/weekly_data.py --chart)를 넣는다")
+    elif figs > 2:
+        warn(f"차트가 {figs}개다. 한 편에 한두 개다")
+    if "**분석:**" in body:
+        warn('해석 표시는 "**해설:**"을 쓴다')
+
+    sched = re.search(r"^## 앞으로 볼 일정\n(.*?)(?=^## |^---|\Z)", body, re.M | re.S)
+    if sched:
+        rows = [r for r in re.findall(r"^\|(.+)\|\s*$", sched.group(1), re.M)
+                if not re.match(r"\s*-+\s*\|", r) and "날짜" not in r.split("|")[0]]
+        if not rows:
+            err("앞으로 볼 일정 표가 비었다")
+        for r in rows:
+            cells = [c.strip() for c in r.split("|")]
+            when = cells[0]
+            if not re.match(r"^\d{1,2}/\d{1,2}(~\d{1,2}(/\d{1,2})?)?\s*\([월화수목금토일]\)(\s+\d{2}:\d{2})?$", when):
+                warn(f"일정 날짜는 한국 시간으로 '9/30 (수) 21:30'처럼 쓴다 → {when}")
+            if "현지" in r:
+                warn(f"일정 표는 한국 시간 하나로 쓴다('현지' 금지) → {when}")
+            if "](" not in r:
+                err(f"일정 줄에 근거 링크가 없다 → {when} {cells[1][:20] if len(cells) > 1 else ''}")
+            if re.search(r"예상|컨센서스|전망치|확률|추정치", r):
+                warn(f"일정 표에 예상치·확률이 있다. 지난번 값을 쓴다 → {when}")
+    check_readability(body)
 
 
 def check_links_only(body):
@@ -523,6 +577,8 @@ def main():
             check_body(body, pub)
         else:
             check_links_only(body)
+            if kind == "주간":
+                check_weekly(fm, body)
             if not fm.get("period"):
                 err(f"{kind} 글은 period: {{ from, to }}로 다루는 기간을 적어야 한다")
         if len(sys.argv) > 2:

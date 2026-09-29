@@ -159,22 +159,25 @@ def small_multiples(panels, labels, caption, alt, gap_note=''):
     """지표 여러 개의 한 주 흐름을 작은 차트로 나란히 그린다.
     칸마다 SVG를 따로 만들어, 넓은 화면에선 2×2로, 휴대폰에선 한 줄에 하나씩 쌓인다.
     축은 칸마다 따로다. 단위가 다른 지표를 한 축에 겹치지 않기 위해서다.
-    panels = [(이름, 서식 함수, [값 또는 None, ...])] — 값 순서는 labels와 같다.
-    첫 값(지난주 금요일)을 점선 기준선으로 긋는다. None은 휴장이다."""
+    panels = [(이름, 서식 함수, [값 또는 None, ...], 기준값)] — 값 순서는 labels와 같다. 기준값은 생략할 수 있다.
+    첫 값(지난주 금요일)을 점선 기준선으로 긋는다. None은 휴장이다.
+    첫 날이 휴장이면 기준값(그 전 마지막 마감)으로 점선을 긋고 그 값을 적는다."""
     pw, ph = 320, 170
     top, bottom = 34, 132                 # 그림 영역 위아래
     x0, x1 = 12, pw - 62                  # 오른쪽은 마지막 값 자리
     step = (x1 - x0) / (len(labels) - 1)
     x_of = lambda i: round(x0 + step * i, 1)
     svgs = []
-    for name, fmt, vals in panels:
-        known = [v for v in vals if v is not None]
+    for name, fmt, vals, *rest in panels:
+        base = vals[0] if vals[0] is not None else (rest[0] if rest else None)
+        known = [v for v in vals if v is not None] + ([base] if base is not None else [])
         lo, hi = min(known), max(known)
         pad = (hi - lo) * 0.25 or abs(hi) * 0.01
         y_of = _scale(lo - pad, hi + pad, bottom - top, top, invert=True)
         out = [f'<text class="panel" x="2" y="16">{name}</text>']
-        by = round(y_of(vals[0]), 1)
-        out.append(f'<line class="base" x1="{x0}" y1="{by}" x2="{x1}" y2="{by}"/>')
+        if base is not None:
+            by = round(y_of(base), 1)
+            out.append(f'<line class="base" x1="{x0}" y1="{by}" x2="{x1}" y2="{by}"/>')
         for i, lab in enumerate(labels):
             out.append(f'<text class="tick" x="{x_of(i)}" y="{ph - 10}" text-anchor="middle">{lab}</text>')
         pts = [(i, v) for i, v in enumerate(vals) if v is not None]
@@ -184,8 +187,13 @@ def small_multiples(panels, labels, caption, alt, gap_note=''):
             out.append(_pt(x_of(i), round(y_of(v), 1), 's1', f'{labels[i]} {fmt(v)}'))
         # 값은 처음과 마지막만 적는다. 첫 값은 선이 나아가는 반대쪽에 둬 선과 겹치지 않게 한다.
         i0, v0 = pts[0]; il, vl = pts[-1]
-        below = pts[1][1] > v0
-        out.append(f'<text class="note" x="{x_of(i0)}" y="{round(y_of(v0), 1) + (17 if below else -9)}">{fmt(v0)}</text>')
+        if vals[0] is None and base is not None:
+            # 첫 날이 휴장: 기준선 왼쪽 끝에 그 전 마지막 마감을 적는다
+            below = v0 > base
+            out.append(f'<text class="note" x="{x0}" y="{round(y_of(base), 1) + (17 if below else -9)}">{fmt(base)}</text>')
+        else:
+            below = len(pts) > 1 and pts[1][1] > v0
+            out.append(f'<text class="note" x="{x_of(i0)}" y="{round(y_of(v0), 1) + (17 if below else -9)}">{fmt(v0)}</text>')
         if len(pts) < len(vals):
             # 휴장으로 끊긴 선은 마지막 값을 점 위에 적고, 빈 구간 한가운데에 까닭을 적는다
             out.append(f'<text class="val" x="{x_of(il)}" y="{round(y_of(vl), 1) - 11}" text-anchor="middle">{fmt(vl)}</text>')
