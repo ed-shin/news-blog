@@ -149,10 +149,115 @@ def decomp(bars, caption, alt):
     return _figure(out, caption, alt)
 
 
-def _figure(body, caption, alt):
+def _pt(x, y, cls, tip):
+    """점 하나. 보이는 점(지름 8px)보다 넓은 투명 영역을 두어 마우스를 올리면 값이 뜬다."""
+    return (f'<g class="pt"><circle class="hit" cx="{x}" cy="{y}" r="12"/>'
+            f'<circle class="dot {cls}" cx="{x}" cy="{y}" r="4"/><title>{tip}</title></g>')
+
+
+def small_multiples(panels, labels, caption, alt, gap_note=''):
+    """지표 여러 개의 한 주 흐름을 작은 차트로 나란히 그린다.
+    칸마다 SVG를 따로 만들어, 넓은 화면에선 2×2로, 휴대폰에선 한 줄에 하나씩 쌓인다.
+    축은 칸마다 따로다. 단위가 다른 지표를 한 축에 겹치지 않기 위해서다.
+    panels = [(이름, 서식 함수, [값 또는 None, ...])] — 값 순서는 labels와 같다.
+    첫 값(지난주 금요일)을 점선 기준선으로 긋는다. None은 휴장이다."""
+    pw, ph = 320, 170
+    top, bottom = 34, 132                 # 그림 영역 위아래
+    x0, x1 = 12, pw - 62                  # 오른쪽은 마지막 값 자리
+    step = (x1 - x0) / (len(labels) - 1)
+    x_of = lambda i: round(x0 + step * i, 1)
+    svgs = []
+    for name, fmt, vals in panels:
+        known = [v for v in vals if v is not None]
+        lo, hi = min(known), max(known)
+        pad = (hi - lo) * 0.25 or abs(hi) * 0.01
+        y_of = _scale(lo - pad, hi + pad, bottom - top, top, invert=True)
+        out = [f'<text class="panel" x="2" y="16">{name}</text>']
+        by = round(y_of(vals[0]), 1)
+        out.append(f'<line class="base" x1="{x0}" y1="{by}" x2="{x1}" y2="{by}"/>')
+        for i, lab in enumerate(labels):
+            out.append(f'<text class="tick" x="{x_of(i)}" y="{ph - 10}" text-anchor="middle">{lab}</text>')
+        pts = [(i, v) for i, v in enumerate(vals) if v is not None]
+        d = ' '.join(f'{"M" if n == 0 else "L"}{x_of(i)} {round(y_of(v), 1)}' for n, (i, v) in enumerate(pts))
+        out.append(f'<path class="line s1" d="{d}"/>')
+        for i, v in pts:
+            out.append(_pt(x_of(i), round(y_of(v), 1), 's1', f'{labels[i]} {fmt(v)}'))
+        # 값은 처음과 마지막만 적는다. 첫 값은 선이 나아가는 반대쪽에 둬 선과 겹치지 않게 한다.
+        i0, v0 = pts[0]; il, vl = pts[-1]
+        below = pts[1][1] > v0
+        out.append(f'<text class="note" x="{x_of(i0)}" y="{round(y_of(v0), 1) + (17 if below else -9)}">{fmt(v0)}</text>')
+        if len(pts) < len(vals):
+            # 휴장으로 끊긴 선은 마지막 값을 점 위에 적고, 빈 구간 한가운데에 까닭을 적는다
+            out.append(f'<text class="val" x="{x_of(il)}" y="{round(y_of(vl), 1) - 11}" text-anchor="middle">{fmt(vl)}</text>')
+            if gap_note:
+                gx = round((x_of(il + 1) + x_of(len(vals) - 1)) / 2, 1)
+                out.append(f'<text class="note" x="{gx}" y="{round((top + bottom) / 2, 1)}" text-anchor="middle">{gap_note}</text>')
+        else:
+            out.append(f'<text class="val" x="{x_of(il) + 8}" y="{round(y_of(vl), 1) + 4}">{fmt(vl)}</text>')
+        # 화면 읽기 도구용: 칸마다 모든 값을 문장으로 (표를 대신한다)
+        said = ', '.join(f'{labels[i]} {fmt(v)}' for i, v in pts)
+        label = f'{name}: {said}' + (f' ({gap_note})' if len(pts) < len(vals) and gap_note else '')
+        inner = '\n      '.join(out)
+        svgs.append(f'<svg viewBox="0 0 {pw} {ph}" role="img" aria-label="{label}">\n      {inner}\n    </svg>')
+    body = '\n    '.join(svgs)
+    return f'''<figure class="chart multiples" aria-label="{alt}">
+  <div class="panels">
+    {body}
+  </div>
+  <figcaption>{caption}</figcaption>
+</figure>'''
+
+
+def indexed(series, labels, caption, alt, base_label='기준 = 100'):
+    """단위가 다른 둘 이상을 첫 값 = 100으로 맞춰 한 축에 그린다(두 축 차트 대신).
+    series = [(이름, 색 클래스, 원래 값 서식 함수, [원래 값, ...])]"""
+    idx = [(n, c, f, raw, [v / raw[0] * 100 for v in raw]) for n, c, f, raw in series]
+    allv = [v for *_, iv in idx for v in iv]
+    lo, hi = min(allv) - 1.2, max(allv) + 1.2
+    pad_r = 120                           # 오른쪽 끝 이름표 자리
+    y_of = _scale(lo, hi, H - PAD['t'] - PAD['b'] - 18, PAD['t'] + 18, invert=True)
+    step = (W - PAD['l'] - pad_r) / (len(labels) - 1)
+    x_of = lambda i: round(PAD['l'] + step * i, 1)
+
+    out = []
+    for t in [t for t in range(int(lo) + 1, int(hi) + 1) if t % 2 == 0]:
+        y = round(y_of(t), 1)
+        cls = 'base' if t == 100 else 'grid'   # 기준선(100)만 점선으로 구분한다
+        out.append(f'<line class="{cls}" x1="{PAD["l"]}" y1="{y}" x2="{W - pad_r + 10}" y2="{y}"/>')
+        out.append(f'<text class="tick" x="{PAD["l"] - 8}" y="{y + 4}" text-anchor="end">{t}</text>')
+    for i, lab in enumerate(labels):
+        out.append(f'<text class="tick" x="{x_of(i)}" y="{H - PAD["b"] + 22}" text-anchor="middle">{lab}</text>')
+
+    # 범례: 색 표시는 선, 글씨는 본문 색
+    lx = PAD['l']
+    for n, c, *_ in idx:
+        out.append(f'<line class="line {c}" x1="{lx}" y1="{PAD["t"] - 6}" x2="{lx + 18}" y2="{PAD["t"] - 6}"/>')
+        out.append(f'<text class="legend" x="{lx + 24}" y="{PAD["t"] - 2}">{n}</text>')
+        lx += 24 + 14 * len(n) + 20
+    out.append(f'<text class="note" x="{W - pad_r + 10}" y="{PAD["t"] - 2}" text-anchor="end">{base_label}</text>')
+
+    ends = []
+    for n, c, f, raw, iv in idx:
+        d = ' '.join(f'{"M" if i == 0 else "L"}{x_of(i)} {round(y_of(v), 1)}' for i, v in enumerate(iv))
+        out.append(f'<path class="line {c}" d="{d}"/>')
+        for i, v in enumerate(iv):
+            out.append(_pt(x_of(i), round(y_of(v), 1), c, f'{n} {labels[i]} {f(raw[i])} (기준 대비 {v:.1f})'))
+        ends.append([round(y_of(iv[-1]), 1), n, c, iv[-1]])
+    # 끝 이름표가 겹치지 않게 벌린다
+    ends.sort()
+    for a, b in zip(ends, ends[1:]):
+        if b[0] - a[0] < 18:
+            b[0] = a[0] + 18
+    for y, n, c, v in ends:
+        out.append(f'<line class="line {c}" x1="{x_of(len(labels) - 1) + 10}" y1="{y}" x2="{x_of(len(labels) - 1) + 22}" y2="{y}"/>')
+        out.append(f'<text class="legend" x="{x_of(len(labels) - 1) + 28}" y="{y + 4}">{n} {v:.1f}</text>')
+    return _figure(out, caption, alt)
+
+
+def _figure(body, caption, alt, h=H):
     inner = '\n    '.join(body)
     return f'''<figure class="chart">
-  <svg viewBox="0 0 {W} {H}" role="img" aria-label="{alt}">
+  <svg viewBox="0 0 {W} {h}" role="img" aria-label="{alt}">
     {inner}
   </svg>
   <figcaption>{caption}</figcaption>
@@ -179,6 +284,26 @@ CHARTS = {
         [('9월 15일', 2.62, 2.38), ('9월 18일', 2.68, 2.33)],
         '미 10년물 명목금리를 실질금리와 기대인플레이션으로 나눈 것. 연준이 금리를 올린 9월 16일 전후로 명목금리는 5.00%에서 5.01%로 거의 그대로인데, 실질금리가 오르고 기대인플레이션이 내렸다. 세인트루이스 연은 FRED 자료(2026년 9월 22일 조회).',
         '9월 15일과 18일의 미 10년물 구성 비교. 명목금리는 5.00%와 5.01%로 비슷하지만 실질금리는 2.62%에서 2.68%로 오르고 기대인플레이션은 2.38%에서 2.33%로 내렸다.'),
+    # 주간 흐름 고정 차트: 네 지표의 한 주. 첫 칸(9/18)은 지난주 금요일 기준선이다.
+    # 10년물은 미 재무부 일별 자료(FRED DGS10, 2026-09-29 조회). 기사마다 기준(종가·장중)이 달라 한 선으로 잇지 않는다.
+    # 브렌트는 11월물 정산가, 원/달러는 서울 오후 3시 30분 종가, 코스피는 종가. 모두 그 주 일일 글에서 확인한 값이다.
+    'week-0921': lambda: small_multiples(
+        [('미 10년물 금리', lambda v: f'{v:.2f}%', [5.01, 4.96, 4.96, 5.11, 5.18, 5.17]),
+         ('브렌트유 (달러)', lambda v: f'{v:.2f}', [103.87, 100.34, 99.25, 103.08, 106.60, 104.32]),
+         ('원/달러 (원)', lambda v: f'{v:,.1f}', [1383.3, 1381.0, 1358.2, 1358.4, None, None]),
+         ('코스피', lambda v: f'{v:,.2f}', [6894.23, 7007.72, 7017.91, 7080.92, None, None])],
+        ['9/18', '9/21', '9/22', '9/23', '9/24', '9/25'],
+        '9월 21~25일 네 지표. 점선은 지난주 금요일(9/18) 값이다. 칸마다 축이 따로다. 미 10년물은 미 재무부 일별 자료(세인트루이스 연은 FRED, 2026년 9월 29일 조회), 브렌트유는 11월물 정산가, 원/달러는 서울 외환시장 오후 3시 30분 종가, 코스피는 종가다. 국내는 24~25일 추석 휴장이었다.',
+        '9월 18일부터 25일까지 네 지표. 미 10년물은 5.01%에서 5.17%로 올랐다. 브렌트유는 103.87달러에서 99.25달러까지 내렸다가 106.60달러까지 오른 뒤 104.32달러로 마쳤다. 원/달러는 1,383.3원에서 1,358.4원으로 내렸고, 코스피는 6,894.23에서 7,080.92로 올랐다. 국내 두 지표는 24~25일 휴장이다.',
+        gap_note='추석 휴장'),
+    # 같은 주, 10년물과 브렌트를 9/18 = 100으로 맞춰 한 축에 둔다(두 축 차트를 쓰지 않는다).
+    'oil-vs-10y-0921': lambda: indexed(
+        [('미 10년물', 's1', lambda v: f'{v:.2f}%', [5.01, 4.96, 4.96, 5.11, 5.18, 5.17]),
+         ('브렌트유', 's2', lambda v: f'{v:.2f}달러', [103.87, 100.34, 99.25, 103.08, 106.60, 104.32])],
+        ['9/18', '9/21', '9/22', '9/23', '9/24', '9/25'],
+        '미 10년물 금리와 브렌트유를 지난주 금요일(9/18) 값 = 100으로 맞춘 것. 금리는 수준 자체의 변화율이다(5.01% → 5.17%가 약 103). 유가는 주중 96 아래까지 내렸다가 102를 넘은 뒤 100 언저리로 돌아왔고, 금리는 수요일부터 한 방향으로 올라 103 위에서 마쳤다. 자료는 위 차트와 같다.',
+        '9월 18일을 100으로 맞춘 미 10년물 금리와 브렌트유. 브렌트유는 96.6, 95.6, 99.2, 102.6을 거쳐 100.4로 마쳤다. 10년물은 99.0, 99.0, 102.0, 103.4를 거쳐 103.2로 마쳤다.',
+        base_label='9/18 = 100'),
     'series': lambda: series_chart(
         [('9/17', 4.939), ('9/18', 4.998), ('9/21', 4.949)],
         [4.94, 4.98],

@@ -285,6 +285,8 @@ def check_front(fm, body):
             if core and core not in body and not (carried and not change):
                 warn(f"지표 '{name}' 값 {value}가 본문에 없다 — 본문 링크로 뒷받침되는지 확인")
 
+    check_schedule(front.get("schedule"))
+
     desks = front.get("desks")
     if not isinstance(desks, list) or not desks:
         err("front.desks가 비었다")
@@ -317,6 +319,26 @@ def check_front(fm, body):
         prefix = DESK_SECTION.get(key)
         if prefix and not any(h.startswith(prefix) for h in headings):
             err(f"데스크 {key}의 1면 링크가 갈 본문 섹션('## {prefix}…')이 없다")
+
+
+def check_schedule(schedule):
+    """1면 '오늘 볼 일정'. 없어도 된다. 있으면 한두 개, 한국 시간, 공식 근거, 예상치 없이."""
+    if schedule is None:
+        return
+    if not isinstance(schedule, list) or not 1 <= len(schedule) <= 2:
+        err("front.schedule은 한두 개다. 해당 일정이 없는 날은 아예 두지 않는다")
+        return
+    for n, it in enumerate(schedule, 1):
+        where = f"front.schedule[{n}]"
+        if not isinstance(it, dict) or not all(is_str(it.get(f)) for f in ("when", "title", "url")):
+            err(f"{where}: when·title·url이 있어야 한다")
+            continue
+        check_url(it["url"], where)
+        if not re.match(r"^\d{1,2}/\d{1,2}\s*\([월화수목금토일]\)(\s+\d{2}:\d{2})?$", it["when"].strip()):
+            warn(f"{where}: when은 한국 시간으로 '9/30(수) 21:30'처럼 쓴다(시각이 공지되지 않았으면 날짜만) → {it['when']}")
+        text = it["title"] + " " + str(it.get("prev") or "")
+        if re.search(r"예상|컨센서스|전망|확률|추정치", text):
+            warn(f"{where}: 예상치·확률은 싣지 않는다. 지난번 값을 붙인다 → {text[:40]}")
 
 
 def check_links_only(body):

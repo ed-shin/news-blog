@@ -374,3 +374,28 @@ main { min-height: 60vh; }
 .prose .chart .seg.real { fill: var(--accent); opacity: 0.85; }
 .prose .chart .seg.be { fill: var(--muted); opacity: 0.55; }
 .prose .chart .seglab { font-size: 13px; font-weight: 700; fill: var(--bg); }
+/* 차트 선 색. 어두운 배경에서 밝기(OKLCH L 0.48~0.67)·색각 이상 구분(ΔE 24)을 검증한 조합이다.
+   사이트 강조색(--accent)은 글씨용이라 차트 선에는 한 단계 어두운 금색을 쓴다. 빨강·파랑은 등락 표시라 쓰지 않는다. */
+:root { --series-1: #b8892f; --series-2: #8a74cc; }
+.prose .chart .line.s1 { stroke: var(--series-1); stroke-width: 2; }
+.prose .chart .line.s2 { stroke: var(--series-2); stroke-width: 2; }
+.prose .chart .dot.s1 { fill: var(--series-1); stroke: var(--bg); stroke-width: 2; }
+.prose .chart .dot.s2 { fill: var(--series-2); stroke: var(--bg); stroke-width: 2; }
+.prose .chart .hit { fill: transparent; }
+.prose .chart .pt:hover .dot { r: 6; }
+.prose .chart .base { stroke: var(--strong); stroke-width: 1; stroke-dasharray: 4 4; }
+.prose .chart .panel { font-size: 13px; font-weight: 700; fill: var(--text); }
+.prose .chart .legend { font-size: 12px; font-weight: 700; fill: var(--text); }
+.prose .chart .val { fill: var(--bright); }
+/* 작은 차트 묶음: 넓은 화면 2×2, 좁은 화면 한 줄에 하나. 칸마다 SVG가 따로라 가로로 밀지 않고 쌓인다 */
+.prose .chart.multiples .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 28px; }
+.prose .chart.multiples svg { width: 100%; max-width: none; }
+@media (max-width: 660px) {
+  .prose .chart.multiples { overflow-x: visible; }
+  .prose .chart.multiples .panels { grid-template-columns: 1fr; }
+  .prose .chart.multiples svg { width: 100%; }
+}
+/* 넓은 화면에서 칸이 원래 크기(320)보다 줄어 글씨가 11px 아래로 내려가지 않게 한 단계 키운다 */
+.prose .chart.multiples .tick, .prose .chart.multiples .note { font-size: 13px; }
+.prose .chart.multiples .panel { font-size: 14px; }
+.prose .chart.multiples .val { font-size: 14px; }

@@ -55,6 +55,7 @@ const dayLabel = today ? `${fmtMonthDay(today.data.pubDate)}자` : '';
           </div>
           <a class="readall" href={todayUrl}>일일 전문 읽기 →</a>
         </div>
+        <div class="side">
         <table class="market">
           <caption>주요 지표<span>{front.markets.asOf}</span></caption>
           <thead><tr><th>지표</th><th>값</th>{showChange && <th>등락</th>}</tr></thead>
@@ -65,6 +66,21 @@ const dayLabel = today ? `${fmtMonthDay(today.data.pubDate)}자` : '';
             })}
           </tbody>
         </table>
+        {front.schedule && front.schedule.length > 0 && (
+          <div class="sched">
+            <p class="sched-h">오늘 볼 일정<span>한국 시간</span></p>
+            <ul>
+              {front.schedule.map((s) => (
+                <li>
+                  <span class="when">{s.when}</span>
+                  <a href={s.url} target="_blank" rel="noopener noreferrer">{s.title}</a>
+                  {s.prev && <span class="prev">지난번 {s.prev}</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        </div>
       </section>
 
       <section class="desks">
@@ -123,7 +139,19 @@ const dayLabel = today ? `${fmtMonthDay(today.data.pubDate)}자` : '';
   .apara b { font-weight: 800; }
   .readall { display: inline-block; margin-top: 16px; font-size: 0.88rem; font-weight: 700; border-bottom: 1.5px solid currentColor; padding-bottom: 1px; }
 
+  .side { align-self: start; min-width: 0; }
   .market { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; align-self: start; }
+  /* 오늘 볼 일정: 지표 표와 같은 머리 모양, 한 줄에 시각과 일정, 아래 줄에 지난번 값 */
+  .sched { margin-top: 24px; }
+  .sched-h { margin: 0 0 8px; padding-bottom: 7px; border-bottom: 1.5px solid var(--accent); font-size: 0.88rem; font-weight: 800; letter-spacing: 0.04em; color: var(--accent); }
+  .sched-h span { margin-left: 8px; font-size: 0.78rem; font-weight: 500; letter-spacing: 0; color: var(--muted); }
+  .sched ul { list-style: none; margin: 0; padding: 0; }
+  .sched li { padding: 9px 0; border-bottom: 1px solid var(--border); line-height: 1.45; }
+  .sched li:last-child { border-bottom: 0; }
+  .sched .when { display: block; font-size: 0.8rem; font-weight: 700; color: var(--bright); font-variant-numeric: tabular-nums; }
+  .sched a { font-size: 0.92rem; color: var(--text); }
+  .sched a:hover { color: var(--accent); }
+  .sched .prev { display: block; margin-top: 2px; font-size: 0.8rem; color: var(--muted); }
   .market caption { caption-side: top; text-align: left; padding: 0 0 9px; font-size: 0.88rem; font-weight: 800; letter-spacing: 0.04em; color: var(--accent); }
   .market caption span { margin-left: 8px; font-size: 0.78rem; font-weight: 500; letter-spacing: 0; color: var(--muted); }
   .market th { padding: 0 0 7px; border-bottom: 1.5px solid var(--accent); font-size: 0.72rem; font-weight: 600; color: var(--muted); text-align: right; }

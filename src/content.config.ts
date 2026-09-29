@@ -9,6 +9,11 @@ const front = z.object({
     asOf: z.string(),
     rows: z.array(z.object({ name: z.string(), value: z.string(), change: z.string().default('') })),
   }),
+  // 오늘 볼 일정(한국 시간). 1면 지표 아래에 나온다. 없는 날은 두지 않는다
+  schedule: z
+    .array(z.object({ when: z.string(), title: z.string(), prev: z.string().optional(), url: z.string().url() }))
+    .max(2)
+    .optional(),
   desks: z.array(
     z.object({
       key: z.enum(['rates', 'energy', 'geo', 'tech', 'etc']),
