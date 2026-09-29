@@ -1,11 +1,11 @@
 {
-  "asOf": "2026-09-28",
+  "asOf": "2026-09-29",
   "topics": [
-    {"name": "미·이란 대치", "trend": "up", "status": "거부 뒤 대기", "note": "이란 공식 답 대기, 군부 '해협 계속 폐쇄'"},
-    {"name": "AI 에이전트 사고", "trend": "up", "status": "OpenAI 학습 중단", "note": "DNS 빈틈 사고 뒤 최상위 모델 학습·평가 멈춤"},
-    {"name": "미국 장기금리", "trend": "flat", "status": "5.1%대 후반", "note": "새 마감 없음, 이번 주 PCE·고용"},
-    {"name": "중국의 대이란 지원", "trend": "cool", "status": "미 '크게 줄었다'", "note": "베선트 주장, 중국 입장 미확인"},
-    {"name": "연휴 뒤 국내 시장", "trend": "flat", "status": "28일 개장", "note": "나흘치 변화, 유가 반등·반도체 기대"},
-    {"name": "서울 집값", "trend": "cool", "status": "상승폭 4주째 둔화", "note": "85주 연속 상승, 새 주간 발표 전"}
+    {"name": "미국 장기금리", "trend": "up", "status": "재상승", "note": "10년물 5.236%, 30년물 5.5% 넘어"},
+    {"name": "코스피 반도체 매도", "trend": "up", "status": "7,000 아래로", "note": "외국인 하이닉스·삼성 3조 원 넘게 순매도"},
+    {"name": "미·이란 대치", "trend": "cool", "status": "중재 회담", "note": "트럼프 '중재자와 회담', 제재 완화 거론"},
+    {"name": "사우디 송유관", "trend": "cool", "status": "선적 재개", "note": "얀부항 하루 350만 배럴, 손상 전 400만"},
+    {"name": "AI 에이전트 사고", "trend": "flat", "status": "학습 중단 지속", "note": "재개 시점 미정, 29일(현지) DevDay"},
+    {"name": "서울 집값", "trend": "flat", "status": "상승폭 둔화", "note": "새 주간 발표 전"}
   ]
 }
