@@ -9,7 +9,19 @@ const today = (await getJoganPosts()).find((p) => kindOf(p) === 'daily' && p.dat
 const front = today?.data.front;
 const recent = (await getPosts()).filter((p) => p !== today).slice(0, 5);
 ---
-<Base>
+<Base
+  fullTitle="견문록 — 매일 아침 검증해 읽는 경제·국제 뉴스, 조간"
+  description="견문록은 매일 아침 경제·국제 뉴스를 원문과 대조해 싣는 조간과, 금리·유가·지정학·AI의 흐름을 한 주 단위로 짚는 주간 흐름과 기획을 펴냅니다."
+  jsonLd={{
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    // 구글이 검색 결과의 사이트 이름을 정할 때 보는 자료. 제목·og:site_name과 이름을 맞춘다
+    name: '견문록',
+    alternateName: ['견문록 조간', 'gyeonmunrok'],
+    url: new URL('/', Astro.site).href,
+    inLanguage: 'ko',
+  }}
+>
   {today && front && (
     <section class="corner">
       <div class="corner-head">

@@ -32,6 +32,7 @@ const dayLabel = today ? `${fmtMonthDay(today.data.pubDate)}자` : '';
 ---
 <Base
   title={date ? `${dayLabel} 조간` : '조간'}
+  fullTitle={date ? undefined : '견문록 조간 — 오늘의 경제·국제 뉴스 1면'}
   description={today?.data.description}
   corner="jogan"
   active={date ? undefined : 'today'}
