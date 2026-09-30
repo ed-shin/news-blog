@@ -1,11 +1,11 @@
 {
-  "asOf": "2026-09-29",
+  "asOf": "2026-09-30",
   "topics": [
-    {"name": "미국 장기금리", "trend": "up", "status": "재상승", "note": "10년물 5.236%, 30년물 5.5% 넘어"},
-    {"name": "코스피 반도체 매도", "trend": "up", "status": "7,000 아래로", "note": "외국인 하이닉스·삼성 3조 원 넘게 순매도"},
-    {"name": "미·이란 대치", "trend": "cool", "status": "중재 회담", "note": "트럼프 '중재자와 회담', 제재 완화 거론"},
-    {"name": "사우디 송유관", "trend": "cool", "status": "선적 재개", "note": "얀부항 하루 350만 배럴, 손상 전 400만"},
-    {"name": "AI 에이전트 사고", "trend": "flat", "status": "학습 중단 지속", "note": "재개 시점 미정, 29일(현지) DevDay"},
-    {"name": "서울 집값", "trend": "flat", "status": "상승폭 둔화", "note": "새 주간 발표 전"}
+    {"name": "미국 장기금리", "trend": "up", "status": "장단기 엇갈림", "note": "30년물 장중 2002년 이후 최고, 2년물 하락"},
+    {"name": "코스피 외국인 매도", "trend": "up", "status": "매도 확산", "note": "2.9조 원 순매도, 반도체는 버텨"},
+    {"name": "미·이란 대치", "trend": "cool", "status": "뉴욕 협상", "note": "우라늄 이전 방식·순서에서 이견"},
+    {"name": "사우디 송유관", "trend": "cool", "status": "선적 확인", "note": "얀부 사흘 1,250만 배럴, 브렌트 102달러대"},
+    {"name": "AI 에이전트 사고", "trend": "flat", "status": "제품화로 이동", "note": "DevDay 새 모델 공개, 학습 전 안전성 논증 제안"},
+    {"name": "AI 모델 가격 경쟁", "trend": "up", "status": "같은 가격대", "note": "Sonnet 5.5·GPT-6.1 Sol 모두 $2/$10"}
   ]
 }
