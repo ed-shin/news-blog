@@ -68,6 +68,8 @@ const crumb = crumbProp ?? (corner === 'jogan' ? nav.find((item) => item.key ===
     <meta name="twitter:image" content={ogImage} />
     <link rel="alternate" type="application/rss+xml" title={siteTitle} href="/rss.xml" />
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+    <!-- /favicon.ico는 검색로봇·옛 브라우저가 관례로 찾는다(없으면 네이버가 '접근 불가'로 잡는다). SVG를 읽는 브라우저는 SVG를 쓴다 -->
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
