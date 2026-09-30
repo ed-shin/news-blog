@@ -1,0 +1,78 @@
+---
+// 글 끝의 "이 글 공유하기". 공유하면 보이는 대표 이미지(src/lib/og.ts)를 작게 보여 주고 링크를 건넨다.
+// 대표 이미지가 메타 정보에만 있으면 글 본문에 이미지가 하나도 없어서, 검색엔진이 볼 수 있게 본문에도 둔다.
+interface Props {
+  url: string;
+  image: string;
+  alt: string;
+}
+const { url, image, alt } = Astro.props;
+---
+<section class="share" aria-label="이 글 공유하기">
+  <p class="ct">이 글 공유하기</p>
+  <div class="share-body">
+    <img src={image} alt={alt} width="1200" height="630" loading="lazy" decoding="async" />
+    <div class="share-side">
+      <p>링크를 보내면 이 카드로 보입니다.</p>
+      <div class="share-actions">
+        <button type="button" class="native" data-url={url} hidden>공유하기</button>
+        <button type="button" class="copy" data-url={url}>링크 복사</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.share .native').forEach((b) => {
+    // 휴대폰에서는 기기의 공유 창(카카오톡 등)을 연다. 지원하지 않는 브라우저에서는 버튼을 숨겨 둔다
+    if (!navigator.share) return;
+    b.hidden = false;
+    b.addEventListener('click', () => navigator.share({ url: b.dataset.url, title: document.title }).catch(() => {}));
+  });
+  // 클립보드 권한을 막는 브라우저(카카오톡 안 브라우저 등)에서는 예전 방식(선택 후 복사)으로 한 번 더 해 본다
+  function copyByCommand(value: string) {
+    const area = document.createElement('textarea');
+    area.value = value;
+    area.setAttribute('readonly', '');
+    area.style.position = 'fixed';
+    area.style.opacity = '0';
+    document.body.append(area);
+    area.select();
+    const ok = document.execCommand('copy');
+    area.remove();
+    return ok;
+  }
+  document.querySelectorAll<HTMLButtonElement>('.share .copy').forEach((b) => {
+    b.addEventListener('click', async () => {
+      const url = b.dataset.url!;
+      let ok = false;
+      try {
+        await navigator.clipboard.writeText(url);
+        ok = true;
+      } catch {
+        ok = copyByCommand(url);
+      }
+      b.textContent = ok ? '복사했습니다' : '복사하지 못했습니다';
+      setTimeout(() => (b.textContent = '링크 복사'), 2000);
+    });
+  });
+</script>
+
+<style>
+  .share { margin: 2.5rem 0 0; padding: 18px 20px 20px; border: 1px solid var(--border); border-radius: 4px; }
+  .ct { margin: 0 0 12px; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; color: var(--accent); }
+  .share-body { display: flex; gap: 20px; align-items: center; }
+  img { display: block; width: 320px; max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 6px; }
+  .share-side p { margin: 0 0 12px; font-size: 0.9rem; line-height: 1.6; color: var(--muted); }
+  .share-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  button {
+    padding: 7px 14px; border: 1px solid var(--strong); border-radius: 999px; background: transparent;
+    color: var(--text); font: inherit; font-size: 0.86rem; font-weight: 700; cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); color: var(--accent); }
+  button[hidden] { display: none; }
+  @media (max-width: 560px) {
+    .share-body { flex-direction: column; align-items: stretch; }
+    img { width: 100%; }
+  }
+</style>

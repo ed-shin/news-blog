@@ -1,6 +1,7 @@
 ---
 // 글 한 편의 화면. 조간 글(/jogan/종류/주소/)과 그 밖의 글(/blog/주소/)이 함께 쓴다.
 import Base from '../layouts/Base.astro';
+import ShareCard from './ShareCard.astro';
 import { render } from 'astro:content';
 import { kindOf, topicsOf, topicLabel, headlineOf, searchTitleOf, fmtFull, fmtPeriod, frontUrl, isoDate, postUrl, ogImagePath, KIND_LABEL, type Post } from '../lib/posts';
 
@@ -103,6 +104,8 @@ const jsonLd = [
           <a class="all" href="/jogan/corrections/">정정 기록 전체 보기 →</a>
         </section>
       )}
+
+      {image && <ShareCard url={pageUrl} image={image.path} alt={`${image.alt} — 견문록 조간 카드`} />}
 
       <footer class="post-foot">
         {kind && topics.length > 0 && (

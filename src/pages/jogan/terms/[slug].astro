@@ -1,5 +1,6 @@
 ---
 import Base from '../../../layouts/Base.astro';
+import ShareCard from '../../../components/ShareCard.astro';
 import { render } from 'astro:content';
 import { getTerms, termUrl, mentions, type Term } from '../../../lib/terms';
 import { getJoganPosts, postUrl, headlineOf, kindOf, fmtFull, isoDate, ogImagePath, KIND_LABEL } from '../../../lib/posts';
@@ -96,6 +97,8 @@ const jsonLd = [
         <a class="all" href="/jogan/corrections/">정정 기록 전체 보기 →</a>
       </section>
     )}
+
+    <ShareCard url={pageUrl} image={ogImagePath(termUrl(term))} alt={`${term.data.name} — 견문록 용어 카드`} />
 
     <footer class="post-foot">
       <p class="disclaimer">
