@@ -112,7 +112,7 @@ Astro 정적 블로그. 글은 `src/content/blog/YYYY-MM-DD-슬러그.md`, main�
    ```
    오류는 모두 고치고 경고는 읽어 보고 판단한다.
 6. 작성자 `barney <jp.shin.kor@gmail.com>`로 커밋하고 main에 푸시한다. 커밋 메시지에 무엇을 왜 고쳤는지 적는다.
-7. 배포를 확인한다. **이번에 바뀐 문구로 확인한다.** 주소가 200을 준다는 것만으로는 옛 페이지일 수 있고, 엣지 캐시 때문에 이전 내용이 잠시 더 보인다.
+7. 배포를 확인한다. **이번에 바뀐 문구로 확인한다.** 주소가 200을 준다는 것만으로는 옛 페이지일 수 있고, 엣지 캐시 때문에 이전 내용이 잠시 더 보인다. 확인되면 `python3 scripts/indexnow.py src/content/blog/D-daily.md`로 새 주소를 네이버·빙에 알린다.
 8. 무엇을 고쳤는지, 무엇을 싣지 않았는지 보고한다. 이해 충돌(Anthropic·Claude)에 해당하는 항목은 실었든 뺐든 보고에 밝힌다.
 
 ### 일요일·월요일판
@@ -151,5 +151,7 @@ Astro 정적 블로그. 글은 `src/content/blog/YYYY-MM-DD-슬러그.md`, main�
 - `scripts/check_post.py`를 고치면 편집자 스킬(`jogan-editor`)의 `scripts/check_post.py`도 같은 판으로 바꾼다. 편집 단계는 스킬 사본으로, 발행 단계는 이 저장소 판으로 검사한다. 스킬은 클라우드에서 동기화되므로 로컬 사본만 고치면 다음 동기화 때 덮인다. 스킬 원본을 올려야 유지된다(2026-09-26, 스킬 사본이 주말판 규칙도 없는 옛 판이었던 것을 발견).
 
 - `scripts/weekly_data.py`는 일일 글 1면 지표의 이름(`브렌트`·`원/달러`·`코스피`)과 "등락이 비면 휴장"이라는 약속에 기대 값을 읽는다. 1면 지표 형식을 바꾸면 이 스크립트도 함께 고치고, `python3 scripts/weekly_data.py 2026-09-21`로 지난 값이 그대로 나오는지 확인한다.
+
+- IndexNow 인증 키는 `public/6b36733a11663d38cacecd670769bf84.txt`이고 `scripts/indexnow.py`의 `KEY`와 같아야 한다. 키 파일을 지우거나 바꾸면 알림이 403으로 막힌다. 구글은 IndexNow를 쓰지 않으므로 사이트맵과 서치 콘솔이 여전히 기본이다.
 
 - `astro.config.mjs`의 마크다운 변환 규칙(remark/rehype)을 바꾼 뒤에는 `rm -rf node_modules/.astro .astro/data-store.json` 후 빌드한다. 변환 결과가 캐시돼 있어 그냥 빌드하면 반영되지 않는다.
