@@ -2,7 +2,7 @@
 import Base from '../../../layouts/Base.astro';
 import { render } from 'astro:content';
 import { getTerms, termUrl, mentions, type Term } from '../../../lib/terms';
-import { getJoganPosts, postUrl, headlineOf, kindOf, fmtFull, isoDate, KIND_LABEL } from '../../../lib/posts';
+import { getJoganPosts, postUrl, headlineOf, kindOf, fmtFull, isoDate, ogImagePath, KIND_LABEL } from '../../../lib/posts';
 
 export async function getStaticPaths() {
   const terms = await getTerms();
@@ -43,6 +43,7 @@ const jsonLd = [
   fullTitle={`${term.data.title} | 견문록 용어`}
   description={term.data.description}
   ogType="article"
+  image={{ path: ogImagePath(termUrl(term)), alt: `${term.data.name} — 견문록 용어` }}
   jsonLd={jsonLd}
   corner="jogan"
   active="terms"

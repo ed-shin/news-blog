@@ -1,4 +1,4 @@
-"""빌드 결과(dist/)의 내부 링크를 검사한다.
+"""빌드 결과(dist/)의 내부 링크와 대표 이미지(og:image)를 검사한다.
 
 서버를 띄우지 않고 파일만 보고 확인하므로 자동 발행 파이프라인에서 그대로 쓸 수 있다.
 글 사이를 잇는 링크가 많고 지난 글을 고치면 앵커가 사라질 수 있어서, 주소뿐 아니라
@@ -17,6 +17,8 @@ from urllib.parse import unquote, urldefrag, urljoin
 
 ROOT = sys.argv[1] if len(sys.argv) > 1 else 'dist'
 HREF = re.compile(r'<a\b[^>]*?href="([^"]+)"', re.I)
+# 대표 이미지(공유 카드·검색 썸네일). 글마다 빌드 때 만들므로 만들다 빠진 것이 없는지 본다
+OG_IMAGE = re.compile(r'<meta property="og:image" content="https://gyeonmunrok\.com(/[^"]*)"')
 
 
 def page_files():
@@ -59,6 +61,10 @@ def main():
         html = open(path, encoding='utf-8').read()
         bodies[path] = html
         here = url_of(path)
+
+        for image in OG_IMAGE.findall(html):
+            if file_for(image) is None:
+                problems.append(f'{here} → 대표 이미지 {image} 없음')
 
         for href in HREF.findall(html):
             if re.match(r'^(https?:|mailto:|tel:|data:)', href):

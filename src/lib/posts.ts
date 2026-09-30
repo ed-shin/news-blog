@@ -86,4 +86,7 @@ export function postUrl(post: Post) {
 }
 
 // 그날 1면의 고정 주소 (일일 글에 front가 있을 때)
+// 페이지 주소 → 대표 이미지 주소. /jogan/daily/2026-09-30/ → /og/jogan/daily/2026-09-30.png
+// 이미지는 src/pages/og/[...slug].png.ts가 빌드 때 만든다(카드 모양은 src/lib/og.ts)
+export const ogImagePath = (pagePath: string) => `/og${pagePath.replace(/\/$/, '')}.png`;
 export const frontUrl = (post: Post) => `/jogan/today/${isoDate(post.data.pubDate)}/`;
