@@ -24,7 +24,7 @@ const { title, fullTitle, description = '견문록 — 보고 들은 것을 기�
 const siteTitle = '견문록';
 const pageTitle = fullTitle ?? (title ? `${title} — ${siteTitle}` : siteTitle);
 const canonical = new URL(Astro.url.pathname, Astro.site);
-// 공유 미리보기용 대표 이미지(1200×630). 글마다 다른 이미지는 아직 만들지 않는다.
+// 공유 미리보기·디스커버용 대표 이미지(1200×630, 디스커버 조건인 폭 1200px 이상). 글마다 다른 이미지는 아직 만들지 않는다.
 const ogImage = new URL('/og.png', Astro.site);
 
 const nav = corner === 'jogan'
@@ -52,7 +52,8 @@ const crumb = crumbProp ?? (corner === 'jogan' ? nav.find((item) => item.key ===
     <!-- 네이버 서치어드바이저 소유 확인 -->
     <meta name="naver-site-verification" content="ac78a0a6fb0dc88dc0e3e59102240f7311333da4" />
     <link rel="canonical" href={canonical} />
-    {noindex && <meta name="robots" content="noindex, follow" />}
+    <!-- 색인하는 페이지는 검색·디스커버에서 대표 이미지를 크게 보여도 된다고 알린다(디스커버 큰 카드의 조건) -->
+    <meta name="robots" content={noindex ? 'noindex, follow' : 'max-image-preview:large'} />
     <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={siteTitle} />
     <meta property="og:locale" content="ko_KR" />

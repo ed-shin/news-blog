@@ -24,7 +24,8 @@ const withToc = Boolean(kind) && toc.length > 1;
 const period = post.data.period;
 const showPubDate = !kind || Boolean(period);
 
-// 검색엔진용 구조화 데이터. 글 한 편(BlogPosting)과 현재 위치(BreadcrumbList).
+// 검색엔진용 구조화 데이터. 글 한 편과 현재 위치(BreadcrumbList).
+// 조간 글(일일·주간 흐름·기획)은 뉴스 기사(NewsArticle), 그 밖의 글은 블로그 글(BlogPosting)로 알린다.
 // 글쓴이는 필명 barney(사람), 발행 주체는 견문록. 만드는 방식과 책임은 소개 페이지에 적어 뒀다.
 const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
 const publisher = { '@type': 'Organization', name: '견문록', url: new URL('/', Astro.site).href };
@@ -32,7 +33,7 @@ const author = { '@type': 'Person', name: 'barney', url: 'https://github.com/ed-
 const jsonLd = [
   {
     '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
+    '@type': kind ? 'NewsArticle' : 'BlogPosting',
     headline: kind ? headlineOf(post) : post.data.title,
     description: post.data.description,
     inLanguage: 'ko-KR',
