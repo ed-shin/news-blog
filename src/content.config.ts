@@ -52,4 +52,21 @@ const blog = defineCollection({
   }),
 });
 
-export const collections = { blog };
+// 용어 해설. 한 쪽에 용어 하나. 일일·주간·기획 본문에서 aliases가 처음 나오는 곳에 자동으로 링크가 걸린다
+// (astro.config.mjs의 rehypeTermLinks). aliases는 한 줄 배열로 쓴다: aliases: ["장단기 금리차", "금리차"]
+const terms = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/terms' }),
+  schema: z.object({
+    name: z.string(),                 // 목록과 링크에 보이는 이름
+    title: z.string(),                // 페이지 제목. 검색하는 모양으로: "장단기 금리차란? 뜻과 역전이 말하는 것"
+    description: z.string(),          // 한두 문장. 목록과 검색 결과 설명에 쓰인다
+    category: z.enum(['금리', '물가', '경기', '시장', '에너지']),
+    aliases: z.array(z.string()).min(1),
+    related: z.array(z.string()).default([]),   // 다른 용어 파일 이름(확장자 없이)
+    pubDate: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
+    corrections: z.array(z.object({ date: z.coerce.date(), text: z.string() })).optional(),
+  }),
+});
+
+export const collections = { blog, terms };

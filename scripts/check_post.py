@@ -397,6 +397,29 @@ def check_weekly(fm, body):
     check_readability(body)
 
 
+def check_term(fm, body):
+    """용어 페이지(src/content/terms). 얇은 페이지를 막고 공식 출처를 요구한다."""
+    for k in ("name", "title", "description", "category", "aliases", "pubDate"):
+        if not fm.get(k):
+            err(f"용어 frontmatter에 {k}가 없다")
+    if fm.get("category") not in ("금리", "물가", "경기", "시장", "에너지"):
+        err(f"category는 금리·물가·경기·시장·에너지 중 하나다 → {fm.get('category')}")
+    heads = re.findall(r"^## (.+)$", body, re.M)
+    for need in ("한 줄로 말하면", "출처"):
+        if need not in heads:
+            err(f"용어 페이지에 '## {need}' 섹션이 없다")
+    src = re.search(r"^## 출처\n(.*)", body, re.M | re.S)
+    n_src = len(re.findall(r"\]\(https?://", src.group(1))) if src else 0
+    if n_src < 1:
+        err("출처 섹션에 공식 출처 링크가 없다")
+    n = visible_len(re.sub(r"^#+ .*$", "", body, flags=re.M))
+    if n < 600:
+        warn(f"용어 본문이 짧다({n}자) — 뜻·왜 보나·읽는 법을 채운다. 얇은 페이지는 검색에서 불이익을 받는다")
+    elif n > 2500:
+        warn(f"용어 본문이 길다({n}자) — 한 쪽에 한 용어, 자세한 이야기는 기획 글로 링크한다")
+    check_readability(body)
+
+
 def check_links_only(body):
     """주간·기획처럼 섹션이 자유로운 글에 쓰는 검사. 링크 규칙만 본다."""
     for m in re.finditer(r"\[[^\]]+\]\((https?://[^)]+)\)", body):
@@ -580,6 +603,11 @@ def main():
         sys.exit(2)
     text = open(sys.argv[1], encoding="utf-8").read()
     fm, body = load_frontmatter(text)
+    if fm and "/content/terms/" in sys.argv[1].replace("\\", "/"):
+        check_term(fm, body)
+        check_links_only(body)
+        fm = None  # 아래 글 검사는 건너뛴다
+        pub = None
     if fm:
         pub = check_frontmatter(fm)
         tags = fm.get("tags")

@@ -12,7 +12,7 @@ interface Props {
   fullTitle?: string;
   // 조간 코너 페이지면 제호가 "견문록 › 조간."으로 바뀌고 조간 메뉴가 나온다
   corner?: 'jogan';
-  active?: 'today' | 'flow' | 'all' | 'jogan' | 'about';
+  active?: 'today' | 'flow' | 'all' | 'terms' | 'jogan' | 'about';
   // 제호 옆 현재 위치를 직접 줄 때(예: 날짜별 1면의 "9월 18일자")
   crumb?: string;
   // 검색엔진에 싣지 않을 페이지(내용이 다른 페이지와 겹치는 날짜별 1면 등).
@@ -32,6 +32,7 @@ const nav = corner === 'jogan'
       { href: '/jogan/', label: '오늘', key: 'today' },
       { href: '/jogan/flow/', label: '흐름', key: 'flow' },
       { href: '/jogan/all/', label: '전체', key: 'all' },
+      { href: '/jogan/terms/', label: '용어', key: 'terms' },
     ]
   : [
       { href: '/jogan/', label: '조간', key: 'jogan' },

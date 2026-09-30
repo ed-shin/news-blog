@@ -1,0 +1,43 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { getTerms, termUrl, TERM_CATEGORIES } from '../../../lib/terms';
+
+const terms = await getTerms();
+const groups = TERM_CATEGORIES.map((c) => ({ c, items: terms.filter((t) => t.data.category === c) })).filter((g) => g.items.length);
+---
+<Base
+  title="용어"
+  fullTitle="경제 뉴스 용어 풀이 — 금리·물가·유가를 읽는 말 | 견문록"
+  description="조간 글에 자주 나오는 경제 용어를 한 쪽씩 풀었습니다. 뜻, 왜 보는지, 숫자를 읽는 법, 공식 출처와 함께 이 용어가 나온 최근 글을 모았습니다."
+  corner="jogan"
+  active="terms"
+>
+  <article class="post">
+    <header class="post-head">
+      <p class="blabel">용어</p>
+      <h1>뉴스를 읽는 말</h1>
+      <p class="dek">조간 글에 자주 나오는 용어를 한 쪽씩 풀었습니다. 글 속 점선 밑줄을 누르면 이 페이지들로 옵니다.</p>
+    </header>
+    {groups.map((g) => (
+      <section class="term-group">
+        <h2>{g.c}</h2>
+        <ul>
+          {g.items.map((t) => (
+            <li><a href={termUrl(t)}>{t.data.name}</a><span>{t.data.description}</span></li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </article>
+</Base>
+
+<style>
+  .term-group { margin: 0 0 34px; }
+  .term-group h2 { margin: 0 0 10px; font-size: 0.88rem; font-weight: 800; letter-spacing: 0.04em; color: var(--accent); }
+  .term-group ul { list-style: none; margin: 0; padding: 0; }
+  .term-group li { padding: 13px 0; border-bottom: 1px solid var(--border); line-height: 1.55; }
+  .term-group li:last-child { border-bottom: 0; }
+  .term-group a { display: block; font-weight: 700; color: var(--bright); }
+  .term-group a:hover { color: var(--accent); }
+  .term-group span { display: block; margin-top: 3px; font-size: 0.9rem; color: var(--muted); }
+</style>

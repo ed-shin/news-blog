@@ -21,6 +21,8 @@ ENDPOINT = 'https://api.indexnow.org/indexnow'   # 참여 검색엔진(네이버
 
 def url_of(path):
     """글 파일 → 공개 주소. 종류 태그(일일·주간·기획)에 따라 나뉜다."""
+    if '/content/terms/' in str(Path(path).resolve()):
+        return f'https://{HOST}/jogan/terms/{Path(path).stem}/'
     text = Path(path).read_text(encoding='utf-8')
     fm = text.split('---')[1]
     slug = Path(path).stem
@@ -44,7 +46,7 @@ def main():
         sys.exit(2)
     urls = [a if a.startswith('http') else url_of(a) for a in args]
     # 새 글이 올라오면 함께 바뀌는 목록 페이지도 알린다
-    for extra in ('/', '/jogan/', '/jogan/all/', '/jogan/flow/'):
+    for extra in ('/', '/jogan/', '/jogan/all/', '/jogan/flow/', '/jogan/terms/'):
         u = f'https://{HOST}{extra}'
         if u not in urls:
             urls.append(u)

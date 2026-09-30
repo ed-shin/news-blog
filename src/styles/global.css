@@ -399,3 +399,7 @@ main { min-height: 60vh; }
 .prose .chart.multiples .tick, .prose .chart.multiples .note { font-size: 13px; }
 .prose .chart.multiples .panel { font-size: 14px; }
 .prose .chart.multiples .val { font-size: 14px; }
+
+/* 용어 자동 링크: 출처 링크와 구분되게 글 색을 그대로 두고 점선 밑줄만 */
+.prose a.term { color: inherit; text-decoration-style: dotted; text-decoration-color: var(--muted); }
+.prose a.term:hover { color: var(--accent); text-decoration-color: var(--accent); }

@@ -1,0 +1,118 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { render } from 'astro:content';
+import { getTerms, termUrl, mentions, type Term } from '../../../lib/terms';
+import { getJoganPosts, postUrl, headlineOf, kindOf, fmtFull, isoDate, KIND_LABEL } from '../../../lib/posts';
+
+export async function getStaticPaths() {
+  const terms = await getTerms();
+  return terms.map((term) => ({ params: { slug: term.id }, props: { term } }));
+}
+
+const { term } = Astro.props as { term: Term };
+const { Content } = await render(term);
+const all = await getTerms();
+const related = term.data.related.map((id) => all.find((t) => t.id === id)).filter((t): t is Term => Boolean(t));
+// 이 용어가 나온 최근 글. 새 글이 쓰면 이 목록이 바뀐다(사이트맵 갱신일도 같이 움직인다)
+const recent = mentions(term, await getJoganPosts()).slice(0, 5);
+const pageUrl = new URL(termUrl(term), Astro.site).href;
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'DefinedTerm',
+    name: term.data.name,
+    alternateName: term.data.aliases.filter((a) => a !== term.data.name),
+    description: term.data.description,
+    url: pageUrl,
+    inDefinedTermSet: { '@type': 'DefinedTermSet', name: '견문록 용어', url: new URL('/jogan/terms/', Astro.site).href },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: '조간', item: new URL('/jogan/', Astro.site).href },
+      { '@type': 'ListItem', position: 2, name: '용어', item: new URL('/jogan/terms/', Astro.site).href },
+      { '@type': 'ListItem', position: 3, name: term.data.name, item: pageUrl },
+    ],
+  },
+];
+---
+<Base
+  title={term.data.title}
+  fullTitle={`${term.data.title} | 견문록 용어`}
+  description={term.data.description}
+  ogType="article"
+  jsonLd={jsonLd}
+  corner="jogan"
+  active="terms"
+>
+  <article class="post">
+    <header class="post-head">
+      <p class="blabel">용어<span class="dl">{term.data.category}</span></p>
+      <h1>{term.data.title}</h1>
+      <p class="dek">{term.data.description}</p>
+      {term.data.updatedDate && <p class="byline"><span>수정 {fmtFull(term.data.updatedDate)}</span></p>}
+    </header>
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    {recent.length > 0 && (
+      <section class="term-more">
+        <h2>요즘 나온 글</h2>
+        <ul>
+          {recent.map((p) => (
+            <li>
+              <span class="meta"><time datetime={isoDate(p.data.pubDate)}>{fmtFull(p.data.pubDate)}</time> · {KIND_LABEL[kindOf(p)!]}</span>
+              <a href={postUrl(p)}>{headlineOf(p)}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    {related.length > 0 && (
+      <section class="term-more">
+        <h2>함께 볼 것</h2>
+        <ul>
+          {related.map((t) => (
+            <li><a href={termUrl(t)}>{t.data.name}</a><span class="meta">{t.data.description}</span></li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    {term.data.corrections && term.data.corrections.length > 0 && (
+      <section class="corrections">
+        <p class="ct">정정</p>
+        <ul>
+          {term.data.corrections.map((c) => (
+            <li><time datetime={isoDate(c.date)}>{fmtFull(c.date)}</time><span>{c.text}</span></li>
+          ))}
+        </ul>
+        <a class="all" href="/jogan/corrections/">정정 기록 전체 보기 →</a>
+      </section>
+    )}
+
+    <footer class="post-foot">
+      <p class="disclaimer">
+        용어 풀이는 정보 제공 목적이며 투자 권유가 아닙니다. 정의의 근거는 본문의 공식 출처를 참고하세요.
+      </p>
+      <a class="back" href="/jogan/terms/">← 용어 전체 보기</a>
+    </footer>
+  </article>
+</Base>
+
+<style>
+  .term-more { margin: 36px 0 0; }
+  .term-more h2 { margin: 0 0 10px; font-size: 0.88rem; font-weight: 800; letter-spacing: 0.04em; color: var(--accent); }
+  .term-more ul { list-style: none; margin: 0; padding: 0; }
+  .term-more li { padding: 11px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+  .term-more li:last-child { border-bottom: 0; }
+  .term-more a { color: var(--text); font-weight: 600; }
+  .term-more a:hover { color: var(--accent); }
+  .term-more .meta { display: block; font-size: 0.8rem; color: var(--muted); }
+  .term-more li > a + .meta { margin-top: 3px; }
+</style>

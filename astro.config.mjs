@@ -67,6 +67,60 @@ function rehypeEditorial() {
   return (tree) => visit(tree);
 }
 
+// 용어 파일을 읽는다. 자동 링크와 사이트맵 갱신일에 쓴다
+function loadTerms() {
+  const dir = 'src/content/terms';
+  let files = [];
+  try { files = readdirSync(dir).filter((f) => f.endsWith('.md')); } catch { return []; }
+  return files.map((name) => {
+    const fm = readFileSync(join(dir, name), 'utf8').split('---')[1] ?? '';
+    const field = (key) => fm.match(new RegExp(`^${key}:\\s*(\\S+)`, 'm'))?.[1];
+    const aliases = JSON.parse(fm.match(/^aliases:\s*(\[.*\])\s*$/m)?.[1] ?? '[]');
+    return { slug: name.replace(/\.md$/, ''), aliases, date: field('updatedDate') ?? field('pubDate') ?? '' };
+  });
+}
+const TERMS = loadTerms();
+
+// 본문에서 용어가 처음 나오는 곳에 용어 페이지 링크를 건다. 글마다 용어 하나에 한 번만.
+// 제목·링크·인용·표·차트·코드 안은 건드리지 않는다. 영문 약어는 앞뒤가 영문자가 아닐 때만 잡는다(BEI ≠ BEIJING).
+// 같은 자리에서 여럿이 걸리면 긴 말이 이긴다("근원 PCE" > "PCE").
+function rehypeTermLinks() {
+  const list = TERMS.flatMap((t) => t.aliases.map((a) => ({ a, slug: t.slug })))
+    .sort((x, y) => y.a.length - x.a.length)
+    .map((x) => ({ ...x, re: /^[\x20-\x7e]+$/.test(x.a)
+      ? new RegExp(`(?<![A-Za-z])${x.a.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![A-Za-z])`)
+      : null }));
+  const SKIP = new Set(['a', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'code', 'pre', 'table', 'figure', 'svg', 'blockquote', 'script', 'style']);
+  return (tree, file) => {
+    const path = String(file?.path ?? file?.history?.[0] ?? '');
+    if (!path.includes('/content/blog/')) return;   // 용어 페이지 자신과 그 밖의 페이지는 건드리지 않는다
+    const done = new Set();
+    const linkText = (text) => {
+      let best = null;
+      for (const x of list) {
+        if (done.has(x.slug)) continue;
+        const i = x.re ? (text.match(x.re)?.index ?? -1) : text.indexOf(x.a);
+        if (i >= 0 && (!best || i < best.i)) best = { i, ...x };
+      }
+      if (!best) return [{ type: 'text', value: text }];
+      done.add(best.slug);
+      const link = { type: 'element', tagName: 'a', properties: { href: `/jogan/terms/${best.slug}/`, className: ['term'] },
+        children: [{ type: 'text', value: best.a }] };
+      const before = text.slice(0, best.i);
+      return [...(before ? [{ type: 'text', value: before }] : []), link, ...linkText(text.slice(best.i + best.a.length))];
+    };
+    const walk = (node) => {
+      if (!node.children) return;
+      node.children = node.children.flatMap((c) => {
+        if (c.type === 'text') return linkText(c.value);
+        if (c.type === 'element' && !SKIP.has(c.tagName)) walk(c);
+        return [c];
+      });
+    };
+    walk(tree);
+  };
+}
+
 // 사이트맵의 lastmod — 글 파일에서 발행일(수정일이 있으면 수정일)을 읽어 주소별로 모은다.
 // 검색엔진이 사이트맵만 보고도 무엇이 새로 생겼는지 알 수 있게 하는 값이다.
 // 주소 규칙은 src/lib/posts.ts의 postUrl과 같게 유지해야 한다. 어긋나면 그 글만 lastmod 없이 나간다.
@@ -96,7 +150,17 @@ function postLastmod() {
     if (last > newest) newest = last;
   }
   // 새 글이 올라오면 함께 바뀌는 페이지들
-  for (const url of ['/', '/jogan/', '/jogan/all/', '/jogan/flow/']) map.set(url, newest);
+  for (const url of ['/', '/jogan/', '/jogan/all/', '/jogan/flow/', '/jogan/terms/']) map.set(url, newest);
+  // 용어 페이지의 "요즘 나온 글"은 그 용어를 쓴 새 글이 올라올 때 바뀐다
+  for (const t of TERMS) {
+    let last = t.date;
+    for (const name of readdirSync(dir).filter((f) => f.endsWith('.md'))) {
+      const text = readFileSync(join(dir, name), 'utf8');
+      const pub = text.split('---')[1]?.match(/^pubDate:\s*(\S+)/m)?.[1] ?? '';
+      if (pub > last && t.aliases.some((a) => text.split('---').slice(2).join('---').includes(a))) last = pub;
+    }
+    map.set(`/jogan/terms/${t.slug}/`, last);
+  }
   return map;
 }
 
@@ -120,6 +184,6 @@ export default defineConfig({
     // "3.50~3.75%"처럼 범위에 쓰는 물결표가 취소선이 되지 않도록 ~~두 개~~만 취소선으로 인정
     gfm: false,
     remarkPlugins: [[remarkGfm, { singleTilde: false }]],
-    rehypePlugins: [rehypeEditorial],
+    rehypePlugins: [rehypeEditorial, rehypeTermLinks],
   },
 });
