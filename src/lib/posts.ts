@@ -16,6 +16,21 @@ export const topicsOf = (post: Post) => post.data.tags.filter((t) => !KIND_TAGS[
 export const topicLabel = (tag: string) => TOPIC_LABEL[tag] ?? tag;
 export const headlineOf = (post: Post) => post.data.front?.headline ?? post.data.title;
 
+// 검색 결과·공유 카드에 쓰는 제목. 구글은 한글 제목을 30자 안팎에서 자르므로
+// 검색될 말(헤드라인)을 앞에 두고 날짜는 뒤로 보낸다. 글 머리의 제목은 그대로 둔다.
+//   일일 "9월 30일 — 헤드라인"          → "헤드라인 | 9월 30일 조간 — 견문록"
+//   주간 "9월 21~25일 주간 흐름 — 헤드라인" → "헤드라인 | 9월 21~25일 주간 흐름 — 견문록"
+// 기획은 제목이 이미 검색어로 시작하므로 undefined(기본 "제목 — 견문록")
+export function searchTitleOf(post: Post): string | undefined {
+  const kind = kindOf(post);
+  if (kind === 'daily') return `${headlineOf(post)} | ${fmtMonthDay(post.data.pubDate)} 조간 — 견문록`;
+  if (kind === 'weekly') {
+    const i = post.data.title.indexOf(' — ');
+    if (i > 0) return `${post.data.title.slice(i + 3)} | ${post.data.title.slice(0, i)} — 견문록`;
+  }
+  return undefined;
+}
+
 export async function getPosts() {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
   return posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());

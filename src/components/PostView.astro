@@ -2,7 +2,7 @@
 // 글 한 편의 화면. 조간 글(/jogan/종류/주소/)과 그 밖의 글(/blog/주소/)이 함께 쓴다.
 import Base from '../layouts/Base.astro';
 import { render } from 'astro:content';
-import { kindOf, topicsOf, topicLabel, headlineOf, fmtFull, fmtPeriod, frontUrl, isoDate, KIND_LABEL, type Post } from '../lib/posts';
+import { kindOf, topicsOf, topicLabel, headlineOf, searchTitleOf, fmtFull, fmtPeriod, frontUrl, isoDate, KIND_LABEL, type Post } from '../lib/posts';
 
 interface Props {
   post: Post;
@@ -56,7 +56,7 @@ const jsonLd = [
   },
 ];
 ---
-<Base title={post.data.title} description={post.data.description} ogType="article" jsonLd={jsonLd} corner={kind ? 'jogan' : undefined}>
+<Base title={post.data.title} fullTitle={searchTitleOf(post)} description={post.data.description} ogType="article" jsonLd={jsonLd} corner={kind ? 'jogan' : undefined}>
   <div class:list={['post-layout', { layout: withToc }]}>
     <article class="post">
       <header class="post-head">
