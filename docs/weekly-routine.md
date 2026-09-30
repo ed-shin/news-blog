@@ -105,3 +105,4 @@ npm install --silent && npm run build && python3 scripts/linkcheck.py
 - 일정 표 줄 수, 공식 근거를 찾지 못해 뺀 일정과 까닭
 - 이해 충돌(Anthropic·Claude)에 해당하는 항목은 실었든 뺐든 밝힌다
 - 검사 경고와 그대로 둔 까닭
+- **수집기에 알릴 것:** 그 주 편집자 보고(Drive `daily/*/desk-report.md`)의 "수집 지침에 알릴 것"을 모아, 두 번 이상 나온 것만 적는다. 수집기 지시문을 고칠 후보다. 편집자는 날마다 적지만 이 칸을 읽는 사람이 따로 없어, 주간 보고로 한 번 모은다.

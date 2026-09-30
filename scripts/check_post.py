@@ -282,6 +282,8 @@ def check_front(fm, body):
                 continue
             if change and not re.match(r"^[+-]", change):
                 err(f"지표 '{name}' 등락 '{change}'에 +/- 부호가 없다")
+            if name == "미 10년물" and change and not change.endswith("%p"):
+                warn(f"미 10년물 등락은 %p로 쓴다(예: +0.013%p) — 날마다 단위가 같아야 1면에서 비교된다 → {change}")
             # 등락이 빈 것은 휴장(직전 거래일 값)이거나 종가가 아닌 값(장중·범위)일 때다. 까닭은 asOf에 밝힌다
             if not change and not re.search(r"휴장|직전 거래일|장중|범위|종가.{0,6}(확인|없)", asof):
                 warn(f"지표 '{name}' 등락이 비었다 — 휴장·장중값·범위라면 asOf에 그 까닭을 밝힌다")
@@ -489,6 +491,18 @@ def check_body(body, pub):
         prev_has_link = "](" in block
 
     check_readability(body)
+    check_next(body)
+
+
+def check_next(body):
+    """다음에 볼 것은 확인 방법을 쓰는 자리다. 시장 확률과 예상치는 쓰지 않는다(CLAUDE.md)."""
+    m = re.search(r"^## 다음에 볼 것\n(.*?)(?=^## |\Z)", body, re.M | re.S)
+    if not m:
+        return
+    text = re.sub(r"\]\([^)]*\)", "]", m.group(1))
+    for hit in re.finditer(r"[^.\n]{0,25}(?:확률|가능성|컨센서스|예상치|시장 예상)[^.\n]{0,25}\d+(?:\.\d+)?(?:~\d+(?:\.\d+)?)?\s*%"
+                           r"|\d+(?:\.\d+)?\s*%[^.\n]{0,12}(?:확률|가능성)", text):
+        warn(f"다음에 볼 것에 시장 확률·예상치가 있다 — 확인 방법으로 쓴다: '…{hit.group(0).strip()[-45:]}…'")
 
 
 def visible_len(text):
