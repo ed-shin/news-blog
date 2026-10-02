@@ -336,6 +336,50 @@ def net_bars(values, labels, caption, alt, gap_after=None, gap_label='', unit='�
     return _figure(out, caption, alt)
 
 
+def line_events(points, caption, alt, events, fmt=lambda v: f'{v:.2f}', base=None, base_label='',
+                tick_step=2, tick_fmt=lambda t: f'{t:g}'):
+    """한 지표의 날짜별 추이에 사건 몇 개를 표시한다. points = [(라벨, 값), ...]
+    events = {라벨: (짧은 설명, 'above' 또는 'below')} — 그 날 점 위·아래에 값과 설명을 두 줄로 적는다.
+    base를 주면 그 높이에 점선과 base_label을 긋는다(예: 100달러)."""
+    values = [v for _, v in points] + ([base] if base is not None else [])
+    lo, hi = min(values), max(values)
+    pad = (hi - lo) * 0.28
+    top, bottom = PAD['t'] + 8, H - PAD['b']
+    y_of = _scale(lo - pad, hi + pad, bottom - top, top, invert=True)
+    step = (W - PAD['l'] - PAD['r'] - 30) / (len(points) - 1)
+    x_of = lambda i: round(PAD['l'] + 15 + step * i, 1)
+    out = []
+    t = int((lo - pad) // tick_step + 1) * tick_step
+    while t <= hi + pad:
+        y = round(y_of(t), 1)
+        out.append(f'<line class="grid" x1="{PAD["l"]}" y1="{y}" x2="{W - PAD["r"]}" y2="{y}"/>')
+        out.append(f'<text class="tick" x="{PAD["l"] - 8}" y="{y + 4}" text-anchor="end">{tick_fmt(t)}</text>')
+        t += tick_step
+    if base is not None:
+        by = round(y_of(base), 1)
+        out.append(f'<line class="base" x1="{PAD["l"]}" y1="{by}" x2="{W - PAD["r"]}" y2="{by}"/>')
+        if base_label:
+            # 기준선 이름은 왼쪽 끝에 둔다(오른쪽은 마지막 사건 설명과 겹치기 쉽다)
+            out.append(f'<text class="note" x="{PAD["l"] + 4}" y="{by - 6}">{base_label}</text>')
+    for i, (lab, _) in enumerate(points):
+        out.append(f'<text class="tick" x="{x_of(i)}" y="{H - PAD["b"] + 22}" text-anchor="middle">{lab}</text>')
+    d = ' '.join(f'{"M" if i == 0 else "L"}{x_of(i)} {round(y_of(v), 1)}' for i, (_, v) in enumerate(points))
+    out.append(f'<path class="line s1" d="{d}"/>')
+    for i, (lab, v) in enumerate(points):
+        out.append(_pt(x_of(i), round(y_of(v), 1), 's1', f'{lab} {fmt(v)}'))
+        if lab in events:
+            note, where = events[lab]
+            y = round(y_of(v), 1)
+            anchor = 'start' if i == 0 else 'end' if i == len(points) - 1 else 'middle'
+            if where == 'above':
+                out.append(f'<text class="val" x="{x_of(i)}" y="{y - 26}" text-anchor="{anchor}">{fmt(v)}</text>')
+                out.append(f'<text class="note" x="{x_of(i)}" y="{y - 11}" text-anchor="{anchor}">{note}</text>')
+            else:
+                out.append(f'<text class="val" x="{x_of(i)}" y="{y + 21}" text-anchor="{anchor}">{fmt(v)}</text>')
+                out.append(f'<text class="note" x="{x_of(i)}" y="{y + 36}" text-anchor="{anchor}">{note}</text>')
+    return _figure(out, caption, alt)
+
+
 def _figure(body, caption, alt, h=H):
     inner = '\n    '.join(body)
     return f'''<figure class="chart">
@@ -394,6 +438,17 @@ CHARTS = {
         '외국인이 코스피에서 날마다 산 금액에서 판 금액을 뺀 값(억 원). 9/18~9/22 사흘만 순매수였다. 9월 24~25일은 추석 연휴로 시장이 쉬었다. 9/23은 보도에 따라 5,047억~5,102억 원 순매도이고, 9/21은 약 1,420억 원으로 보도된 값이다. 출처는 표에 단 각 날짜의 일일 글이다.',
         '외국인의 코스피 순매수. 9월 16일 1조 6,800억 원 순매도, 17일 2조 4,606억 원 순매도, 18일 4,388억 원 순매수, 21일 약 1,420억 원 순매수, 22일 853억 원 순매수, 23일 약 5,100억 원 순매도, 28일 3조 2,263억 원 순매도, 29일 2조 9,046억 원 순매도, 30일 2조 2,747억 원 순매도, 10월 1일 3,366억 원 순매도.',
         gap_after=5, gap_label='추석 연휴', names=('외국인 순매수', '외국인 순매도')),
+    # 기획 '국제유가와 호르무즈 해협'(9/14~10/1). 브렌트 11월물 정산가, 그 주의 일일·주간 글에서 확인한 값.
+    # 10/1부터는 12월물이라 이 선에 잇지 않는다(본문에서 따로 적는다).
+    'brent-0914': lambda: line_events(
+        [('9/14', 105.68), ('9/15', 108.75), ('9/16', 105.83), ('9/17', 104.82), ('9/18', 103.87),
+         ('9/21', 100.34), ('9/22', 99.25), ('9/23', 103.08), ('9/24', 106.60), ('9/25', 104.32),
+         ('9/28', 105.28), ('9/29', 102.59), ('9/30', 103.53)],
+        '브렌트유 11월물 정산가(달러). 점선은 100달러다. 송유관이 멈춘 주에 5월 이후 최고(9/15)까지 갔다가, 송유관이 다시 돈 날(9/22) 100달러 아래로 정산됐다. 그 뒤로는 공급량보다 공격과 협상 소식에 하루 2~4%씩 오르내렸다. 10월 1일부터 기준 월물이 12월물로 바뀌어 이 선에 잇지 않았다. 출처는 표에 단 각 날짜의 일일 글이다.',
+        '브렌트유 11월물 정산가. 9월 14일 105.68달러, 15일 108.75달러로 5월 이후 최고, 16일 105.83, 17일 104.82, 18일 103.87, 21일 100.34, 22일 99.25로 100달러 아래, 23일 103.08, 24일 106.60, 25일 104.32, 28일 105.28, 29일 102.59, 30일 103.53달러.',
+        {'9/15': ('5월 이후 최고', 'above'), '9/22': ('송유관 재가동', 'below'), '9/24': ('후티 미사일', 'above'),
+         '9/25': ('7일 개방안', 'below'), '9/29': ('얀부 선적 확인', 'below')},
+        base=100, base_label='100달러'),
     'series': lambda: series_chart(
         [('9/17', 4.939), ('9/18', 4.998), ('9/21', 4.949)],
         [4.94, 4.98],
