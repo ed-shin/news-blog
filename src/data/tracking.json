@@ -1,11 +1,11 @@
 {
-  "asOf": "2026-10-01",
+  "asOf": "2026-10-02",
   "topics": [
-    { "name": "미국 장기금리", "trend": "up", "status": "물가 둔화에도 상승", "note": "10년물 5.296%, 30년물 5.64%, 2년물 보합" },
-    { "name": "코스피 외국인 매도", "trend": "up", "status": "매도 지속", "note": "2.27조 원 순매도, 기관도 매도" },
-    { "name": "미·이란 대치", "trend": "flat", "status": "답신 수령", "note": "카타르 경유 답신, 내용 비공개" },
-    { "name": "사우디 송유관", "trend": "flat", "status": "유가 반등", "note": "제재 완화 부인에 브렌트 103달러대" },
-    { "name": "AI 모델 증류 공방", "trend": "up", "status": "OpenAI 보고서", "note": "Moonshot AI 관련 개인 지목, 7월 차단" },
-    { "name": "AI 모델 가격 경쟁", "trend": "flat", "status": "같은 가격대", "note": "Sonnet 5.5·GPT-6.1 Sol 모두 $2/$10" }
+    { "name": "미국 장기금리", "trend": "up", "status": "신고점 뒤 반락", "note": "10년물 장중 5.3445%, 이후 5.243%" },
+    { "name": "코스피 외국인 매도", "trend": "cool", "status": "규모 축소", "note": "5거래일째 매도, 3,366억 원으로 줄어" },
+    { "name": "미·이란 대치", "trend": "up", "status": "군사 압박", "note": "세 번째 항모 출항, 대표단 출국 지시 보도" },
+    { "name": "석유 공급 차질", "trend": "up", "status": "정제유로 확대", "note": "중국 10월 연료 수출 미승인, 브렌트 102달러" },
+    { "name": "AI 메모리 수요", "trend": "up", "status": "수출로 확인", "note": "9월 반도체 수출 603억 달러, 사상 최대" },
+    { "name": "AI 모델 가격 경쟁", "trend": "flat", "status": "같은 가격대", "note": "Gemini 4 Argon도 도입가 $2/$10" }
   ]
 }
