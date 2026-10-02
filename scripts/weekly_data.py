@@ -14,7 +14,9 @@
   휴장일에도 1면에는 직전 거래일 값을 이어 싣기 때문에, 값만 보면 휴장인지 알 수 없다.
 - 미 10년물은 1면 값을 쓰지 않는다. 기사마다 종가·장중이 섞여 한 선으로 이을 수 없어서다.
   미 재무부 일별 자료(세인트루이스 연은 FRED, DGS10)를 받아 쓴다.
-- 브렌트유 계약 월물은 본문 "오늘의 숫자" 표에서 읽는다. 주중에 월물이 바뀌면 캡션에 밝힌다.
+- 브렌트유 계약 월물은 본문 "오늘의 숫자" 표에서 읽는다. 주중에 월물이 바뀌면(근월물 교체) 두 월물
+  값을 잇지 않고 선을 끊는다. 바뀐 날의 1면 값과 등락(새 월물 기준)으로 새 월물의 전날 값을 셈해
+  새 선을 거기서 시작하고, 캡션에 밝힌다. 그냥 이으면 오른 날이 내린 것처럼 그려진다(10/1 12월물 교체).
 """
 import re
 import sys
@@ -69,14 +71,19 @@ def collect(monday):
     series = {k: [] for k in ROWS.values()}
     base = {}                               # 기준일(지난 금)이 휴장인 지표의 그 전 마지막 마감
     months, missing = [], []
+    day_month, brent_change = [], []        # 날마다 브렌트 월물과 1면 등락(근월물 교체를 찾는 데 쓴다)
     for d in days:
         rows, month = front_rows(d + timedelta(days=1))
         if rows is None:
             missing.append(f'{d + timedelta(days=1)} 일일 글이 없다')
             for k in series:
                 series[k].append(None)
+            day_month.append(None)
+            brent_change.append('')
             continue
         months.append(month)
+        day_month.append(month)
+        brent_change.append(rows.get('brent', (None, ''))[1])
         for k in series:
             v, change = rows.get(k, (None, ''))
             # 등락이 비면 그날 새 마감이 없다(휴장). 1면이 이어 실은 직전 값이라 선에 넣지 않는다
@@ -89,7 +96,15 @@ def collect(monday):
         before = [v for k, v in sorted(fred.items()) if k < days[0].isoformat() and v is not None]
         if before:
             base['us10y'] = before[-1]
-    return days, labels, series, base, [m for m in months if m], missing
+    # 근월물 교체: 월물이 바뀐 날의 등락은 새 월물끼리 비교한 값이다. 그 날 값을 등락으로 되돌려
+    # 새 월물의 전날 값을 얻는다(예: 10/1 12월물 102.31, +4.37% → 9/30 12월물 98.03)
+    roll = None
+    for k in range(1, len(days)):
+        a, b, v, ch = day_month[k - 1], day_month[k], series['brent'][k], brent_change[k].strip()
+        if a and b and a != b and v is not None and ch.endswith('%'):
+            roll = {'at': k, 'from': round(v / (1 + num(ch) / 100), 2), 'label': f'{b}월물', 'prev_label': f'{a}월물'}
+            break
+    return days, labels, series, base, [m for m in months if m], missing, roll
 
 
 def span(days, vals):
@@ -108,7 +123,7 @@ def main():
     monday = date.fromisoformat(sys.argv[1])
     if monday.weekday() != 0:
         sys.exit(f'{monday}는 월요일이 아니다')
-    days, labels, s, base, months, missing = collect(monday)
+    days, labels, s, base, months, missing, roll = collect(monday)
     today = datetime.now(timezone(timedelta(hours=9))).date()
 
     if '--chart' not in sys.argv:
@@ -116,6 +131,9 @@ def main():
         for name, key in [('미 10년물', 'us10y'), ('브렌트', 'brent'), ('원/달러', 'usdkrw'), ('코스피', 'kospi')]:
             print(f'{name:8}' + '  '.join(f'{("—" if v is None else f"{v:,.2f}"):>9}' for v in s[key]))
         print(f'브렌트 월물: {sorted(set(months))}')
+        if roll:
+            print(f'근월물 교체: {labels[roll["at"]]}부터 {roll["label"]}. 선을 끊고, '
+                  f'{labels[roll["at"] - 1]} {roll["label"]} 값 {roll["from"]:,.2f}(그날 값과 등락으로 셈)에서 새 선을 시작한다')
         for k, v in base.items():
             print(f'기준일 휴장 → 그 전 마지막 마감을 기준선으로: {k} {v:,.2f}')
         for m in missing:
@@ -136,10 +154,14 @@ def main():
         notes.append(f'미국은 {us_gap} 휴장이었다')
     fmt = {'us10y': lambda v: f'{v:.2f}%', 'brent': lambda v: f'{v:.2f}',
            'usdkrw': lambda v: f'{v:,.1f}', 'kospi': lambda v: f'{v:,.2f}'}
-    panels = [(n, fmt[k], s[k], base.get(k)) for n, k in
+    panels = [(n, fmt[k], s[k], base.get(k), roll if k == 'brent' else None) for n, k in
               [('미 10년물 금리', 'us10y'), ('브렌트유 (달러)', 'brent'), ('원/달러 (원)', 'usdkrw'), ('코스피', 'kospi')]]
     if base:
         notes.append('기준일이 휴장이던 지표는 그 전 마지막 마감을 점선으로 그었다')
+    if roll:
+        k = roll['at']
+        notes.append(f'브렌트유는 {labels[k]}부터 {roll["label"]}이라 그 앞뒤 선을 잇지 않았다. '
+                     f'{roll["label"]} 선의 첫 점은 {labels[k - 1]}의 {roll["label"]} 값({roll["from"]:.2f})이다')
     caption = (f'{mon.month}월 {mon.day}~{days[-1].day}일 네 지표. 점선은 지난주 금요일({fri.month}/{fri.day}) 값이다. '
                f'칸마다 축이 따로다. 미 10년물은 미 재무부 일별 자료(세인트루이스 연은 FRED, '
                f'{today.year}년 {today.month}월 {today.day}일 조회), 브렌트유는 {month_note} 정산가, '
@@ -151,6 +173,8 @@ def main():
     alt = (f'{fri.month}월 {fri.day}일부터 {days[-1].month}월 {days[-1].day}일까지 네 지표. '
            + ', '.join(said(n, k) for n, k in [('미 10년물', 'us10y'), ('브렌트유', 'brent'),
                                                 ('원/달러', 'usdkrw'), ('코스피', 'kospi')]) + ' 움직였다.')
+    if roll:
+        alt += f' 브렌트유는 {labels[roll["at"]]}부터 {roll["label"]}이다.'
     gap = sys.argv[sys.argv.index('--gap-note') + 1] if '--gap-note' in sys.argv else '휴장'
     print(chart.small_multiples(panels, labels, caption, alt, gap_note=gap))
 

@@ -161,7 +161,10 @@ def small_multiples(panels, labels, caption, alt, gap_note=''):
     축은 칸마다 따로다. 단위가 다른 지표를 한 축에 겹치지 않기 위해서다.
     panels = [(이름, 서식 함수, [값 또는 None, ...], 기준값)] — 값 순서는 labels와 같다. 기준값은 생략할 수 있다.
     첫 값(지난주 금요일)을 점선 기준선으로 긋는다. None은 휴장이다.
-    첫 날이 휴장이면 기준값(그 전 마지막 마감)으로 점선을 긋고 그 값을 적는다."""
+    첫 날이 휴장이면 기준값(그 전 마지막 마감)으로 점선을 긋고 그 값을 적는다.
+    다섯째 값 roll = {'at': i, 'from': 값, 'label': '12월물', 'prev_label': '11월물'}을 주면 선물 근월물이 바뀐 날로 보고
+    i-1과 i 사이 선을 끊는다. 새 월물 선은 i-1 자리의 새 월물 값('from')에서 시작한다.
+    두 월물 값을 그냥 이으면 오른 날이 내린 것처럼 그려지기 때문이다."""
     pw, ph = 320, 170
     top, bottom = 34, 132                 # 그림 영역 위아래
     x0, x1 = 12, pw - 62                  # 오른쪽은 마지막 값 자리
@@ -169,8 +172,10 @@ def small_multiples(panels, labels, caption, alt, gap_note=''):
     x_of = lambda i: round(x0 + step * i, 1)
     svgs = []
     for name, fmt, vals, *rest in panels:
+        roll = rest[1] if len(rest) > 1 else None
         base = vals[0] if vals[0] is not None else (rest[0] if rest else None)
-        known = [v for v in vals if v is not None] + ([base] if base is not None else [])
+        known = ([v for v in vals if v is not None] + ([base] if base is not None else [])
+                 + ([roll['from']] if roll else []))
         lo, hi = min(known), max(known)
         pad = (hi - lo) * 0.25 or abs(hi) * 0.01
         y_of = _scale(lo - pad, hi + pad, bottom - top, top, invert=True)
@@ -181,10 +186,27 @@ def small_multiples(panels, labels, caption, alt, gap_note=''):
         for i, lab in enumerate(labels):
             out.append(f'<text class="tick" x="{x_of(i)}" y="{ph - 10}" text-anchor="middle">{lab}</text>')
         pts = [(i, v) for i, v in enumerate(vals) if v is not None]
-        d = ' '.join(f'{"M" if n == 0 else "L"}{x_of(i)} {round(y_of(v), 1)}' for n, (i, v) in enumerate(pts))
-        out.append(f'<path class="line s1" d="{d}"/>')
+        segs = [pts]
+        if roll:
+            k = roll['at']
+            segs = [[p for p in pts if p[0] < k], [(k - 1, roll['from'])] + [p for p in pts if p[0] >= k]]
+        for seg in segs:
+            if seg:
+                d = ' '.join(f'{"M" if n == 0 else "L"}{x_of(i)} {round(y_of(v), 1)}' for n, (i, v) in enumerate(seg))
+                out.append(f'<path class="line s1" d="{d}"/>')
         for i, v in pts:
             out.append(_pt(x_of(i), round(y_of(v), 1), 's1', f'{labels[i]} {fmt(v)}'))
+        if roll:
+            # 새 월물 선의 첫 점, 그리고 같은 자리의 두 점에 월물 이름. 위에 있는 점은 이름을 위에, 아래 점은 아래에 둔다
+            k = roll['at']
+            rx, ry = x_of(k - 1), round(y_of(roll['from']), 1)
+            out.append(_pt(rx, ry, 's1', f'{labels[k - 1]} {roll["label"]} {fmt(roll["from"])}'))
+            old = vals[k - 1]
+            new_low = old is None or old >= roll['from']
+            out.append(f'<text class="note" x="{rx}" y="{ry + 17 if new_low else ry - 9}" text-anchor="middle">{roll["label"]}</text>')
+            if old is not None and roll.get('prev_label'):
+                oy = round(y_of(old), 1)
+                out.append(f'<text class="note" x="{rx}" y="{oy - 9 if new_low else oy + 17}" text-anchor="middle">{roll["prev_label"]}</text>')
         # 값은 처음과 마지막만 적는다. 첫 값은 선이 나아가는 반대쪽에 둬 선과 겹치지 않게 한다.
         i0, v0 = pts[0]; il, vl = pts[-1]
         if vals[0] is None and base is not None:
@@ -205,6 +227,8 @@ def small_multiples(panels, labels, caption, alt, gap_note=''):
         # 화면 읽기 도구용: 칸마다 모든 값을 문장으로 (표를 대신한다)
         said = ', '.join(f'{labels[i]} {fmt(v)}' for i, v in pts)
         label = f'{name}: {said}' + (f' ({gap_note})' if len(pts) < len(vals) and gap_note else '')
+        if roll:
+            label += f' ({labels[roll["at"]]}부터 {roll["label"]}, 그 전날 {roll["label"]} {fmt(roll["from"])})'
         inner = '\n      '.join(out)
         svgs.append(f'<svg viewBox="0 0 {pw} {ph}" role="img" aria-label="{label}">\n      {inner}\n    </svg>')
     body = '\n    '.join(svgs)
