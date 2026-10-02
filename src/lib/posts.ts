@@ -20,8 +20,10 @@ export const headlineOf = (post: Post) => post.data.front?.headline ?? post.data
 // 검색될 말(헤드라인)을 앞에 두고 날짜는 뒤로 보낸다. 글 머리의 제목은 그대로 둔다.
 //   일일 "9월 30일 — 헤드라인"          → "헤드라인 | 9월 30일 조간 — 견문록"
 //   주간 "9월 21~25일 주간 흐름 — 헤드라인" → "헤드라인 | 9월 21~25일 주간 흐름 — 견문록"
-// 기획은 제목이 이미 검색어로 시작하므로 undefined(기본 "제목 — 견문록")
+// 기획은 제목이 이미 검색어로 시작하므로 undefined(기본 "제목 — 견문록").
+// frontmatter에 searchTitle이 있으면 그것을 그대로 쓴다(검색되는 말이 제목과 다를 때)
 export function searchTitleOf(post: Post): string | undefined {
+  if (post.data.searchTitle) return post.data.searchTitle;
   const kind = kindOf(post);
   if (kind === 'daily') return `${headlineOf(post)} | ${fmtMonthDay(post.data.pubDate)} 조간 — 견문록`;
   if (kind === 'weekly') {

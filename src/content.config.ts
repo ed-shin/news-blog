@@ -42,6 +42,9 @@ const blog = defineCollection({
     corrections: z.array(z.object({ date: z.coerce.date(), text: z.string() })).optional(),
     // 흐름 페이지에서 기획·주간 글 아래 숫자 칸으로 보인다 (라벨 / 값 / 메모). 3개 안팎
     highlights: z.array(z.object({ label: z.string(), value: z.string(), note: z.string().optional() })).optional(),
+    // 검색 결과·공유 카드 제목(<title>, og:title)을 따로 줄 때. 글 머리 제목은 그대로다.
+    // 사람들이 실제로 검색하는 말이 제목과 다를 때 기획 글에 쓴다(예: "미국 국채 금리 상승의 의미")
+    searchTitle: z.string().optional(),
   }).superRefine((data, ctx) => {
     if (data.tags.includes('기획') && !data.period) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['period'], message: '기획 글은 period: { from, to }로 다루는 기간을 적어야 합니다' });
