@@ -286,6 +286,56 @@ def indexed(series, labels, caption, alt, base_label='기준 = 100'):
     return _figure(out, caption, alt)
 
 
+def net_bars(values, labels, caption, alt, gap_after=None, gap_label='', unit='억 원',
+             names=('순매수', '순매도')):
+    """날마다 산 금액에서 판 금액을 뺀 값(순매수)을 0 위아래 막대로 그린다.
+    values = [억 원 단위 값, ...] (양수 = 순매수, 음수 = 순매도). 1조 원이 넘으면 조 단위로 적는다.
+    gap_after = i 를 주면 i번째와 다음 막대 사이에 쉰 날(연휴)을 점선과 gap_label로 표시한다.
+    색은 순매수 --series-1(금색), 순매도 --series-2(보라). 빨강·파랑은 등락 표시라 쓰지 않는다."""
+    def fmt(v):
+        sign = '+' if v > 0 else '−' if v < 0 else ''
+        a = abs(v)
+        return f'{sign}{a / 10000:.1f}조' if a >= 10000 else f'{sign}{a:,.0f}억'
+    top, bottom = PAD['t'] + 24, H - PAD['b'] - 20       # 위는 범례, 아래는 음수 막대 값 자리
+    lo, hi = min(min(values), 0), max(max(values), 0)
+    pad = (hi - lo) * 0.12
+    y_of = _scale(lo - pad, hi + pad, bottom - top, top, invert=True)
+    slot = (W - PAD['l'] - PAD['r']) / len(values)
+    bw = round(slot * 0.58, 1)
+    x_of = lambda i: round(PAD['l'] + slot * (i + 0.5), 1)
+    out = []
+    # 조 단위 눈금(0 포함)
+    step = 10000
+    for t in range(int((lo - pad) // step) + 1, int((hi + pad) // step) + 1):
+        v = t * step
+        y = round(y_of(v), 1)
+        out.append(f'<line class="{"zero" if v == 0 else "grid"}" x1="{PAD["l"]}" y1="{y}" x2="{W - PAD["r"]}" y2="{y}"/>')
+        out.append(f'<text class="tick" x="{PAD["l"] - 8}" y="{y + 4}" text-anchor="end">{"0" if v == 0 else f"{'+' if v > 0 else '−'}{abs(t)}조"}</text>')
+    # 범례
+    lx = PAD['l']
+    for cls, name in (('s1', names[0]), ('s2', names[1])):
+        out.append(f'<rect class="bar {cls}" x="{lx}" y="{PAD["t"] - 14}" width="12" height="12" rx="2"/>')
+        out.append(f'<text class="legend" x="{lx + 18}" y="{PAD["t"] - 3}">{name}</text>')
+        lx += 18 + 14 * len(name) + 22
+    out.append(f'<text class="note" x="{W - PAD["r"]}" y="{PAD["t"] - 3}" text-anchor="end">단위: {unit}</text>')
+    y0 = y_of(0)
+    for i, (v, lab) in enumerate(zip(values, labels)):
+        y = y_of(v)
+        y1, y2 = (y, y0) if v >= 0 else (y0, y)
+        cls = 's1' if v >= 0 else 's2'
+        out.append(f'<g class="pt"><rect class="bar {cls}" x="{round(x_of(i) - bw / 2, 1)}" y="{round(y1, 1)}" '
+                   f'width="{bw}" height="{round(max(y2 - y1, 1.5), 1)}" rx="2"/><title>{lab} {fmt(v)}</title></g>')
+        ty = round(y - 6, 1) if v >= 0 else round(y + 15, 1)
+        out.append(f'<text class="val" x="{x_of(i)}" y="{ty}" text-anchor="middle">{fmt(v)}</text>')
+        out.append(f'<text class="tick" x="{x_of(i)}" y="{H - PAD["b"] + 22}" text-anchor="middle">{lab}</text>')
+    if gap_after is not None:
+        gx = round(PAD['l'] + slot * (gap_after + 1), 1)
+        out.append(f'<line class="mark" x1="{gx}" y1="{top - 6}" x2="{gx}" y2="{H - PAD["b"] + 6}"/>')
+        if gap_label:
+            out.append(f'<text class="note" x="{gx}" y="{top - 10}" text-anchor="middle">{gap_label}</text>')
+    return _figure(out, caption, alt)
+
+
 def _figure(body, caption, alt, h=H):
     inner = '\n    '.join(body)
     return f'''<figure class="chart">
@@ -336,6 +386,14 @@ CHARTS = {
         '미 10년물 금리와 브렌트유를 지난주 금요일(9/18) 값 = 100으로 맞춘 것. 금리는 수준 자체의 변화율이다(5.01% → 5.17%가 약 103). 유가는 주중 96 아래까지 내렸다가 102를 넘은 뒤 100 언저리로 돌아왔고, 금리는 수요일부터 한 방향으로 올라 103 위에서 마쳤다. 자료는 위 차트와 같다.',
         '9월 18일을 100으로 맞춘 미 10년물 금리와 브렌트유. 브렌트유는 96.6, 95.6, 99.2, 102.6을 거쳐 100.4로 마쳤다. 10년물은 99.0, 99.0, 102.0, 103.4를 거쳐 103.2로 마쳤다.',
         base_label='9/18 = 100'),
+    # 기획 '코스피 외국인 매매 동향'(9/16~10/1). 값은 각 날짜 다음 날 일일 글의 코스피 투자자별 매매(억 원).
+    # 9/23은 보도에 따라 5,047억~5,102억 원 순매도라 머니투데이 값(5,102억)으로 그린다. 9/21은 '약 1,420억 원' 보도값.
+    'foreign-flows-0916': lambda: net_bars(
+        [-16800, -24606, 4388, 1420, 853, -5102, -32263, -29046, -22747, -3366],
+        ['9/16', '9/17', '9/18', '9/21', '9/22', '9/23', '9/28', '9/29', '9/30', '10/1'],
+        '외국인이 코스피에서 날마다 산 금액에서 판 금액을 뺀 값(억 원). 9/18~9/22 사흘만 순매수였다. 9월 24~25일은 추석 연휴로 시장이 쉬었다. 9/23은 보도에 따라 5,047억~5,102억 원 순매도이고, 9/21은 약 1,420억 원으로 보도된 값이다. 출처는 표에 단 각 날짜의 일일 글이다.',
+        '외국인의 코스피 순매수. 9월 16일 1조 6,800억 원 순매도, 17일 2조 4,606억 원 순매도, 18일 4,388억 원 순매수, 21일 약 1,420억 원 순매수, 22일 853억 원 순매수, 23일 약 5,100억 원 순매도, 28일 3조 2,263억 원 순매도, 29일 2조 9,046억 원 순매도, 30일 2조 2,747억 원 순매도, 10월 1일 3,366억 원 순매도.',
+        gap_after=5, gap_label='추석 연휴', names=('외국인 순매수', '외국인 순매도')),
     'series': lambda: series_chart(
         [('9/17', 4.939), ('9/18', 4.998), ('9/21', 4.949)],
         [4.94, 4.98],

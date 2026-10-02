@@ -382,6 +382,9 @@ main { min-height: 60vh; }
 .prose .chart .dot.s1 { fill: var(--series-1); stroke: var(--bg); stroke-width: 2; }
 .prose .chart .dot.s2 { fill: var(--series-2); stroke: var(--bg); stroke-width: 2; }
 .prose .chart .hit { fill: transparent; }
+.prose .chart .bar.s1 { fill: var(--series-1); }
+.prose .chart .bar.s2 { fill: var(--series-2); }
+.prose .chart .pt:hover .bar { opacity: 0.85; }
 .prose .chart .pt:hover .dot { r: 6; }
 .prose .chart .base { stroke: var(--strong); stroke-width: 1; stroke-dasharray: 4 4; }
 .prose .chart .panel { font-size: 13px; font-weight: 700; fill: var(--text); }
