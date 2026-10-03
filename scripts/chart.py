@@ -310,7 +310,8 @@ def net_bars(values, labels, caption, alt, gap_after=None, gap_label='', unit='�
         v = t * step
         y = round(y_of(v), 1)
         out.append(f'<line class="{"zero" if v == 0 else "grid"}" x1="{PAD["l"]}" y1="{y}" x2="{W - PAD["r"]}" y2="{y}"/>')
-        out.append(f'<text class="tick" x="{PAD["l"] - 8}" y="{y + 4}" text-anchor="end">{"0" if v == 0 else f"{'+' if v > 0 else '−'}{abs(t)}조"}</text>')
+        label = '0' if v == 0 else ('+' if v > 0 else '−') + f'{abs(t)}조'
+        out.append(f'<text class="tick" x="{PAD["l"] - 8}" y="{y + 4}" text-anchor="end">{label}</text>')
     # 범례
     lx = PAD['l']
     for cls, name in (('s1', names[0]), ('s2', names[1])):

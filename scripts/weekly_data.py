@@ -13,7 +13,9 @@
 - 1면 지표의 등락(change)이 비어 있으면 그날 새 마감이 없는 것(휴장)으로 보고 비운다.
   휴장일에도 1면에는 직전 거래일 값을 이어 싣기 때문에, 값만 보면 휴장인지 알 수 없다.
 - 미 10년물은 1면 값을 쓰지 않는다. 기사마다 종가·장중이 섞여 한 선으로 이을 수 없어서다.
-  미 재무부 일별 자료(세인트루이스 연은 FRED, DGS10)를 받아 쓴다.
+  미 재무부 일별 자료(세인트루이스 연은 FRED, DGS10)를 받아 쓴다. FRED는 하루 늦게 올라오므로
+  토요일에 돌면 금요일 값이 없다. 그날만 재무부 사이트의 같은 자료(10년 만기 수익률)로 채우고 캡션에 밝힌다.
+  재무부 자료에도 없는 날만 휴장으로 본다.
 - 브렌트유 계약 월물은 본문 "오늘의 숫자" 표에서 읽는다. 주중에 월물이 바뀌면(근월물 교체) 두 월물
   값을 잇지 않고 선을 끊는다. 바뀐 날의 1면 값과 등락(새 월물 기준)으로 새 월물의 전날 값을 셈해
   새 선을 거기서 시작하고, 캡션에 밝힌다. 그냥 이으면 오른 날이 내린 것처럼 그려진다(10/1 12월물 교체).
@@ -55,13 +57,31 @@ def front_rows(d):
 
 def fred_dgs10(start, end):
     url = f'https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS10&cosd={start}&coed={end}'
-    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+    # User-Agent를 따로 달면('Mozilla/5.0' 등) FRED가 연결을 끊는 일이 있었다(2026-10-03). 기본값으로 둔다
+    req = urllib.request.Request(url)
     with urllib.request.urlopen(req, timeout=30) as r:
         lines = r.read().decode().strip().splitlines()[1:]
     out = {}
     for line in lines:
         d, v = line.split(',')
         out[d] = float(v) if v not in ('.', '') else None
+    return out
+
+
+def treasury_10y(year):
+    """미 재무부 일별 수익률 곡선의 10년 만기 → {'2026-10-02': 5.28, ...}"""
+    url = ('https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/'
+           f'{year}/all?type=daily_treasury_yield_curve&field_tdr_date_value={year}&page&_format=csv')
+    req = urllib.request.Request(url)
+    with urllib.request.urlopen(req, timeout=30) as r:
+        lines = r.read().decode().strip().splitlines()
+    head = [h.strip('"') for h in lines[0].split(',')]
+    i = head.index('10 Yr')
+    out = {}
+    for line in lines[1:]:
+        cells = line.split(',')
+        m, d, y = cells[0].split('/')
+        out[f'{y}-{m}-{d}'] = float(cells[i]) if cells[i] else None
     return out
 
 
@@ -92,6 +112,13 @@ def collect(monday):
                 base[k] = v                 # 이어 실은 값 = 그 전 마지막 마감. 기준선으로만 쓴다
     fred = fred_dgs10((days[0] - timedelta(days=10)).isoformat(), days[-1].isoformat())
     series['us10y'] = [fred.get(d.isoformat()) for d in days]
+    late = [d for d, v in zip(days, series['us10y']) if v is None and d.isoformat() > max(fred, default='')]
+    if late:                                # FRED에 아직 안 올라온 날 → 재무부 자료로 채운다
+        tsy = treasury_10y(late[-1].year)
+        for i, d in enumerate(days):
+            if d in late and tsy.get(d.isoformat()) is not None:
+                series['us10y'][i] = tsy[d.isoformat()]
+                series.setdefault('_tsy', []).append(d)
     if series['us10y'][0] is None:
         before = [v for k, v in sorted(fred.items()) if k < days[0].isoformat() and v is not None]
         if before:
@@ -105,6 +132,14 @@ def collect(monday):
             roll = {'at': k, 'from': round(v / (1 + num(ch) / 100), 2), 'label': f'{b}월물', 'prev_label': f'{a}월물'}
             break
     return days, labels, series, base, [m for m in months if m], missing, roll
+
+
+def josa(word, a, b):
+    """받침이 있으면 a, 없으면 b (은/는)"""
+    c = word[-1]
+    if '가' <= c <= '힣':
+        return a if (ord(c) - 0xAC00) % 28 else b
+    return a if c in '0136789lmnr' else b
 
 
 def span(days, vals):
@@ -131,6 +166,8 @@ def main():
         for name, key in [('미 10년물', 'us10y'), ('브렌트', 'brent'), ('원/달러', 'usdkrw'), ('코스피', 'kospi')]:
             print(f'{name:8}' + '  '.join(f'{("—" if v is None else f"{v:,.2f}"):>9}' for v in s[key]))
         print(f'브렌트 월물: {sorted(set(months))}')
+        for d in s.get('_tsy', []):
+            print(f'미 10년물 {d.month}/{d.day}: FRED에 아직 없어 재무부 사이트 자료로 채웠다')
         if roll:
             print(f'근월물 교체: {labels[roll["at"]]}부터 {roll["label"]}. 선을 끊고, '
                   f'{labels[roll["at"] - 1]} {roll["label"]} 값 {roll["from"]:,.2f}(그날 값과 등락으로 셈)에서 새 선을 시작한다')
@@ -162,14 +199,20 @@ def main():
         k = roll['at']
         notes.append(f'브렌트유는 {labels[k]}부터 {roll["label"]}이라 그 앞뒤 선을 잇지 않았다. '
                      f'{roll["label"]} 선의 첫 점은 {labels[k - 1]}의 {roll["label"]} 값({roll["from"]:.2f})이다')
-    caption = (f'{mon.month}월 {mon.day}~{days[-1].day}일 네 지표. 점선은 지난주 금요일({fri.month}/{fri.day}) 값이다. '
-               f'칸마다 축이 따로다. 미 10년물은 미 재무부 일별 자료(세인트루이스 연은 FRED, '
+    period = (f'{mon.month}월 {mon.day}~{days[-1].day}일' if days[-1].month == mon.month
+              else f'{mon.month}월 {mon.day}일~{days[-1].month}월 {days[-1].day}일')
+    tsy = s.get('_tsy', [])
+    tsy_note = (f', {", ".join(f"{d.month}/{d.day}" for d in tsy)} 값은 FRED에 아직 없어 재무부 사이트'
+                if tsy else '')
+    caption = (f'{period} 네 지표. 점선은 지난주 금요일({fri.month}/{fri.day}) 값이다. '
+               f'칸마다 축이 따로다. 미 10년물은 미 재무부 일별 자료(세인트루이스 연은 FRED{tsy_note}, '
                f'{today.year}년 {today.month}월 {today.day}일 조회), 브렌트유는 {month_note} 정산가, '
                f'원/달러는 서울 외환시장 오후 3시 30분 종가, 코스피는 종가다.'
                + (' ' + '. '.join(notes) + '.' if notes else ''))
     def said(name, key):
         known = [(l, v) for l, v in zip(labels, s[key]) if v is not None]
-        return f'{name}는 {fmt[key](known[0][1])}에서 {fmt[key](known[-1][1])}로' if known else f'{name}는 값 없음'
+        p = josa(name, '은', '는')
+        return f'{name}{p} {fmt[key](known[0][1])}에서 {fmt[key](known[-1][1])}로' if known else f'{name}{p} 값 없음'
     alt = (f'{fri.month}월 {fri.day}일부터 {days[-1].month}월 {days[-1].day}일까지 네 지표. '
            + ', '.join(said(n, k) for n, k in [('미 10년물', 'us10y'), ('브렌트유', 'brent'),
                                                 ('원/달러', 'usdkrw'), ('코스피', 'kospi')]) + ' 움직였다.')
