@@ -216,7 +216,10 @@ def small_multiples(panels, labels, caption, alt, gap_note=''):
         else:
             below = len(pts) > 1 and pts[1][1] > v0
             out.append(f'<text class="note" x="{x_of(i0)}" y="{round(y_of(v0), 1) + (17 if below else -9)}">{fmt(v0)}</text>')
-        if len(pts) < len(vals):
+        # 뒤쪽이 휴장으로 비어 있을 때만 빈 구간에 까닭을 적는다. 첫날(기준일)만 휴장이면
+        # 기준선에 그 전 마지막 마감을 적었으니 따로 적지 않는다(오른쪽 끝에 '휴장'이 붙던 것, 2026-10-05)
+        trailing = il < len(vals) - 1
+        if trailing:
             # 휴장으로 끊긴 선은 마지막 값을 점 위에 적고, 빈 구간 한가운데에 까닭을 적는다
             out.append(f'<text class="val" x="{x_of(il)}" y="{round(y_of(vl), 1) - 11}" text-anchor="middle">{fmt(vl)}</text>')
             if gap_note:
@@ -226,7 +229,7 @@ def small_multiples(panels, labels, caption, alt, gap_note=''):
             out.append(f'<text class="val" x="{x_of(il) + 8}" y="{round(y_of(vl), 1) + 4}">{fmt(vl)}</text>')
         # 화면 읽기 도구용: 칸마다 모든 값을 문장으로 (표를 대신한다)
         said = ', '.join(f'{labels[i]} {fmt(v)}' for i, v in pts)
-        label = f'{name}: {said}' + (f' ({gap_note})' if len(pts) < len(vals) and gap_note else '')
+        label = f'{name}: {said}' + (f' ({gap_note})' if trailing and gap_note else '')
         if roll:
             label += f' ({labels[roll["at"]]}부터 {roll["label"]}, 그 전날 {roll["label"]} {fmt(roll["from"])})'
         inner = '\n      '.join(out)

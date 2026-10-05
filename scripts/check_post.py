@@ -30,6 +30,14 @@ LIVE_PAGE_PATTERNS = [
     (r"^news\.ycombinator\.com$", r"^/(?!item)"),
 ]
 
+# 개표 결과·실시간 속보처럼 시간이 지나면 다른 값을 보여 주는 페이지(경고). 2026-10-05: 브라질 대선
+# 득표율을 실시간 개표 페이지에서 옮겨, 그 페이지가 최종 집계로 바뀐 뒤 글의 숫자가 남았다
+LIVE_RESULT_PATH = re.compile(r"election-results|live-results|results-live|live-updates|/live/|live-news")
+
+# 상대의 속내를 짐작하는 말(경고). 의도는 본인이 밝혔거나 보도가 전한 경우에만 쓴다(편집 원칙 8).
+# 2026-10-02·03: "압박이 협상용에 가깝고"가 이틀 연속 나왔다
+INTENT_PATTERNS = re.compile(r"협상용|노림수|떠보기|속셈|엄포용|보여주기용")
+
 # 읽기 쉬운 길이. 넘으면 할 말이 둘인지, 결론을 받치지 않는 사실이 섞였는지 본다
 PARA_MAX = 350          # 본문 단락
 LIST_LINE_MAX = 350     # 목록 항목의 한 줄 (다음에 볼 것은 세 갈래를 줄 나눠 쓴다)
@@ -180,6 +188,8 @@ def check_url(url, where):
     for host_re, path_re in LIVE_PAGE_PATTERNS:
         if re.search(host_re, host) and re.search(path_re, path):
             err(f"{where}: 내용이 계속 바뀌는 페이지(시세·첫 화면)라 근거가 되지 않는다 → {url}")
+    if LIVE_RESULT_PATH.search(path):
+        warn(f"{where}: 개표·실시간 속보 페이지일 수 있다 — 값이 바뀌므로 고정된 기사 주소를 찾아 쓴다 → {url}")
 
 
 def is_weekend_edition(pub):
@@ -526,6 +536,9 @@ def check_next(body):
     for hit in re.finditer(r"[^.\n]{0,25}(?:확률|가능성|컨센서스|예상치|시장 예상)[^.\n]{0,25}\d+(?:\.\d+)?(?:~\d+(?:\.\d+)?)?\s*%"
                            r"|\d+(?:\.\d+)?\s*%[^.\n]{0,12}(?:확률|가능성)", text):
         warn(f"다음에 볼 것에 시장 확률·예상치가 있다 — 확인 방법으로 쓴다: '…{hit.group(0).strip()[-45:]}…'")
+    # 예상치를 판단 기준으로 삼는 문장(퍼센트가 없어도). 실제 값끼리, 또는 실제 반응으로 견준다
+    for hit in re.finditer(r"[^.\n]{0,30}(?:컨센서스|예상치|전망치|시장 예상)(?:와|과|를|을|보다|에)[^.\n]{0,20}", text):
+        warn(f"다음에 볼 것이 예상치를 기준으로 삼는다 — 지난 실제 값이나 시장 반응으로 바꾼다: '…{hit.group(0).strip()[-50:]}…'")
 
 
 def visible_len(text):
@@ -536,6 +549,9 @@ def visible_len(text):
 def check_readability(body):
     """긴 단락과 검증 과정 문구. 모두 경고이고, 원칙대로 고칠지는 읽고 판단한다.
     길이는 링크 주소를 뺀, 화면에 읽히는 글자로 잰다."""
+    for hit in INTENT_PATTERNS.finditer(body):
+        around = body[max(0, hit.start() - 25):hit.end() + 10].replace("\n", " ")
+        warn(f"상대의 의도를 짐작하는 말이 있다 — 본인이 밝혔거나 보도가 전한 것만 쓴다: '…{around}…'")
     section = ""
     # 빈 줄 없이 단락 바로 아래 목록이 붙으면 둘을 따로 센다
     blocks = []
