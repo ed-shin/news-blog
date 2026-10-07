@@ -109,9 +109,13 @@ export function postCard(post: Post): Card | undefined {
       .map((name) => rows.find((r) => r.name === name))
       .filter((r): r is NonNullable<typeof r> => Boolean(r && r.value && r.value !== '—'))
       .map((r) => ({ label: r.name, value: r.value, change: r.change }));
+    // 기준일은 asOf의 첫 마디다. 휴장한 시장이 있으면 그 마디도 붙인다.
+    // 카드의 코스피·원/달러가 미국과 다른 날의 종가일 수 있어서다(10/6: 미국 5일, 국내 2일).
+    const segs = (d.front?.markets.asOf ?? '').split(' · ');
+    const closed = segs.find((x) => x.includes('휴장'));
     return {
       kind: '일일', when: `${m}월 ${day}일 (${DAYS[d.pubDate.getUTCDay()]})`, headline: headlineOf(post),
-      stats, asOf: d.front?.markets.asOf.split(' · ')[0],
+      stats, asOf: [segs[0], closed].filter(Boolean).join(' · '),
     };
   }
   if (kind === 'weekly') {
