@@ -62,7 +62,7 @@ highlights:                                       # 세 개. 그 주를 대표�
 
 ## 6. 차트
 
-- **고정 차트:** 먼저 값 표를 보고, 일일 글과 맞는지 확인한다.
+- **고정 차트:** 먼저 값 표를 보고, 일일 글과 맞는지 확인한다. 원/달러·코스피는 한국은행 ECOS 값이라 일일 글과 다르면 일일 글이 틀린 것일 수 있다. 그때는 보고에 적는다(원/달러는 공휴일에도 거래한다).
   ```bash
   python3 scripts/weekly_data.py M            # 값 표
   python3 scripts/weekly_data.py M --chart    # 글에 붙일 SVG (휴장 이름이 있으면 --gap-note "추석 휴장")

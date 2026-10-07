@@ -5,12 +5,15 @@
     python3 scripts/weekly_data.py 2026-09-21 --chart    # 글에 붙일 차트 SVG
     python3 scripts/weekly_data.py 2026-09-21 --chart --gap-note "추석 휴장"   # 빈 구간 이름
 
-값을 손으로 옮기면 틀리기 쉽다. 이 스크립트는 이미 검증을 거쳐 실린 일일 글의 1면 지표를
-그대로 읽는다. 기준은 이렇다.
+값을 손으로 옮기면 틀리기 쉽다. 이 스크립트는 공식 자료와, 이미 검증을 거쳐 실린 일일 글의 1면 지표를
+읽는다(공식 자료는 scripts/official.py). 기준은 이렇다.
 
-- 거래일 T의 마감은 다음 날(T+1) 일일 글의 1면 지표에 있다. 월~금 마감 → 화~토 일일.
+- 원/달러(오후 3시 30분 종가)와 코스피(종가)는 한국은행 ECOS에서 읽는다. 값이 없는 날이 휴장이다.
+  서울 외환시장은 2026-07-06부터 공휴일에도 열려 추석에도 원/달러 종가가 있다. 일일 글이 이 날들을
+  휴장으로 처리했던 일이 있어(9/25·9/26·10/6) 글보다 공식 자료를 먼저 본다. ECOS를 읽지 못하면 일일 글로 돌아간다.
+- 브렌트는 일일 글에서 읽는다. 거래일 T의 마감은 다음 날(T+1) 일일 글의 1면 지표에 있다. 월~금 마감 → 화~토 일일.
   기준선은 지난주 금요일 마감(지난주 토요일 일일)이다.
-- 1면 지표의 등락(change)이 비어 있으면 그날 새 마감이 없는 것(휴장)으로 보고 비운다.
+- 일일 글의 1면 등락(change)이 비어 있으면 그날 새 마감이 없는 것(휴장)으로 보고 비운다.
   휴장일에도 1면에는 직전 거래일 값을 이어 싣기 때문에, 값만 보면 휴장인지 알 수 없다.
 - 미 10년물은 1면 값을 쓰지 않는다. 기사마다 종가·장중이 섞여 한 선으로 이을 수 없어서다.
   미 재무부 일별 자료(세인트루이스 연은 FRED, DGS10)를 받아 쓴다. FRED는 하루 늦게 올라오므로
@@ -22,12 +25,12 @@
 """
 import re
 import sys
-import urllib.request
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 import chart  # noqa: E402
+import official  # noqa: E402
 
 BLOG = Path(__file__).resolve().parent.parent / 'src' / 'content' / 'blog'
 DAYS = '월화수목금토일'
@@ -55,36 +58,6 @@ def front_rows(d):
     return rows, (month.group(1) if month else None)
 
 
-def fred_dgs10(start, end):
-    url = f'https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS10&cosd={start}&coed={end}'
-    # User-Agent를 따로 달면('Mozilla/5.0' 등) FRED가 연결을 끊는 일이 있었다(2026-10-03). 기본값으로 둔다
-    req = urllib.request.Request(url)
-    with urllib.request.urlopen(req, timeout=30) as r:
-        lines = r.read().decode().strip().splitlines()[1:]
-    out = {}
-    for line in lines:
-        d, v = line.split(',')
-        out[d] = float(v) if v not in ('.', '') else None
-    return out
-
-
-def treasury_10y(year):
-    """미 재무부 일별 수익률 곡선의 10년 만기 → {'2026-10-02': 5.28, ...}"""
-    url = ('https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/'
-           f'{year}/all?type=daily_treasury_yield_curve&field_tdr_date_value={year}&page&_format=csv')
-    req = urllib.request.Request(url)
-    with urllib.request.urlopen(req, timeout=30) as r:
-        lines = r.read().decode().strip().splitlines()
-    head = [h.strip('"') for h in lines[0].split(',')]
-    i = head.index('10 Yr')
-    out = {}
-    for line in lines[1:]:
-        cells = line.split(',')
-        m, d, y = cells[0].split('/')
-        out[f'{y}-{m}-{d}'] = float(cells[i]) if cells[i] else None
-    return out
-
-
 def collect(monday):
     days = [monday - timedelta(days=3)] + [monday + timedelta(days=i) for i in range(5)]  # 지난 금 + 월~금
     labels = [f'{d.month}/{d.day}' for d in days]
@@ -110,14 +83,27 @@ def collect(monday):
             series[k].append(v if change else None)
             if d == days[0] and not change and v is not None:
                 base[k] = v                 # 이어 실은 값 = 그 전 마지막 마감. 기준선으로만 쓴다
-    fred = fred_dgs10((days[0] - timedelta(days=10)).isoformat(), days[-1].isoformat())
+    for k in ('usdkrw', 'kospi'):               # 원/달러·코스피는 공식 자료가 먼저다
+        try:
+            obs = official.ecos(k, days[0] - timedelta(days=10), days[-1])
+        except Exception as e:
+            print(f'주의: ECOS {k}를 읽지 못해 일일 글 값을 쓴다({e})', file=sys.stderr)
+            continue
+        series[k] = [obs.get(d) for d in days]
+        base.pop(k, None)
+        if series[k][0] is None:
+            before = [v for d, v in sorted(obs.items()) if d < days[0]]
+            if before:
+                base[k] = before[-1]
+    fred = {d.isoformat(): v for d, v in
+            official.fred('DGS10', days[0] - timedelta(days=10), days[-1]).items()}
     series['us10y'] = [fred.get(d.isoformat()) for d in days]
     late = [d for d, v in zip(days, series['us10y']) if v is None and d.isoformat() > max(fred, default='')]
     if late:                                # FRED에 아직 안 올라온 날 → 재무부 자료로 채운다
-        tsy = treasury_10y(late[-1].year)
+        tsy = official.treasury_10y(late[-1].year)
         for i, d in enumerate(days):
-            if d in late and tsy.get(d.isoformat()) is not None:
-                series['us10y'][i] = tsy[d.isoformat()]
+            if d in late and tsy.get(d) is not None:
+                series['us10y'][i] = tsy[d]
                 series.setdefault('_tsy', []).append(d)
     if series['us10y'][0] is None:
         before = [v for k, v in sorted(fred.items()) if k < days[0].isoformat() and v is not None]
@@ -182,11 +168,11 @@ def main():
     fri, mon = days[0], days[1]
     month_note = (f'{months[0]}월물' if len(set(months)) == 1
                   else f'근월물(주중 {"→".join(sorted(set(months), key=months.index))}월물로 바뀜)')
-    kr_gap = span(days, s['usdkrw'])
+    kr_gap = span(days, s['kospi'])         # 원/달러는 공휴일에도 열리니 국내 휴장은 코스피로 본다
     us_gap = span(days, s['us10y'])
     notes = []
     if kr_gap:
-        notes.append(f'국내는 {kr_gap} 휴장이었다')
+        notes.append(f'국내 증시는 {kr_gap} 휴장이었다')
     if us_gap:
         notes.append(f'미국은 {us_gap} 휴장이었다')
     fmt = {'us10y': lambda v: f'{v:.2f}%', 'brent': lambda v: f'{v:.2f}',
@@ -207,7 +193,7 @@ def main():
     caption = (f'{period} 네 지표. 점선은 지난주 금요일({fri.month}/{fri.day}) 값이다. '
                f'칸마다 축이 따로다. 미 10년물은 미 재무부 일별 자료(세인트루이스 연은 FRED{tsy_note}, '
                f'{today.year}년 {today.month}월 {today.day}일 조회), 브렌트유는 {month_note} 정산가, '
-               f'원/달러는 서울 외환시장 오후 3시 30분 종가, 코스피는 종가다.'
+               f'원/달러는 서울 외환시장 오후 3시 30분 종가, 코스피는 종가(둘 다 한국은행 경제통계시스템)다.'
                + (' ' + '. '.join(notes) + '.' if notes else ''))
     def said(name, key):
         known = [(l, v) for l, v in zip(labels, s[key]) if v is not None]

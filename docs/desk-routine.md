@@ -73,10 +73,11 @@
 
 ```bash
 python3 scripts/check_post.py src/content/blog/D-daily.md src/data/tracking.json
+python3 scripts/market_check.py src/content/blog/D-daily.md
 npm install --silent && npm run build && python3 scripts/linkcheck.py
 ```
 
-오류는 모두 고친다. 경고는 읽어 보고 판단한다. **검사를 통과하지 못하면 푸시하지 않는다.** 그날은 글을 올리지 말고 무엇이 막혔는지 보고한다. 잘못된 글이 조용히 올라가는 것보다 낫다.
+오류는 모두 고친다. 경고는 읽어 보고 판단한다. `market_check.py`가 값이나 등락이 공식 자료와 다르다고 하면 공식 값으로 고친다. 등락은 비우지 않는다(2026-10-07 사용자 결정). "확인하지 못함"은 공식 자료가 아직 안 올라온 것이니 기사 대조 결과를 따른다. **검사를 통과하지 못하면 푸시하지 않는다.** 그날은 글을 올리지 말고 무엇이 막혔는지 보고한다. 잘못된 글이 조용히 올라가는 것보다 낫다.
 
 ## 5-2. 이미 공개된 글을 고칠 때
 
