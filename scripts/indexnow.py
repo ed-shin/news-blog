@@ -35,7 +35,9 @@ def url_of(path):
         frm = re.search(r'from:\s*([\d-]+)', fm).group(1)
         return f'https://{HOST}/jogan/weekly/{frm}/'
     if '"기획"' in tags:
-        return f'https://{HOST}/jogan/feature/{re.sub(r"^\d{4}-\d{2}-\d{2}-", "", slug)}/'
+        # f-string 안에 역슬래시를 두면 클라우드 루틴의 Python 3.11에서 문법 오류가 난다
+        feature = re.sub(r'^\d{4}-\d{2}-\d{2}-', '', slug)
+        return f'https://{HOST}/jogan/feature/{feature}/'
     return f'https://{HOST}/blog/{slug}/'
 
 
