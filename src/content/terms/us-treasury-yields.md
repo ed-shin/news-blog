@@ -6,11 +6,23 @@ category: "금리"
 aliases: ["10년물", "30년물", "2년물"]
 related: ["term-spread", "term-premium", "policy-rate", "breakeven-real-rate"]
 pubDate: 2026-09-30
+updatedDate: 2026-10-07
+corrections:
+  - date: 2026-10-07
+    text: "국채 값과 금리가 반대로 움직이는 까닭을 풀어 쓴 '국채 값과 금리'를 더했다. 이전 판은 금리를 '시장이 정한다'고만 적어 어떻게 정해지는지 알 수 없었다."
 ---
 
 ## 한 줄로 말하면
 
 **미국 정부가 10년 동안 돈을 빌릴 때 붙는 이자율이다.** 미국 재무부는 만기 2·3·5·7·10년짜리 국채를 노트(Notes)라는 이름으로 판다([재무부 TreasuryDirect](https://www.treasurydirect.gov/marketable-securities/treasury-notes/)). 20·30년짜리는 본드(Bonds)다([재무부 TreasuryDirect](https://www.treasurydirect.gov/marketable-securities/treasury-bonds/)). 뉴스의 "2년물", "10년물", "30년물"은 이 만기별 국채의 금리를 말한다.
+
+## 국채 값과 금리
+
+**국채 값이 내리면 금리가 오르고, 값이 오르면 금리가 내린다.** 10년물 노트는 경매 때 정한 이자를 액면가에 대해 6개월마다 준다. 이 이자율은 만기까지 바뀌지 않는다([재무부 TreasuryDirect](https://www.treasurydirect.gov/marketable-securities/treasury-notes/)). 그런데 국채는 시장에서 액면가보다 싸게도, 비싸게도 팔린다.
+
+**뉴스의 "10년물 금리"는 이자율이 아니라 지금 값에 사서 만기까지 들고 있을 때의 1년 수익률이다.** 재무부가 든 예를 보면, 이자율 1.375%짜리 7년물이 액면 100달러당 99.43달러에 팔렸다. 만기에 100달러를 돌려받으니 이자 말고도 0.57달러를 더 벌고, 그래서 수익률은 1.461%로 이자율보다 높다([재무부 TreasuryDirect](https://www.treasurydirect.gov/marketable-securities/understanding-pricing/)).
+
+그래서 "국채를 파는 사람이 많아 금리가 올랐다"는 말이 성립한다. 팔려는 사람이 많으면 값이 내리고, 값이 내리면 같은 이자에 대한 수익률이 오른다.
 
 ## 왜 보나
 
@@ -34,5 +46,6 @@ pubDate: 2026-09-30
 ## 출처
 
 - [재무부 TreasuryDirect — Treasury Notes](https://www.treasurydirect.gov/marketable-securities/treasury-notes/): 노트는 만기 2·3·5·7·10년, 6개월마다 고정 이자를 준다
+- [재무부 TreasuryDirect — 가격과 이자율](https://www.treasurydirect.gov/marketable-securities/understanding-pricing/): 수익률이 이자율보다 높으면 값이 액면가보다 낮다, 7년물 예시
 - [재무부 TreasuryDirect — Treasury Bonds](https://www.treasurydirect.gov/marketable-securities/treasury-bonds/): 본드는 만기 20·30년
 - [뉴욕 연은 리버티 스트리트 이코노믹스(2014)](https://libertystreeteconomics.newyorkfed.org/2014/05/treasury-term-premia-1961-present.html): 국채 금리는 단기 금리 경로에 대한 예상과 기간 프리미엄으로 나뉜다
