@@ -129,12 +129,16 @@ def josa(word, a, b):
 
 
 def span(days, vals):
-    """None인 날들을 'M/D~M/D'로"""
-    gone = [d for d, v in zip(days, vals) if v is None]
-    if not gone:
-        return ''
-    a, b = gone[0], gone[-1]
-    return f'{a.month}/{a.day}' + (f'~{b.month}/{b.day}' if b != a else '')
+    """None인 날들을 'M/D~M/D'로. 떨어진 휴장은 'M/D, M/D'로 따로 적는다(10/5·10/9 사이를 잇지 않게)"""
+    runs, prev = [], False
+    for d, v in zip(days, vals):
+        if v is None:
+            if prev:
+                runs[-1][1] = d
+            else:
+                runs.append([d, d])
+        prev = v is None
+    return ', '.join(f'{a.month}/{a.day}' + (f'~{b.month}/{b.day}' if b != a else '') for a, b in runs)
 
 
 def main():
