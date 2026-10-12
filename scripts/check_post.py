@@ -413,8 +413,8 @@ def check_term(fm, body):
     for k in ("name", "title", "description", "category", "aliases", "pubDate"):
         if not fm.get(k):
             err(f"용어 frontmatter에 {k}가 없다")
-    if fm.get("category") not in ("금리", "물가", "경기", "시장", "에너지"):
-        err(f"category는 금리·물가·경기·시장·에너지 중 하나다 → {fm.get('category')}")
+    if fm.get("category") not in ("금리", "물가", "경기", "시장", "에너지", "테크"):
+        err(f"category는 금리·물가·경기·시장·에너지·테크 중 하나다 → {fm.get('category')}")
     heads = re.findall(r"^## (.+)$", body, re.M)
     for need in ("한 줄로 말하면", "출처"):
         if need not in heads:

@@ -2,7 +2,7 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import type { Post } from './posts';
 
 export type Term = CollectionEntry<'terms'>;
-export const TERM_CATEGORIES = ['금리', '물가', '경기', '시장', '에너지'] as const;
+export const TERM_CATEGORIES = ['금리', '물가', '경기', '시장', '에너지', '테크'] as const;
 
 export async function getTerms() {
   return (await getCollection('terms')).sort((a, b) => a.data.name.localeCompare(b.data.name, 'ko'));

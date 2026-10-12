@@ -63,7 +63,7 @@ const terms = defineCollection({
     name: z.string(),                 // 목록과 링크에 보이는 이름
     title: z.string(),                // 페이지 제목. 검색하는 모양으로: "장단기 금리차란? 뜻과 역전이 말하는 것"
     description: z.string(),          // 한두 문장. 목록과 검색 결과 설명에 쓰인다
-    category: z.enum(['금리', '물가', '경기', '시장', '에너지']),
+    category: z.enum(['금리', '물가', '경기', '시장', '에너지', '테크']),
     aliases: z.array(z.string()).min(1),
     related: z.array(z.string()).default([]),   // 다른 용어 파일 이름(확장자 없이)
     pubDate: z.coerce.date(),
