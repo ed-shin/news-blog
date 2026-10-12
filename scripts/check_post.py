@@ -423,7 +423,9 @@ def check_term(fm, body):
     n_src = len(re.findall(r"\]\(https?://", src.group(1))) if src else 0
     if n_src < 1:
         err("출처 섹션에 공식 출처 링크가 없다")
-    n = visible_len(re.sub(r"^#+ .*$", "", body, flags=re.M))
+    # 그림(<figure>…</figure>)은 SVG 코드라 읽는 글자가 아니다. 길이에서 뺀다
+    prose = re.sub(r"<figure\b.*?</figure>", "", body, flags=re.S)
+    n = visible_len(re.sub(r"^#+ .*$", "", prose, flags=re.M))
     if n < 600:
         warn(f"용어 본문이 짧다({n}자) — 뜻·왜 보나·읽는 법을 채운다. 얇은 페이지는 검색에서 불이익을 받는다")
     elif n > 2500:
