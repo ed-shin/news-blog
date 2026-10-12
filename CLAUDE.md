@@ -120,7 +120,7 @@ Astro 정적 블로그. 글은 `src/content/blog/YYYY-MM-DD-슬러그.md`, main�
 - **용어 페이지가 있는 말은 일일 글에서 길게 풀지 않는다.** 링크가 자동으로 걸리므로 풀이는 한 줄 이하로 줄인다. 10년물 풀이를 18편 중 13편이 반복했던 것을 줄이려는 것이다.
 - **구조 그림:** 구성 요소와 연결을 보여야 하는 용어는 글 목록 대신 `<figure class="chart diagram">` 안의 SVG로 그린다(예: MCP의 호스트·클라이언트·서버). 상자는 `box`(강조는 `box key`, 묶음은 `box host`), 선은 `wire`, 글씨는 `lbl`·`sub`·`tag` 클래스를 쓴다. 세로로 그려 휴대폰에서도 가로로 밀지 않게 한다. 그 용어의 핵심만 그린다. 범위 밖의 것(MCP 그림의 모델·하네스)을 넣으면 정작 보여 줄 관계가 묻힌다(2026-10-12 사용자 지적).
 - **늘리는 법:** 두 편 이상에서 풀어 쓴 말만 새 페이지 후보다. 토요일 주간 루틴이 후보를 보고하고, 추가는 대화에서 공식 출처를 확인하며 한다. 자동 발행하지 않는다. 대량으로 찍어 낸 얇은 페이지는 검색에서 불이익을 받는다.
-- 용어를 더하거나 별칭을 바꾸면 로컬에서는 `rm -rf node_modules/.astro .astro/data-store.json` 뒤에 빌드해야 지난 글의 링크가 바뀐다. 배포는 매번 새로 빌드하므로 따로 할 일이 없다. 검사는 `python3 scripts/check_post.py src/content/terms/<이름>.md`.
+- 용어를 더하거나 별칭을 바꾸면 지난 글의 링크도 다시 계산해야 한다. `npm run build`가 Astro 변환 캐시(`node_modules/.astro`, `.astro/data-store.json`)를 먼저 지우므로 로컬과 배포 모두 따로 할 일은 없다. Cloudflare 빌드는 지난 빌드의 `node_modules`를 캐시에서 되살려, 캐시를 지우지 않으면 바뀌지 않은 지난 글에 옛 변환 결과(새 용어 링크가 없는 판)가 그대로 나간다(2026-10-12, 10/3 일일에 새 용어 링크가 빠진 것으로 발견). 검사는 `python3 scripts/check_post.py src/content/terms/<이름>.md`.
 
 ## AI 기획과 테크 용어
 
@@ -208,4 +208,4 @@ Astro 정적 블로그. 글은 `src/content/blog/YYYY-MM-DD-슬러그.md`, main�
 
 - IndexNow 인증 키는 `public/6b36733a11663d38cacecd670769bf84.txt`이고 `scripts/indexnow.py`의 `KEY`와 같아야 한다. 키 파일을 지우거나 바꾸면 알림이 403으로 막힌다. 구글은 IndexNow를 쓰지 않으므로 사이트맵과 서치 콘솔이 여전히 기본이다.
 
-- `astro.config.mjs`의 마크다운 변환 규칙(remark/rehype)을 바꾼 뒤에는 `rm -rf node_modules/.astro .astro/data-store.json` 후 빌드한다. 변환 결과가 캐시돼 있어 그냥 빌드하면 반영되지 않는다.
+- `astro.config.mjs`의 마크다운 변환 규칙(remark/rehype)을 바꿔도 `npm run build`가 변환 캐시를 먼저 지우므로 그대로 빌드하면 반영된다. `npm run dev`(개발 서버)는 캐시를 지우지 않으니, 개발 서버에서 볼 때는 `rm -rf node_modules/.astro .astro/data-store.json` 뒤에 띄운다.

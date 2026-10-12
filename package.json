@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "rm -rf node_modules/.astro .astro/data-store.json && astro build",
     "preview": "astro preview"
   },
   "dependencies": {
