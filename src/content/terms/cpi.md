@@ -6,6 +6,10 @@ category: "물가"
 aliases: ["CPI", "근원 CPI", "미국 소비자물가"]
 related: ["pce", "breakeven-real-rate", "policy-rate"]
 pubDate: 2026-10-12
+updatedDate: 2026-10-12
+corrections:
+  - date: 2026-10-12
+    text: "한 달 100만 원 장바구니로 품목 비중을 보인 예시와, 2026년 8월 상승률 3.4%를 에너지·식품·근원으로 쪼갠 표를 '예를 들어 보면'으로 더했다."
 ---
 
 ## 한 줄로 말하면
@@ -16,13 +20,32 @@ pubDate: 2026-10-12
 
 **같은 장바구니의 값을 매달 다시 매긴다.** 노동통계국은 미국 75개 도시에서 약 6,000가구와 2만 2,000곳의 점포·병원 등을 찾아 가격을 모은다([미 노동통계국](https://www.bls.gov/news.release/archives/cpi_09112026.htm)).
 
-**품목마다 비중이 다르다.** 비중은 가계 지출 조사로 정하고 해마다 바꾼다([미 노동통계국](https://www.bls.gov/opub/hom/cpi/data.htm)). 2025년 12월 기준으로 주거비가 35.6%로 가장 크고, 식품은 13.7%, 에너지는 6.4%다([미 노동통계국 품목별 비중](https://www.bls.gov/cpi/tables/relative-importance/2025.htm)).
+**품목마다 비중이 다르다.** 비중은 가계 지출 조사로 정하고 해마다 바꾼다([미 노동통계국](https://www.bls.gov/opub/hom/cpi/data.htm)).
 
 **품목별 지수를 먼저 구한 뒤 비중대로 합친다.** 지역 32곳과 품목 243개를 곱한 7,776개 조합마다 지수를 먼저 구하고, 이를 정해 둔 비중대로 묶어 전체 지수를 만든다. 묶는 단계에서는 품목 사이에서 바꿔 사는 변화를 없는 것으로 본다([미 노동통계국](https://www.bls.gov/opub/hom/cpi/calculation.htm)). [PCE 물가](/jogan/terms/pce/)와 숫자가 달라지는 까닭 가운데 하나다.
 
 지수는 1982~84년 평균을 100으로 놓는다. 2026년 8월 지수는 334.980, 1년 전인 2025년 8월은 323.976이었다([2026년 8월 발표](https://www.bls.gov/news.release/archives/cpi_09112026.htm), [2025년 8월 발표](https://www.bls.gov/news.release/archives/cpi_09112025.htm)). (334.980 − 323.976) ÷ 323.976 = 3.40%가 그달 발표된 "1년 전보다 3.4%"다.
 
-비중이 큰 품목일수록 전체를 많이 움직인다. 비중이 35.6%인 주거비가 1% 오르면 전체 지수는 약 0.36%p 오른다. 2026년 8월에는 휘발유가 한 달에 3.9% 올라 그달 전체 상승분의 3분의 1 넘게를 차지했다고 노동통계국이 밝혔다([미 노동통계국](https://www.bls.gov/news.release/archives/cpi_09112026.htm)).
+## 예를 들어 보면
+
+**한 달에 100만 원을 쓰는 가구로 바꿔 보자.** 2025년 12월 품목 비중을 반올림하면 이 가구는 집(주거비)에 36만 원, 식품에 14만 원, 에너지에 6만 원, 나머지에 44만 원을 쓴다. 에너지 6만 원 가운데 휘발유가 3만 원쯤이다([미 노동통계국 품목별 비중](https://www.bls.gov/cpi/tables/relative-importance/2025.htm)).
+
+- **주거비만 1% 오르면:** 같은 장바구니가 100만 3,600원이 된다. 물가는 0.36% 오른 것이다.
+- **휘발유만 10% 뛰면:** 3만 원이 3만 3,000원이 되어 장바구니는 100만 3,000원이다. 값은 크게 뛰었는데 물가는 0.3%만 오른다.
+- **둘이 함께 오르면:** 0.36%와 0.3%를 더한 약 0.66%가 된다.
+
+비중이 큰 품목은 조금만 올라도, 작은 품목은 크게 뛰어야 전체를 움직인다. 2026년 8월에는 휘발유가 한 달에 3.9% 올라 그달 상승분의 3분의 1 넘게를 차지했다([미 노동통계국](https://www.bls.gov/news.release/archives/cpi_09112026.htm)).
+
+**실제 2026년 8월의 3.4%를 쪼개면 이렇다.** 1년 전 비중([2025년 9월 발표](https://www.bls.gov/news.release/archives/cpi_10242025.htm))에 1년 상승률([2026년 8월 발표](https://www.bls.gov/news.release/archives/cpi_09112026.htm))을 곱한 값으로, 노동통계국의 기여도 계산법을 따랐다([미 노동통계국](https://www.bls.gov/cpi/tables/relative-importance/home.htm)).
+
+| 묶음 | 1년 전 비중 | 1년 상승률 | 3.4%에 보탠 몫 |
+|---|---|---|---|
+| 에너지 | 6.4% | 16.3% | 약 1.0%p |
+| 식품 | 13.6% | 2.7% | 약 0.4%p |
+| 근원(식품·에너지 제외) | 80.0% | 2.4% | 약 2.0%p |
+| └ 그 가운데 주거비 | 35.5% | 3.0% | 약 1.1%p |
+
+에너지는 비중이 6%뿐인데 1년 새 16.3% 올라 3.4% 가운데 거의 3분의 1을 보탰다. 근원 CPI(2.4%)가 전체보다 1%p 낮은 까닭이 이것이다.
 
 ## 왜 보나
 
@@ -37,10 +60,12 @@ pubDate: 2026-10-12
 
 ## 출처
 
-- [미 노동통계국 — 2026년 8월 소비자물가 발표](https://www.bls.gov/news.release/archives/cpi_09112026.htm): 8월 지수 334.980과 상승률, 가격 수집 범위, 대상 인구, 휘발유 기여, 다음 발표일
+- [미 노동통계국 — 2026년 8월 소비자물가 발표](https://www.bls.gov/news.release/archives/cpi_09112026.htm): 8월 지수와 상승률, 가격 수집, 다음 발표일
 - [미 노동통계국 — 2025년 8월 소비자물가 발표](https://www.bls.gov/news.release/archives/cpi_09112025.htm): 1년 전 지수 323.976
-- [미 노동통계국 — CPI 자료와 가중치](https://www.bls.gov/opub/hom/cpi/data.htm): 가계 지출 조사로 정하고 해마다 바꾸는 비중
-- [미 노동통계국 — 품목별 비중(2025년 12월)](https://www.bls.gov/cpi/tables/relative-importance/2025.htm): 주거비 35.625%, 식품 13.698%, 근원 79.919%
-- [미 노동통계국 — CPI 계산 방법](https://www.bls.gov/opub/hom/cpi/calculation.htm): 7,776개 기본 지수와 비중대로 묶는 방식
-- [미 노동통계국 — CPI 묻고 답하기](https://www.bls.gov/cpi/questions-and-answers.htm): 근원 지수를 쓰는 까닭
-- [미 연방규정 31 CFR 356.2](https://www.ecfr.gov/current/title-31/subtitle-B/chapter-II/subchapter-A/part-356/subpart-A/section-356.2): TIPS 원금 조정에 쓰는 CPI
+- [미 노동통계국 — 2025년 9월 소비자물가 발표](https://www.bls.gov/news.release/archives/cpi_10242025.htm): 2025년 8월 품목 비중
+- [미 노동통계국 — 품목 비중과 기여도 계산법](https://www.bls.gov/cpi/tables/relative-importance/home.htm): 기여도 계산법
+- [미 노동통계국 — CPI 자료와 가중치](https://www.bls.gov/opub/hom/cpi/data.htm): 해마다 바꾸는 비중
+- [미 노동통계국 — 품목별 비중(2025년 12월)](https://www.bls.gov/cpi/tables/relative-importance/2025.htm): 2025년 12월 품목 비중
+- [미 노동통계국 — CPI 계산 방법](https://www.bls.gov/opub/hom/cpi/calculation.htm): 기본 지수를 묶는 방식
+- [미 노동통계국 — CPI 묻고 답하기](https://www.bls.gov/cpi/questions-and-answers.htm): 근원 지수
+- [미 연방규정 31 CFR 356.2](https://www.ecfr.gov/current/title-31/subtitle-B/chapter-II/subchapter-A/part-356/subpart-A/section-356.2): TIPS 원금 조정
