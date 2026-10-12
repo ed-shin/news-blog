@@ -32,7 +32,8 @@ LIVE_PAGE_PATTERNS = [
 
 # 개표 결과·실시간 속보처럼 시간이 지나면 다른 값을 보여 주는 페이지(경고). 2026-10-05: 브라질 대선
 # 득표율을 실시간 개표 페이지에서 옮겨, 그 페이지가 최종 집계로 바뀐 뒤 글의 숫자가 남았다
-LIVE_RESULT_PATH = re.compile(r"election-results|live-results|results-live|live-updates|/live/|live-news")
+# 2026-10-11: CBS live-updates와 이란인터내셔널 /liveblog/를 근거로 달았다가 항목이 밀려나 확인할 수 없게 됐다
+LIVE_RESULT_PATH = re.compile(r"election-results|live-results|results-live|live-updates|/live/|live-news|liveblog|live-blog|#post-update-")
 
 # 상대의 속내를 짐작하는 말(경고). 의도는 본인이 밝혔거나 보도가 전한 경우에만 쓴다(편집 원칙 8).
 # 2026-10-02·03: "압박이 협상용에 가깝고"가 이틀 연속 나왔다
