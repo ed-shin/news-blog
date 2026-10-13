@@ -2,6 +2,10 @@
 title: "국제유가와 호르무즈 해협 — 송유관이 멈추고 다시 돌기까지, 100달러를 오르내린 3주"
 description: "사우디 동서 송유관이 멈춘 주에 브렌트유는 108.75달러로 5월 이후 최고까지 갔다가, 송유관이 다시 돈 날 99.25달러로 100달러 아래에 정산됐다. 그 뒤 후티의 미사일, 이란의 7일 개방안과 미국의 거부, 얀부 선적 확인, 중국의 정제유 수출 중단이 차례로 값을 흔든 3주를 날짜별 기록으로 따라간다."
 pubDate: 2026-10-02
+updatedDate: 2026-10-13
+corrections:
+  - date: 2026-10-13
+    text: "근거로 단 라이브 페이지 링크 1곳을 같은 내용을 실은 고정 기사로 바꿨다. 사실은 바꾸지 않았다."
 tags: ["기획", "에너지", "지정학"]
 searchTitle: "국제유가와 호르무즈 해협 — 브렌트 100달러를 오르내린 3주 기록(9월 14일~10월 1일) | 견문록"
 period: { from: 2026-09-14, to: 2026-10-01 }
@@ -146,7 +150,7 @@ Al Jazeera는 순서를 이렇게 정리했다. 먼저 모든 전선에서 교�
 
 **25일 브렌트는 2.13% 내려 104.32달러에 마감했다.** 파이낸셜뉴스는 미국과 이란이 호르무즈 개방을 두고 협상에 나설 것이란 기대가 유가를 끌어내렸다고 적었다([파이낸셜뉴스](https://www.fnnews.com/news/202609260530471185)).
 
-**26일 미국의 답은 거부였다.** 트럼프 대통령은 이란의 제안을 거부했다고 밝히면서, 미국이 호르무즈 해협을 완전히 통제하고 있고 막대한 양의 원유가 해협을 빠져나오고 있다고 주장했다([Fox News](https://www.foxnews.com/live-news/iran-war-strait-hormuz-trump-talks-oil-gas-prices-midterms-09-26-26)).
+**26일 미국의 답은 거부였다.** 트럼프 대통령은 이란의 제안을 거부했다고 밝히면서, 미국이 호르무즈 해협을 완전히 통제하고 있고 막대한 양의 원유가 해협을 빠져나오고 있다고 주장했다([The National Desk, WJLA 전재](https://wjla.com/news/nation-world/us-president-donald-trump-says-that-iran-wants-a-strait-of-hormuz-deal-because-theyre-dying-rejected-ceasefire-military-history-blockade-control-war-united-nations-general-assembly-strikes-winning-oil)).
 
 **28일 브렌트는 장중 108.83달러까지 뛰었다가 105.28달러에 정산됐다.** 상승 폭을 줄인 것은 사우디 송유관이었다. 아람코는 송유관으로 옮긴 원유를 27일부터 얀부항에서 다시 싣기 시작했고, 하루 약 350만 배럴을 보내고 있다([파이낸셜뉴스](https://www.fnnews.com/news/202609290323505297)).
 
