@@ -2,7 +2,6 @@
 // 글 한 편의 화면. 조간 글(/jogan/종류/주소/)과 그 밖의 글(/blog/주소/)이 함께 쓴다.
 import Base from '../layouts/Base.astro';
 import ShareCard from './ShareCard.astro';
-import MarketTable from './MarketTable.astro';
 import { render } from 'astro:content';
 import { kindOf, topicsOf, topicLabel, headlineOf, searchTitleOf, fmtFull, fmtPeriod, frontUrl, isoDate, postUrl, ogImagePath, KIND_LABEL, type Post } from '../lib/posts';
 
@@ -25,11 +24,6 @@ const toc = headings
 const withToc = Boolean(kind) && toc.length > 1;
 const period = post.data.period;
 const showPubDate = !kind || Boolean(period);
-// 일요일·월요일판은 본문에 '오늘의 숫자' 표를 두지 않는다(새 마감이 없다). 그런 날에도 1면의 주요 지표는
-// 일일 글에서 보이게 한다(2026-10-13 사용자 지적: 1면에만 있고 일일 글에는 없었다)
-const marketsInPost = kind === 'daily' && post.data.front?.markets
-  && !headings.some((h) => h.depth === 2 && h.text.startsWith('오늘의 숫자'))
-  ? post.data.front.markets : undefined;
 
 // 검색엔진용 구조화 데이터. 글 한 편과 현재 위치(BreadcrumbList).
 // 조간 글(일일·주간 흐름·기획)은 뉴스 기사(NewsArticle), 그 밖의 글은 블로그 글(BlogPosting)로 알린다.
@@ -90,10 +84,6 @@ const jsonLd = [
         <nav class="toc-chips" aria-label="차례">
           {toc.map((t) => <a href={`#${t.id}`}>{t.label}</a>)}
         </nav>
-      )}
-
-      {marketsInPost && (
-        <div class="post-markets"><MarketTable markets={marketsInPost} /></div>
       )}
 
       <div class="prose">
