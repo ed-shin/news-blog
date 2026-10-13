@@ -51,6 +51,12 @@ PROCESS_PATTERNS = re.compile(
     r"|종가라고 밝|밝힌 기사|기사도 없|기사에서도 나오지|확인하지 못했|이 글이 (?:물은|확인하자고|짚은)"
 )
 
+# 조간은 전날 일을 다음 날 아침에 싣는데, 1면 머리에는 발행일이 찍힌다. 날짜 없는 "코스피 3.65% 급락"은
+# 발행일의 일로 읽힌다(2026-10-13 사용자 지적). 1면 글마다 사건 날짜를 적는다.
+# "어제·간밤"은 날짜별 1면으로 남은 뒤에는 언제인지 알 수 없는 말이 된다
+EVENT_DATE = re.compile(r"\d{1,2}일")
+RELATIVE_DAY = re.compile(r"어제|간밤|지난밤|오늘 새벽")
+
 errors, warnings = [], []
 
 
@@ -237,6 +243,15 @@ def check_frontmatter(fm):
     return pub_s
 
 
+def check_dated(text, where):
+    """1면 글에 사건 날짜가 있는지. 없으면 발행일의 일로 읽힌다."""
+    if not EVENT_DATE.search(text):
+        warn(f"{where}에 사건 날짜가 없다 — 1면은 발행일 아래 보여 오늘 일로 읽힌다. '12일', '12일(현지)'처럼 적는다")
+    m = RELATIVE_DAY.search(text)
+    if m:
+        warn(f"{where}에 '{m.group(0)}'이 있다 — 지난 1면에서는 언제인지 알 수 없다. 날짜로 쓴다")
+
+
 def check_front(fm, body):
     weekend = is_weekend_edition(fm.get("pubDate"))
     front = fm.get("front")
@@ -245,8 +260,10 @@ def check_front(fm, body):
         return
     if not is_str(front.get("headline")):
         err("front.headline이 비었다")
-    elif is_str(fm.get("title")) and front["headline"] not in fm["title"]:
-        warn("title과 front.headline이 다르다")
+    else:
+        check_dated(front["headline"], "front.headline")
+        if is_str(fm.get("title")) and front["headline"] not in fm["title"]:
+            warn("title과 front.headline이 다르다")
 
     analysis = front.get("analysis")
     if not isinstance(analysis, list) or not analysis:
@@ -264,6 +281,8 @@ def check_front(fm, body):
                      "text는 그 결론을 받치는 사실과 뜻만 두세 문장으로. 검증 과정과 곁가지는 뺀다")
 
         for n, a in enumerate(analysis, 1):
+            if isinstance(a, dict) and is_str(a.get("lead")) and is_str(a.get("text")):
+                check_dated(a["lead"] + " " + a["text"], f"front.analysis[{n}]")
             if isinstance(a, dict) and is_str(a.get("text")) and PROCESS_PATTERNS.search(a["text"]):
                 warn(f"front.analysis[{n}]에 검증 과정 문구가 있다('{PROCESS_PATTERNS.search(a['text']).group(0)}') — 1면에는 결과만 쓴다")
 
@@ -328,6 +347,7 @@ def check_front(fm, body):
                 err(f"{where}: title·text·source·url이 모두 있어야 한다")
                 continue
             check_url(it["url"], where)
+            check_dated(it["title"] + " " + it["text"], where)
             for num in re.findall(r"\d[\d,.]*\d|\d", it["text"]):
                 if len(num) >= 3 and num not in body:
                     warn(f"{where}: 숫자 {num}이 본문에 없다 — 1면 항목 숫자는 본문에서 확인된 것이어야 한다")
@@ -335,6 +355,8 @@ def check_front(fm, body):
                 err(f"{where}: 링크가 본문에 없다 — 1면 항목은 본문에 실린 기사여야 한다 → {it['url']}")
         if not is_str(d.get("summary")):
             err(f"데스크 {key}: summary가 비었다")
+        else:
+            check_dated(d["summary"], f"데스크 {key} summary")
         prefix = DESK_SECTION.get(key)
         if prefix and not any(h.startswith(prefix) for h in headings):
             err(f"데스크 {key}의 1면 링크가 갈 본문 섹션('## {prefix}…')이 없다")
@@ -467,6 +489,9 @@ def check_body(body, pub):
     summary = re.search(r"^## 3줄 요약\n(.*?)(?=^## )", body, re.M | re.S)
     if summary and len(re.findall(r"^\d+\. ", summary.group(1), re.M)) != 3:
         warn("3줄 요약이 세 줄이 아니다")
+    if summary:
+        for n, line in enumerate(re.findall(r"^\d+\. (.+)$", summary.group(1), re.M), 1):
+            check_dated(line, f"3줄 요약 {n}")
 
     if "**분석:**" in body:
         warn('해석 표시는 "**해설:**"을 쓴다')
