@@ -243,13 +243,17 @@ def check_frontmatter(fm):
     return pub_s
 
 
-def check_dated(text, where):
-    """1면 글에 사건 날짜가 있는지. 없으면 발행일의 일로 읽힌다."""
+def check_dated(text, where, strict=False):
+    """1면 글에 사건 날짜가 있는지. 없으면 발행일의 일로 읽힌다.
+    헤드라인(strict)은 그날 가장 큰 사건이라 날짜를 모를 수 없으므로 오류로 막는다. 나머지는 경고로 둔다.
+    기사에 시점이 없는 사실도 있어서다. 오류로 막으면 날짜를 지어 넣게 된다. 남긴 경고는 desk-report에 까닭을 적는다"""
+    report = err if strict else warn
     if not EVENT_DATE.search(text):
-        warn(f"{where}에 사건 날짜가 없다 — 1면은 발행일 아래 보여 오늘 일로 읽힌다. '12일', '12일(현지)'처럼 적는다")
+        report(f"{where}에 사건 날짜가 없다 — 1면은 발행일 아래 보여 오늘 일로 읽힌다. '12일', '12일(현지)'처럼 적는다"
+               + ("" if strict else ". 기사에 시점이 없어 둔다면 desk-report에 까닭을 적는다"))
     m = RELATIVE_DAY.search(text)
     if m:
-        warn(f"{where}에 '{m.group(0)}'이 있다 — 지난 1면에서는 언제인지 알 수 없다. 날짜로 쓴다")
+        report(f"{where}에 '{m.group(0)}'이 있다 — 지난 1면에서는 언제인지 알 수 없다. 날짜로 쓴다")
 
 
 def check_front(fm, body):
@@ -261,7 +265,7 @@ def check_front(fm, body):
     if not is_str(front.get("headline")):
         err("front.headline이 비었다")
     else:
-        check_dated(front["headline"], "front.headline")
+        check_dated(front["headline"], "front.headline", strict=True)
         if is_str(fm.get("title")) and front["headline"] not in fm["title"]:
             warn("title과 front.headline이 다르다")
 
