@@ -148,6 +148,7 @@ main { min-height: 60vh; }
   line-height: 1.42;
   letter-spacing: -0.02em;
 }
+.post-markets { max-width: 420px; margin: 0 0 36px; }
 .post-head .dek { margin: 16px 0 0; color: var(--muted); font-size: 1rem; line-height: 1.75; }
 .post-head .byline { display: flex; flex-wrap: wrap; margin: 14px 0 0; color: var(--muted); font-size: 0.82rem; }
 .post-head .byline > * + *::before { content: '·'; margin: 0 8px; color: var(--strong); }

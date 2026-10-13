@@ -1,0 +1,35 @@
+---
+// 1면 주요 지표 표. 1면(FrontPage)과, 본문에 '오늘의 숫자' 표가 없는 일일 글(일요일·월요일판)이 함께 쓴다.
+import { direction } from '../lib/posts';
+
+interface Props {
+  markets: { asOf: string; rows: { name: string; value: string; change?: string }[] };
+}
+
+const { markets } = Astro.props;
+// 등락이 하나도 없는 날(일요일·월요일판)은 등락 칸을 통째로 뺀다
+const showChange = markets.rows.some((r) => r.change);
+---
+<table class="market">
+  <caption>주요 지표<span>{markets.asOf}</span></caption>
+  <thead><tr><th>지표</th><th>값</th>{showChange && <th>등락</th>}</tr></thead>
+  <tbody>
+    {markets.rows.map((r) => {
+      const d = direction(r.change ?? '');
+      return <tr><td>{r.name}</td><td>{r.value}</td>{showChange && <td class={d.cls}>{d.arrow}{d.abs}</td>}</tr>;
+    })}
+  </tbody>
+</table>
+
+<style>
+  .market { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; align-self: start; }
+  .market caption { caption-side: top; text-align: left; padding: 0 0 9px; font-size: 0.88rem; font-weight: 800; letter-spacing: 0.04em; color: var(--accent); }
+  .market caption span { margin-left: 8px; font-size: 0.78rem; font-weight: 500; letter-spacing: 0; color: var(--muted); }
+  .market th { padding: 0 0 7px; border-bottom: 1.5px solid var(--accent); font-size: 0.72rem; font-weight: 600; color: var(--muted); text-align: right; }
+  .market th:first-child { text-align: left; }
+  .market td { padding: 10px 0; border-bottom: 1px solid var(--border); text-align: right; font-size: 0.96rem; }
+  .market tr:last-child td { border-bottom: 0; }
+  .market td:first-child { text-align: left; font-size: 0.9rem; color: var(--muted); }
+  .market td:nth-child(2) { font-weight: 700; color: var(--bright); }
+  .market td:nth-child(3) { width: 86px; font-size: 0.84rem; font-weight: 700; }
+</style>
