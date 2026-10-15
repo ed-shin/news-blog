@@ -1,15 +1,17 @@
 ---
 name: "PCE 물가와 근원 PCE"
-title: "PCE 물가란? 근원 PCE와 연준이 이 숫자를 보는 이유"
-description: "미국 사람들이 상품과 서비스에 치르는 가격을 재는 물가 지표다. 연준의 2% 물가 목표가 바로 이 지표 기준이고, 식품과 에너지를 뺀 것이 근원 PCE다."
+title: "PCE 물가 뜻 — 근원 PCE, CPI와 다른 점"
+description: "PCE 물가는 미국 가계의 소비 가격을 재는 지표로, 연준의 2% 물가 목표 기준이다. 근원 PCE의 뜻과 CPI와 숫자가 달라지는 이유를 범위·품목 비중·계산식으로 설명한다."
 category: "물가"
 aliases: ["근원 PCE", "PCE", "개인소비지출"]
 related: ["policy-rate", "breakeven-real-rate", "us-treasury-yields"]
 pubDate: 2026-09-30
-updatedDate: 2026-10-07
+updatedDate: 2026-10-15
 corrections:
   - date: 2026-10-07
     text: "PCE가 CPI와 무엇이 다르게 만들어지는지(세는 범위, 품목 비중, 계산식)와 연준이 PCE를 쓰는 까닭을 '어떻게 만드나'로 더했다. 이전 판은 '같은 달이라도 숫자가 다르다'고만 적었다."
+  - date: 2026-10-15
+    text: "검색에서 찾기 쉽게 제목과 소개 문구를 실제 검색어에 맞춰 고쳤다. 본문은 바꾸지 않았다."
 ---
 
 ## 한 줄로 말하면
