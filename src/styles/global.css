@@ -386,6 +386,14 @@ main { min-height: 60vh; }
 .prose .chart .bar.s2 { fill: var(--series-2); }
 .prose .chart .pt:hover .bar { opacity: 0.85; }
 .prose .chart .pt:hover .dot { r: 6; }
+.chart-tip {
+  position: absolute; z-index: 50; transform: translate(-50%, -100%);
+  padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px;
+  background: var(--surface); color: var(--text);
+  font: 600 12px/1.4 var(--sans); font-variant-numeric: tabular-nums;
+  white-space: nowrap; pointer-events: none;
+}
+.chart-tip[hidden] { display: none; }
 .prose .chart .base { stroke: var(--strong); stroke-width: 1; stroke-dasharray: 4 4; }
 .prose .chart .panel { font-size: 13px; font-weight: 700; fill: var(--text); }
 .prose .chart .legend { font-size: 12px; font-weight: 700; fill: var(--text); }

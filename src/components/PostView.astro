@@ -149,4 +149,28 @@ const jsonLd = [
     addEventListener('scroll', () => requestAnimationFrame(update), { passive: true });
     update();
   }
+
+  // 차트의 점·막대에 마우스를 올리거나 누르면 값(data-tip)을 띄운다.
+  // SVG <title>로 띄우면 네이버가 페이지 제목이 여럿인 것으로 본다(2026-10-19).
+  const marks = document.querySelectorAll<SVGElement>('.chart [data-tip]');
+  if (marks.length) {
+    const tip = document.createElement('div');
+    tip.className = 'chart-tip';
+    tip.hidden = true;
+    document.body.append(tip);
+    const show = (el: SVGElement) => {
+      const r = el.getBoundingClientRect();
+      tip.textContent = el.dataset.tip ?? '';
+      tip.style.left = `${r.left + r.width / 2 + scrollX}px`;
+      tip.style.top = `${r.top + scrollY - 8}px`;
+      tip.hidden = false;
+    };
+    marks.forEach((el) => {
+      el.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') show(el); });
+      el.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') tip.hidden = true; });
+      el.addEventListener('click', (e) => { e.stopPropagation(); show(el); });
+    });
+    document.addEventListener('click', () => { tip.hidden = true; });
+    addEventListener('scroll', () => { tip.hidden = true; }, { passive: true });
+  }
 </script>

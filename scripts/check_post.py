@@ -651,6 +651,9 @@ def main():
         sys.exit(2)
     text = open(sys.argv[1], encoding="utf-8").read()
     fm, body = load_frontmatter(text)
+    if re.search(r"<title[\s>]", body):
+        err("본문 SVG에 <title>이 있다 — 네이버가 페이지 제목이 여럿인 것으로 본다. "
+            "마우스를 올리면 뜨는 값은 data-tip으로 단다(scripts/chart.py)")
     if fm and "/content/terms/" in sys.argv[1].replace("\\", "/"):
         check_term(fm, body)
         check_links_only(body)

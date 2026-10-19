@@ -76,29 +76,29 @@ highlights:
     <text class="tick" x="598.7" y="276" text-anchor="middle">9/29</text>
     <text class="tick" x="647.0" y="276" text-anchor="middle">9/30</text>
     <path class="line s1" d="M67.0 119.1 L115.3 73.5 L163.7 116.8 L212.0 131.8 L260.3 145.9 L308.7 198.3 L357.0 214.5 L405.3 157.7 L453.7 105.4 L502.0 139.2 L550.3 125.0 L598.7 164.9 L647.0 151.0"/>
-    <g class="pt"><circle class="hit" cx="67.0" cy="119.1" r="12"/><circle class="dot s1" cx="67.0" cy="119.1" r="4"/><title>9/14 105.68</title></g>
-    <g class="pt"><circle class="hit" cx="115.3" cy="73.5" r="12"/><circle class="dot s1" cx="115.3" cy="73.5" r="4"/><title>9/15 108.75</title></g>
+    <g class="pt" data-tip="9/14 105.68"><circle class="hit" cx="67.0" cy="119.1" r="12"/><circle class="dot s1" cx="67.0" cy="119.1" r="4"/></g>
+    <g class="pt" data-tip="9/15 108.75"><circle class="hit" cx="115.3" cy="73.5" r="12"/><circle class="dot s1" cx="115.3" cy="73.5" r="4"/></g>
     <text class="val" x="115.3" y="47.5" text-anchor="middle">108.75</text>
     <text class="note" x="115.3" y="62.5" text-anchor="middle">5월 이후 최고</text>
-    <g class="pt"><circle class="hit" cx="163.7" cy="116.8" r="12"/><circle class="dot s1" cx="163.7" cy="116.8" r="4"/><title>9/16 105.83</title></g>
-    <g class="pt"><circle class="hit" cx="212.0" cy="131.8" r="12"/><circle class="dot s1" cx="212.0" cy="131.8" r="4"/><title>9/17 104.82</title></g>
-    <g class="pt"><circle class="hit" cx="260.3" cy="145.9" r="12"/><circle class="dot s1" cx="260.3" cy="145.9" r="4"/><title>9/18 103.87</title></g>
-    <g class="pt"><circle class="hit" cx="308.7" cy="198.3" r="12"/><circle class="dot s1" cx="308.7" cy="198.3" r="4"/><title>9/21 100.34</title></g>
-    <g class="pt"><circle class="hit" cx="357.0" cy="214.5" r="12"/><circle class="dot s1" cx="357.0" cy="214.5" r="4"/><title>9/22 99.25</title></g>
+    <g class="pt" data-tip="9/16 105.83"><circle class="hit" cx="163.7" cy="116.8" r="12"/><circle class="dot s1" cx="163.7" cy="116.8" r="4"/></g>
+    <g class="pt" data-tip="9/17 104.82"><circle class="hit" cx="212.0" cy="131.8" r="12"/><circle class="dot s1" cx="212.0" cy="131.8" r="4"/></g>
+    <g class="pt" data-tip="9/18 103.87"><circle class="hit" cx="260.3" cy="145.9" r="12"/><circle class="dot s1" cx="260.3" cy="145.9" r="4"/></g>
+    <g class="pt" data-tip="9/21 100.34"><circle class="hit" cx="308.7" cy="198.3" r="12"/><circle class="dot s1" cx="308.7" cy="198.3" r="4"/></g>
+    <g class="pt" data-tip="9/22 99.25"><circle class="hit" cx="357.0" cy="214.5" r="12"/><circle class="dot s1" cx="357.0" cy="214.5" r="4"/></g>
     <text class="val" x="357.0" y="235.5" text-anchor="middle">99.25</text>
     <text class="note" x="357.0" y="250.5" text-anchor="middle">송유관 재가동</text>
-    <g class="pt"><circle class="hit" cx="405.3" cy="157.7" r="12"/><circle class="dot s1" cx="405.3" cy="157.7" r="4"/><title>9/23 103.08</title></g>
-    <g class="pt"><circle class="hit" cx="453.7" cy="105.4" r="12"/><circle class="dot s1" cx="453.7" cy="105.4" r="4"/><title>9/24 106.60</title></g>
+    <g class="pt" data-tip="9/23 103.08"><circle class="hit" cx="405.3" cy="157.7" r="12"/><circle class="dot s1" cx="405.3" cy="157.7" r="4"/></g>
+    <g class="pt" data-tip="9/24 106.60"><circle class="hit" cx="453.7" cy="105.4" r="12"/><circle class="dot s1" cx="453.7" cy="105.4" r="4"/></g>
     <text class="val" x="453.7" y="79.4" text-anchor="middle">106.60</text>
     <text class="note" x="453.7" y="94.4" text-anchor="middle">후티 미사일</text>
-    <g class="pt"><circle class="hit" cx="502.0" cy="139.2" r="12"/><circle class="dot s1" cx="502.0" cy="139.2" r="4"/><title>9/25 104.32</title></g>
+    <g class="pt" data-tip="9/25 104.32"><circle class="hit" cx="502.0" cy="139.2" r="12"/><circle class="dot s1" cx="502.0" cy="139.2" r="4"/></g>
     <text class="val" x="502.0" y="160.2" text-anchor="middle">104.32</text>
     <text class="note" x="502.0" y="175.2" text-anchor="middle">7일 개방안</text>
-    <g class="pt"><circle class="hit" cx="550.3" cy="125.0" r="12"/><circle class="dot s1" cx="550.3" cy="125.0" r="4"/><title>9/28 105.28</title></g>
-    <g class="pt"><circle class="hit" cx="598.7" cy="164.9" r="12"/><circle class="dot s1" cx="598.7" cy="164.9" r="4"/><title>9/29 102.59</title></g>
+    <g class="pt" data-tip="9/28 105.28"><circle class="hit" cx="550.3" cy="125.0" r="12"/><circle class="dot s1" cx="550.3" cy="125.0" r="4"/></g>
+    <g class="pt" data-tip="9/29 102.59"><circle class="hit" cx="598.7" cy="164.9" r="12"/><circle class="dot s1" cx="598.7" cy="164.9" r="4"/></g>
     <text class="val" x="598.7" y="185.9" text-anchor="middle">102.59</text>
     <text class="note" x="598.7" y="200.9" text-anchor="middle">얀부 선적 확인</text>
-    <g class="pt"><circle class="hit" cx="647.0" cy="151.0" r="12"/><circle class="dot s1" cx="647.0" cy="151.0" r="4"/><title>9/30 103.53</title></g>
+    <g class="pt" data-tip="9/30 103.53"><circle class="hit" cx="647.0" cy="151.0" r="12"/><circle class="dot s1" cx="647.0" cy="151.0" r="4"/></g>
   </svg>
   <figcaption>브렌트유 11월물 정산가(달러). 점선은 100달러다. 송유관이 멈춘 주에 5월 이후 최고(9/15)까지 갔다가, 송유관이 다시 돈 날(9/22) 100달러 아래로 정산됐다. 그 뒤로는 공급량보다 공격과 협상 소식에 하루 2~4%씩 오르내렸다. 10월 1일부터 기준 월물이 12월물로 바뀌어 이 선에 잇지 않았다. 출처는 표에 단 각 날짜의 일일 글이다.</figcaption>
 </figure>

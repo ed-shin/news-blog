@@ -11,6 +11,7 @@
 """
 
 import sys
+from html import escape
 
 W, H = 680, 300
 PAD = {'l': 52, 'r': 18, 't': 26, 'b': 46}
@@ -150,9 +151,10 @@ def decomp(bars, caption, alt):
 
 
 def _pt(x, y, cls, tip):
-    """점 하나. 보이는 점(지름 8px)보다 넓은 투명 영역을 두어 마우스를 올리면 값이 뜬다."""
-    return (f'<g class="pt"><circle class="hit" cx="{x}" cy="{y}" r="12"/>'
-            f'<circle class="dot {cls}" cx="{x}" cy="{y}" r="4"/><title>{tip}</title></g>')
+    """점 하나. 보이는 점(지름 8px)보다 넓은 투명 영역을 두어 마우스를 올리면 값이 뜬다.
+    값은 SVG <title>이 아니라 data-tip에 단다. 네이버가 <title>을 페이지 제목이 여럿인 것으로 본다(2026-10-19)."""
+    return (f'<g class="pt" data-tip="{escape(tip)}"><circle class="hit" cx="{x}" cy="{y}" r="12"/>'
+            f'<circle class="dot {cls}" cx="{x}" cy="{y}" r="4"/></g>')
 
 
 def small_multiples(panels, labels, caption, alt, gap_note=''):
@@ -327,8 +329,8 @@ def net_bars(values, labels, caption, alt, gap_after=None, gap_label='', unit='�
         y = y_of(v)
         y1, y2 = (y, y0) if v >= 0 else (y0, y)
         cls = 's1' if v >= 0 else 's2'
-        out.append(f'<g class="pt"><rect class="bar {cls}" x="{round(x_of(i) - bw / 2, 1)}" y="{round(y1, 1)}" '
-                   f'width="{bw}" height="{round(max(y2 - y1, 1.5), 1)}" rx="2"/><title>{lab} {fmt(v)}</title></g>')
+        out.append(f'<g class="pt" data-tip="{escape(f"{lab} {fmt(v)}")}"><rect class="bar {cls}" x="{round(x_of(i) - bw / 2, 1)}" '
+                   f'y="{round(y1, 1)}" width="{bw}" height="{round(max(y2 - y1, 1.5), 1)}" rx="2"/></g>')
         ty = round(y - 6, 1) if v >= 0 else round(y + 15, 1)
         out.append(f'<text class="val" x="{x_of(i)}" y="{ty}" text-anchor="middle">{fmt(v)}</text>')
         out.append(f'<text class="tick" x="{x_of(i)}" y="{H - PAD["b"] + 22}" text-anchor="middle">{lab}</text>')

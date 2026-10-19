@@ -50,34 +50,34 @@ highlights:
     <rect class="bar s2" x="190" y="12" width="12" height="12" rx="2"/>
     <text class="legend" x="208" y="23">외국인 순매도</text>
     <text class="note" x="662" y="23" text-anchor="end">단위: 억 원</text>
-    <g class="pt"><rect class="bar s2" x="64.8" y="85.6" width="35.4" height="68.0" rx="2"/><title>9/16 −1.7조</title></g>
+    <g class="pt" data-tip="9/16 −1.7조"><rect class="bar s2" x="64.8" y="85.6" width="35.4" height="68.0" rx="2"/></g>
     <text class="val" x="82.5" y="168.6" text-anchor="middle">−1.7조</text>
     <text class="tick" x="82.5" y="276" text-anchor="middle">9/16</text>
-    <g class="pt"><rect class="bar s2" x="125.8" y="85.6" width="35.4" height="99.6" rx="2"/><title>9/17 −2.5조</title></g>
+    <g class="pt" data-tip="9/17 −2.5조"><rect class="bar s2" x="125.8" y="85.6" width="35.4" height="99.6" rx="2"/></g>
     <text class="val" x="143.5" y="200.2" text-anchor="middle">−2.5조</text>
     <text class="tick" x="143.5" y="276" text-anchor="middle">9/17</text>
-    <g class="pt"><rect class="bar s1" x="186.8" y="67.8" width="35.4" height="17.8" rx="2"/><title>9/18 +4,388억</title></g>
+    <g class="pt" data-tip="9/18 +4,388억"><rect class="bar s1" x="186.8" y="67.8" width="35.4" height="17.8" rx="2"/></g>
     <text class="val" x="204.5" y="61.8" text-anchor="middle">+4,388억</text>
     <text class="tick" x="204.5" y="276" text-anchor="middle">9/18</text>
-    <g class="pt"><rect class="bar s1" x="247.8" y="79.8" width="35.4" height="5.7" rx="2"/><title>9/21 +1,420억</title></g>
+    <g class="pt" data-tip="9/21 +1,420억"><rect class="bar s1" x="247.8" y="79.8" width="35.4" height="5.7" rx="2"/></g>
     <text class="val" x="265.5" y="73.8" text-anchor="middle">+1,420억</text>
     <text class="tick" x="265.5" y="276" text-anchor="middle">9/21</text>
-    <g class="pt"><rect class="bar s1" x="308.8" y="82.1" width="35.4" height="3.5" rx="2"/><title>9/22 +853억</title></g>
+    <g class="pt" data-tip="9/22 +853억"><rect class="bar s1" x="308.8" y="82.1" width="35.4" height="3.5" rx="2"/></g>
     <text class="val" x="326.5" y="76.1" text-anchor="middle">+853억</text>
     <text class="tick" x="326.5" y="276" text-anchor="middle">9/22</text>
-    <g class="pt"><rect class="bar s2" x="369.8" y="85.6" width="35.4" height="20.7" rx="2"/><title>9/23 −5,102억</title></g>
+    <g class="pt" data-tip="9/23 −5,102억"><rect class="bar s2" x="369.8" y="85.6" width="35.4" height="20.7" rx="2"/></g>
     <text class="val" x="387.5" y="121.2" text-anchor="middle">−5,102억</text>
     <text class="tick" x="387.5" y="276" text-anchor="middle">9/23</text>
-    <g class="pt"><rect class="bar s2" x="430.8" y="85.6" width="35.4" height="130.6" rx="2"/><title>9/28 −3.2조</title></g>
+    <g class="pt" data-tip="9/28 −3.2조"><rect class="bar s2" x="430.8" y="85.6" width="35.4" height="130.6" rx="2"/></g>
     <text class="val" x="448.5" y="231.2" text-anchor="middle">−3.2조</text>
     <text class="tick" x="448.5" y="276" text-anchor="middle">9/28</text>
-    <g class="pt"><rect class="bar s2" x="491.8" y="85.6" width="35.4" height="117.6" rx="2"/><title>9/29 −2.9조</title></g>
+    <g class="pt" data-tip="9/29 −2.9조"><rect class="bar s2" x="491.8" y="85.6" width="35.4" height="117.6" rx="2"/></g>
     <text class="val" x="509.5" y="218.2" text-anchor="middle">−2.9조</text>
     <text class="tick" x="509.5" y="276" text-anchor="middle">9/29</text>
-    <g class="pt"><rect class="bar s2" x="552.8" y="85.6" width="35.4" height="92.1" rx="2"/><title>9/30 −2.3조</title></g>
+    <g class="pt" data-tip="9/30 −2.3조"><rect class="bar s2" x="552.8" y="85.6" width="35.4" height="92.1" rx="2"/></g>
     <text class="val" x="570.5" y="192.7" text-anchor="middle">−2.3조</text>
     <text class="tick" x="570.5" y="276" text-anchor="middle">9/30</text>
-    <g class="pt"><rect class="bar s2" x="613.8" y="85.6" width="35.4" height="13.6" rx="2"/><title>10/1 −3,366억</title></g>
+    <g class="pt" data-tip="10/1 −3,366억"><rect class="bar s2" x="613.8" y="85.6" width="35.4" height="13.6" rx="2"/></g>
     <text class="val" x="631.5" y="114.2" text-anchor="middle">−3,366억</text>
     <text class="tick" x="631.5" y="276" text-anchor="middle">10/1</text>
     <line class="mark" x1="418.0" y1="44" x2="418.0" y2="260"/>
