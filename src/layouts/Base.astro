@@ -32,6 +32,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 // 조간 글과 용어는 글마다 만든 카드(src/lib/og.ts), 그 밖의 페이지는 사이트 공통 이미지
 const ogImage = new URL(image?.path ?? '/og.png', Astro.site);
 const ogImageAlt = image?.alt ?? '견문록 — 보고 들은 것을 기록한다';
+// 파비콘 주소: 배포 빌드는 절대 주소(네이버 권장), 개발 서버는 지금 보고 있는 주소의 파일
+const iconHref = (path: string) => (import.meta.env.PROD ? new URL(path, Astro.site).href : path);
 
 const nav = corner === 'jogan'
   ? [
@@ -77,10 +79,12 @@ const crumb = crumbProp ?? (corner === 'jogan' ? nav.find((item) => item.key ===
     <meta name="twitter:image:alt" content={ogImageAlt} />
     <link rel="alternate" type="application/rss+xml" title={siteTitle} href="/rss.xml" />
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
-    <!-- /favicon.ico는 검색로봇·옛 브라우저가 관례로 찾는다(없으면 네이버가 '접근 불가'로 잡는다). SVG를 읽는 브라우저는 SVG를 쓴다 -->
-    <link rel="icon" href="/favicon.ico" sizes="32x32" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!-- 파비콘(2026-10-21). 네이버는 shortcut icon을 먼저 보고 절대 주소를 쓰라고 한다. 구글은 48px보다 큰 아이콘을 권하고
+         SVG는 쓰지 않으며(구글 뉴스 로고로도 쓴다), shortcut icon과 icon 가운데 어느 것을 고를지는 정해져 있지 않다.
+         그래서 ico에도 192px까지 넣었다(16·32·48·96·192). 절대 주소는 배포 빌드에서만 쓰고 개발 서버는 로컬 파일을 쓴다 -->
+    <link rel="shortcut icon" href={iconHref('/favicon.ico')} sizes="16x16 32x32 48x48 96x96 192x192" />
+    <link rel="icon" type="image/png" sizes="192x192" href={iconHref('/favicon-192.png')} />
+    <link rel="apple-touch-icon" href={iconHref('/apple-touch-icon.png')} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@600;700;800;900&display=swap" />

@@ -2,6 +2,11 @@
 {
   "name": "gyeonmunrok",
   "compatibility_date": "2026-09-16",
+  // 기본 주소(gyeonmunrok.jp-shin-kor.workers.dev)를 끈다. 켜 두면 같은 사이트가 주소 두 개로 떠 있다.
+  // 대시보드에서만 끄면 다음 배포 때 다시 켜지므로 여기 적어 둔다(2026-10-21)
+  "workers_dev": false,
+  // 버전별 미리보기 주소(…workers.dev)도 쓰지 않는다. 지정하지 않으면 기존 설정을 그대로 둔다(Wrangler 설정 문서)
+  "preview_urls": false,
   "assets": {
     "directory": "./dist/",
     // 없는 주소는 직접 만든 404 페이지로 (기본값은 밋밋한 기본 404)
