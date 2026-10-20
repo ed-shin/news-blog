@@ -63,6 +63,7 @@ main { min-height: 60vh; }
 }
 
 .brand { display: flex; align-items: baseline; gap: 9px; }
+h1.brand { margin: 0; font-size: inherit; line-height: inherit; }
 .brand .parent { font-size: 0.84rem; font-weight: 600; color: var(--muted); letter-spacing: 0.02em; }
 .brand .parent:hover { color: var(--text); }
 .brand .sep { font-size: 0.9rem; color: var(--muted); }

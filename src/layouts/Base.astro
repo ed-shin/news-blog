@@ -20,9 +20,11 @@ interface Props {
   noindex?: boolean;
   // 이 페이지의 대표 이미지(1200×630). 없으면 사이트 공통 /og.png
   image?: { path: string; alt: string };
+  // 제호를 이 페이지의 h1로 쓴다(홈). 이름으로 찾아온 사람과 검색엔진에 사이트 이름을 먼저 보인다
+  brandHeading?: boolean;
 }
 
-const { title, fullTitle, description = '견문록 — 보고 들은 것을 기록하는 블로그', ogType = 'website', jsonLd, corner, active, crumb: crumbProp, noindex = false, image } = Astro.props;
+const { title, fullTitle, description = '견문록 — 보고 들은 것을 기록하는 블로그', ogType = 'website', jsonLd, corner, active, crumb: crumbProp, noindex = false, image, brandHeading = false } = Astro.props;
 const siteTitle = '견문록';
 const pageTitle = fullTitle ?? (title ? `${title} — ${siteTitle}` : siteTitle);
 const canonical = new URL(Astro.url.pathname, Astro.site);
@@ -100,7 +102,9 @@ const crumb = crumbProp ?? (corner === 'jogan' ? nav.find((item) => item.key ===
             )}
           </div>
         ) : (
-          <div class="brand"><a class="name" href="/">견문록</a></div>
+          brandHeading
+            ? <h1 class="brand"><a class="name" href="/">견문록</a></h1>
+            : <div class="brand"><a class="name" href="/">견문록</a></div>
         )}
         <nav aria-label="주요 메뉴">
           {nav.map((item) => (

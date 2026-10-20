@@ -10,6 +10,7 @@ const front = today?.data.front;
 const recent = (await getPosts()).filter((p) => p !== today).slice(0, 5);
 ---
 <Base
+  brandHeading
   fullTitle="견문록 — 매일 아침 검증해 읽는 경제·국제 뉴스, 조간"
   description="견문록은 매일 아침 경제·국제 뉴스를 원문과 대조해 싣는 조간과, 금리·유가·지정학·AI의 흐름을 한 주 단위로 짚는 주간 흐름과 기획을 펴냅니다."
   jsonLd={{
@@ -22,13 +23,23 @@ const recent = (await getPosts()).filter((p) => p !== today).slice(0, 5);
     inLanguage: 'ko',
   }}
 >
+  <section class="intro">
+    <p class="lede">매일 아침 경제·국제 뉴스를 기사 원문과 대조해 정리합니다.</p>
+    <ul class="ways">
+      <li><a href="/jogan/"><b>조간</b><span>매일 아침, 전날 일어난 일을 분야별로</span></a></li>
+      <li><a href="/jogan/all/?type=weekly"><b>주간 흐름</b><span>토요일 오후, 그 주의 흐름과 앞으로 볼 일정</span></a></li>
+      <li><a href="/jogan/all/?type=feature"><b>기획</b><span>한 주제를 몇 주에 걸쳐 따라간 기록</span></a></li>
+      <li><a href="/jogan/terms/"><b>용어</b><span>뉴스에 자주 나오는 경제·AI 용어 풀이</span></a></li>
+    </ul>
+  </section>
+
   {today && front && (
     <section class="corner">
       <div class="corner-head">
         <a class="corner-name" href="/jogan/">조간<i>.</i></a>
         <span class="date">{fmtFull(today.data.pubDate)}</span>
       </div>
-      <h1><a href="/jogan/">{front.headline}</a></h1>
+      <h2 class="headline"><a href="/jogan/">{front.headline}</a></h2>
       <dl class="desklines">
         {front.desks.map((desk) => (
           <>
@@ -62,13 +73,22 @@ const recent = (await getPosts()).filter((p) => p !== today).slice(0, 5);
 </Base>
 
 <style>
+  /* 이름으로 찾아온 사람에게 무엇을 하는 곳인지 먼저 보인다. 그날 1면은 그 아래다 */
+  .intro { max-width: 760px; padding: 26px 0 0; }
+  .lede { margin: 0; font-size: 1.02rem; font-weight: 600; line-height: 1.6; }
+  .ways { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 24px; margin: 14px 0 0; padding: 0; list-style: none; }
+  .ways a { display: flex; align-items: baseline; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .ways b { flex: none; font-size: 0.86rem; font-weight: 800; color: var(--accent); }
+  .ways span { font-size: 0.88rem; color: var(--muted); line-height: 1.5; }
+  .ways a:hover span { color: var(--text); }
+
   .corner { max-width: 760px; padding: 34px 0 0; }
   .corner-head { display: flex; align-items: baseline; gap: 12px; }
   .corner-name { font-family: var(--serif); font-weight: 800; font-size: 1.3rem; }
   .corner-name i { font-style: normal; color: var(--accent); }
   .date { font-size: 0.84rem; color: var(--muted); }
-  h1 { margin: 12px 0 0; font-family: var(--serif); font-weight: 800; font-size: clamp(1.4rem, 3.6vw, 1.9rem); line-height: 1.4; letter-spacing: -0.02em; }
-  h1 a:hover { color: var(--accent); }
+  .headline { margin: 12px 0 0; font-family: var(--serif); font-weight: 800; font-size: clamp(1.4rem, 3.6vw, 1.9rem); line-height: 1.4; letter-spacing: -0.02em; }
+  .headline a:hover { color: var(--accent); }
   .desklines { margin-top: 20px; }
   .enter { display: inline-block; margin-top: 16px; font-weight: 700; font-size: 0.92rem; color: var(--accent); }
 
@@ -84,6 +104,7 @@ const recent = (await getPosts()).filter((p) => p !== today).slice(0, 5);
   .about a:hover { color: var(--accent); }
 
   @media (max-width: 620px) {
+    .ways { grid-template-columns: 1fr; gap: 0; }
     .corner { padding-top: 26px; }
     .item { flex-wrap: wrap; gap: 2px 10px; }
     .item .title { flex-basis: 100%; }
