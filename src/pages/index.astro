@@ -8,11 +8,13 @@ import {
 const today = (await getJoganPosts()).find((p) => kindOf(p) === 'daily' && p.data.front);
 const front = today?.data.front;
 const recent = (await getPosts()).filter((p) => p !== today).slice(0, 5);
+// 네이버는 홈(사이트 대표 페이지) 설명만 80자 이내로 쓰라고 진단한다(2026-10-20). 다른 페이지 설명은 길어도 지적하지 않았다
+const description = '견문록은 매일 아침 경제·국제 뉴스를 원문과 대조해 정리합니다. 일일 조간, 주간 흐름, 기획, 용어 풀이를 싣습니다.';
 ---
 <Base
   brandHeading
   fullTitle="견문록 — 매일 아침 검증해 읽는 경제·국제 뉴스, 조간"
-  description="견문록은 매일 아침 경제·국제 뉴스를 원문과 대조해 싣는 조간과, 금리·유가·지정학·AI의 흐름을 한 주 단위로 짚는 주간 흐름과 기획을 펴냅니다."
+  description={description}
   jsonLd={{
     '@context': 'https://schema.org',
     '@type': 'WebSite',
