@@ -202,7 +202,13 @@ def main():
     def said(name, key):
         known = [(l, v) for l, v in zip(labels, s[key]) if v is not None]
         p = josa(name, '은', '는')
-        return f'{name}{p} {fmt[key](known[0][1])}에서 {fmt[key](known[-1][1])}로' if known else f'{name}{p} 값 없음'
+        if not known:
+            return f'{name}{p} 값 없음'
+        # 기준일(지난 금)이 휴장이면 그 전 마지막 마감에서 센다. 그림의 점선·본문의 주간 등락률과 같은 기준이다.
+        # 그 주 첫 값에서 세면 기준이 어긋난다(10/12~16 주간: 9일 한글날 휴장인데 12일 값에서 셌다, 2026-10-20 정정)
+        start = (f'{fmt[key](base[key])}({labels[0]} 휴장 전 마지막 마감)' if s[key][0] is None and key in base
+                 else fmt[key](known[0][1]))
+        return f'{name}{p} {start}에서 {fmt[key](known[-1][1])}로'
     alt = (f'{fri.month}월 {fri.day}일부터 {days[-1].month}월 {days[-1].day}일까지 네 지표. '
            + ', '.join(said(n, k) for n, k in [('미 10년물', 'us10y'), ('브렌트유', 'brent'),
                                                 ('원/달러', 'usdkrw'), ('코스피', 'kospi')]) + ' 움직였다.')
