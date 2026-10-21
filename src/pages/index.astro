@@ -20,8 +20,9 @@ const description = '견문록은 매일 아침 경제·국제 뉴스를 원문�
     '@type': 'WebSite',
     // 구글이 검색 결과의 사이트 이름을 정할 때 보는 자료. 제목·og:site_name과 이름을 맞춘다
     name: '견문록',
-    // 별칭은 '견문록'이 채택되지 않을 때의 후보. 도메인 예비안은 소문자 도메인 그대로 쓴다(구글 사이트 이름 안내)
-    alternateName: ['견문록 조간', 'gyeonmunrok.com'],
+    // 별칭은 '견문록'이 채택되지 않을 때의 후보로, 사이트 전체의 이름이다. '견문록 조간'은 일일 글 코너 이름이라 넣지 않는다.
+    // 도메인 예비안은 소문자 도메인 그대로 쓴다(구글 사이트 이름 안내)
+    alternateName: ['gyeonmunrok.com'],
     url: new URL('/', Astro.site).href,
     inLanguage: 'ko',
   }}
