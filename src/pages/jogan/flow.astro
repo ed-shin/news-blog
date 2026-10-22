@@ -50,7 +50,7 @@ const asOf = new Date(`${tracking.asOf}T00:00:00Z`);
                 <>
                   <p class="dek">{post.data.description}</p>
                   {post.data.highlights && (
-                    <div class="nums">
+                    <div class="nums hl">
                       {post.data.highlights.map((h) => (
                         <div class="num"><span>{h.label}</span><b>{h.value}</b>{h.note && <i class="note">{h.note}</i>}</div>
                       ))}
@@ -101,13 +101,23 @@ const asOf = new Date(`${tracking.asOf}T00:00:00Z`);
   .entry h2 { font-family: var(--serif); font-weight: 800; font-size: clamp(1.35rem, 5vw, 1.65rem); line-height: 1.4; letter-spacing: -0.02em; margin: 8px 0 10px; }
   .entry h2 a:hover { color: var(--accent); }
   .dek { margin: 0; color: var(--muted); font-size: 0.95rem; line-height: 1.7; }
-  /* 칸 너비는 글 종류와 상관없이 같게 (숫자가 적어도 늘어나지 않음) */
-  .nums { display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 8px; margin: 16px 0 0; }
+  /* 일일 지표 여섯 칸은 6·3·2칸으로 나눠 한 칸만 다음 줄에 남지 않게 한다(기준금리가 붙는 날은 4칸).
+     기획·주간의 숫자 셋은 아래 설명 줄이 길어 세 칸으로 넓게 두고, 좁으면 한 줄에 하나씩 쌓는다 */
+  .entry { container-type: inline-size; }
+  .nums { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 16px 0 0; }
+  .nums.hl { grid-template-columns: 1fr; }
+  @container (min-width: 420px) {
+    .nums, .nums.hl { grid-template-columns: repeat(3, 1fr); }
+  }
+  @container (min-width: 700px) {
+    .nums { grid-template-columns: repeat(6, 1fr); }
+    .nums:has(> .num:nth-child(7)) { grid-template-columns: repeat(4, 1fr); }
+  }
   .num { padding: 9px 12px; border-radius: 10px; background: var(--surface); font-variant-numeric: tabular-nums; }
   .num span { display: block; font-size: 0.72rem; color: var(--muted); }
   .num b { font-size: 0.98rem; white-space: nowrap; }
   .num i { display: block; font-style: normal; font-size: 0.76rem; font-weight: 700; white-space: nowrap; }
-  .num i.note { font-weight: 600; color: var(--muted); }
+  .num i.note { font-weight: 600; color: var(--muted); white-space: normal; line-height: 1.45; }
 
   .topic { display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; padding: 12px 0; border-top: 1px solid var(--border); }
   .side-label + .topic { border-top: 1.5px solid var(--muted); }
@@ -121,6 +131,5 @@ const asOf = new Date(`${tracking.asOf}T00:00:00Z`);
   @media (max-width: 620px) {
     .topic { padding: 9px 0; }
     .topic small { display: none; }
-    .nums { grid-template-columns: repeat(2, 1fr); }
   }
 </style>
