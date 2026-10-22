@@ -169,7 +169,10 @@ def small_multiples(panels, labels, caption, alt, gap_note=''):
     두 월물 값을 그냥 이으면 오른 날이 내린 것처럼 그려지기 때문이다."""
     pw, ph = 320, 170
     top, bottom = 34, 132                 # 그림 영역 위아래
-    x0, x1 = 12, pw - 62                  # 오른쪽은 마지막 값 자리
+    # 왼쪽은 첫 날짜 글자 반쪽 자리, 오른쪽은 마지막 값 자리. 마지막 값은 13px 굵은 숫자로 한 자에 8px 남짓이라
+    # 가장 긴 값에 맞춘다(5,668.05가 62px 자리를 넘어 잘렸다, 2026-10-22). 칸끼리 날짜 자리가 맞게 모든 칸에 같은 폭을 쓴다
+    last_len = max(len(fmt([v for v in vals if v is not None][-1])) for _, fmt, vals, *_ in panels)
+    x0, x1 = 16, pw - max(62, last_len * 8 + 14)
     step = (x1 - x0) / (len(labels) - 1)
     x_of = lambda i: round(x0 + step * i, 1)
     svgs = []
