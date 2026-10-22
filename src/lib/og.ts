@@ -94,7 +94,8 @@ const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
 const md = (d: Date) => ({ m: d.getUTCMonth() + 1, d: d.getUTCDate() });
 function shortPeriod(p: { from: Date; to: Date }) {
   const a = md(p.from), b = md(p.to);
-  return a.m === b.m ? `${a.m}월 ${a.d}~${b.d}일` : `${a.m}월 ${a.d}일~${b.m}월 ${b.d}일`;
+  if (a.m === b.m && a.d === b.d) return `${a.m}월 ${a.d}일`;
+  return a.m === b.m ?`${a.m}월 ${a.d}~${b.d}일` : `${a.m}월 ${a.d}일~${b.m}월 ${b.d}일`;
 }
 const afterDash = (title: string) => (title.includes(' — ') ? title.slice(title.indexOf(' — ') + 3) : title);
 

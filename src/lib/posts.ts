@@ -59,6 +59,8 @@ export function fmtPeriod(period?: { from: Date; to: Date }) {
   if (!period) return '';
   const a = seoul(period.from);
   const b = seoul(period.to);
+  // 하루에 일어난 일을 다루는 기획은 날짜 하나로 쓴다
+  if (a.y === b.y && a.m === b.m && a.d === b.d) return `${a.m}월 ${a.d}일`;
   return a.y === b.y
     ? `${a.m}월 ${a.d}일 ~ ${b.m}월 ${b.d}일`
     : `${a.y}년 ${a.m}월 ${a.d}일 ~ ${b.y}년 ${b.m}월 ${b.d}일`;
