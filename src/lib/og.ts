@@ -124,7 +124,10 @@ export function postCard(post: Post): Card | undefined {
   }
   if (kind === 'feature') {
     const [head, ...rest] = d.title.split(' — ');
-    return { kind: '기획', when: d.period ? shortPeriod(d.period) : '', headline: head, sub: rest.join(' — ') || undefined, stats: highlights };
+    const when = d.period ? shortPeriod(d.period) : '';
+    // "국제유가와 호르무즈 해협 — 9월 14일~10월 1일"처럼 제목 뒤가 기간이면 오른쪽 위 날짜와 겹치므로 부제로 싣지 않는다
+    const sub = rest.join(' — ');
+    return { kind: '기획', when, headline: head, sub: sub && sub !== when ? sub : undefined, stats: highlights };
   }
   return undefined;
 }
