@@ -1,6 +1,6 @@
 # 일일 원고 형식
 
-편집 단계(`docs/editor-routine.md`)가 쓰는 `post.md`는 데스크 단계를 거쳐 `src/content/blog/D-daily.md`로 옮겨진다. 사이트(Astro)가 frontmatter를 스키마(`src/content.config.ts`)로 검사하므로 형식이 틀리면 빌드가 깨진다. 완성 예시는 `src/content/blog/`의 최근 일일 글이다. 전날 글을 열어 구성과 문체를 따라가면 된다.
+편집 단계(`docs/editor-routine.md`)가 쓰는 `post.md`는 데스크 단계를 거쳐 `src/content/blog/D-daily.md`로 옮겨진다. 사이트(Astro)가 frontmatter를 스키마(`src/content.config.ts`)로 검사하므로 형식이 틀리면 빌드가 깨진다. 완성 예시는 `src/content/blog/`의 최근 일일 글이다. 전날 글을 열어 구성을 따라가고, 문체는 CLAUDE.md "문체"를 따른다.
 
 ## 차례
 1. frontmatter

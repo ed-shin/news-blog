@@ -43,6 +43,10 @@ INTENT_PATTERNS = re.compile(r"협상용|노림수|떠보기|속셈|엄포용|�
 PARA_MAX = 350          # 본문 단락
 LIST_LINE_MAX = 350     # 목록 항목의 한 줄 (다음에 볼 것은 세 갈래를 줄 나눠 쓴다)
 LIST_ITEM_MAX = 700     # 목록 항목 하나 전체
+# 문장 끝 괄호 출처 "…했다([뉴스핌](…))." 출처는 문장의 매체 이름에 건다(docs/post-format.md 4절).
+# 10/20~10/22 일일은 한 편에 35~47곳, 이름에 걸어 고친 10/23은 다섯 곳이다
+TRAILING_SOURCE = re.compile(r"다\([^()\n]*\[[^\]]+\]\(https?://")
+TRAILING_SOURCE_MAX = 10
 ANALYSIS_MIN, ANALYSIS_MAX = 100, 180   # 1면 해설 text (결론은 lead에 있다)
 # 검증 과정이 본문에 새어 나온 문구. 과정은 desk-report에, 본문에는 결과만 쓴다.
 # "라고 적었다"(발언 인용)와 "입장은 확인되지 않았다"(편집 원칙 8)는 걸지 않는다.
@@ -615,6 +619,11 @@ def check_readability(body):
                             break
         elif visible_len(text) > PARA_MAX:
             warn(f"단락이 길다({where}, {visible_len(text)}자): {text[:30]}… — 할 말이 둘이면 나누고, 첫 문장을 받치지 않는 사실은 뺀다")
+
+    trailing = len(TRAILING_SOURCE.findall(body))
+    if trailing > TRAILING_SOURCE_MAX:
+        warn(f"문장 끝 괄호 출처가 {trailing}곳이다 — 문장의 매체·기관·회사 이름에 링크를 걸고(\"[뉴스핌](…)에 따르면\"), "
+             f"이름이 없는 문장에만 괄호로 단다(docs/post-format.md 4절)")
 
     hits = [(m.start(), m.group(0)) for m in PROCESS_PATTERNS.finditer(body)]
     if hits:
