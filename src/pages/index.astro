@@ -1,13 +1,30 @@
 ---
 import Base from '../layouts/Base.astro';
-import {
-  getPosts, getJoganPosts, kindOf, postUrl, headlineOf, firstSentence,
-  fmtFull, fmtShort, fmtPeriod, DESK_NAME, KIND_LABEL,
-} from '../lib/posts';
+import tracking from '../data/tracking.json';
+import { getPosts, kindOf, postUrl, headlineOf, firstSentence, fmtShort, fmtPeriod, fmtMonthDay, KIND_LABEL } from '../lib/posts';
+import { getTerms, termUrl, mentions } from '../lib/terms';
 
-const today = (await getJoganPosts()).find((p) => kindOf(p) === 'daily' && p.data.front);
-const front = today?.data.front;
-const recent = (await getPosts()).filter((p) => p !== today).slice(0, 5);
+// 글은 한 번만 불러와 같은 배열에서 고른다. getPosts()를 두 번 부르면 같은 글도 다른 객체라
+// "이미 보여 준 글"을 객체로 견주는 거름이 늘 빗나간다(오늘 일일이 최근 글에 또 나오던 원인)
+const posts = await getPosts();
+const jogan = posts.filter((p) => kindOf(p));
+const features = jogan.filter((p) => kindOf(p) === 'feature').slice(0, 2);
+// 요즘 일일 글(최근 7편)에 가장 자주 나온 용어 셋. 손으로 고르지 않아 갈아 끼울 일이 없다
+const recentDailies = jogan.filter((p) => kindOf(p) === 'daily').slice(0, 7);
+const terms = (await getTerms())
+  .map((term) => ({ term, n: mentions(term, recentDailies).length }))
+  .filter(({ n }) => n > 0)
+  .sort((a, b) => b.n - a.n)
+  .slice(0, 3)
+  .map(({ term }) => term);
+// 흐름: 조간이 날마다 쌓는 기록을 날짜순으로 다섯 편. 아래 기획 칸에 따로 보이는 두 편은 뺀다
+const shown = new Set(features.map((p) => p.id));
+const timeline = jogan.filter((p) => !shown.has(p.id)).slice(0, 5);
+const asOf = new Date(`${tracking.asOf}T00:00:00Z`);
+// 기획 제목의 " — 기간"은 카드 위 날짜와 겹치므로 앞부분만 쓴다
+const titleHead = (title: string) => title.split(' — ')[0];
+// 주간 흐름 제목은 "10월 19~23일 주간 흐름 — 헤드라인"이라 헤드라인만 쓴다
+const titleTail = (title: string) => (title.includes(' — ') ? title.slice(title.indexOf(' — ') + 3) : title);
 // 네이버는 홈(사이트 대표 페이지) 설명만 80자 이내로 쓰라고 진단한다(2026-10-20). 다른 페이지 설명은 길어도 지적하지 않았다
 const description = '견문록은 매일 아침 경제·국제 뉴스를 원문과 대조해 정리합니다. 일일 조간, 주간 흐름, 기획, 용어 풀이를 싣습니다.';
 ---
@@ -27,90 +44,132 @@ const description = '견문록은 매일 아침 경제·국제 뉴스를 원문�
     inLanguage: 'ko',
   }}
 >
-  <section class="intro">
-    <p class="lede">매일 아침 경제·국제 뉴스를 기사 원문과 대조해 정리합니다.</p>
-    <ul class="ways">
-      <li><a href="/jogan/"><b>조간</b><span>매일 아침, 전날 일어난 일을 분야별로</span></a></li>
-      <li><a href="/jogan/all/?type=weekly"><b>주간 흐름</b><span>토요일 오후, 그 주의 흐름과 앞으로 볼 일정</span></a></li>
-      <li><a href="/jogan/all/?type=feature"><b>기획</b><span>한 주제를 몇 주에 걸쳐 따라간 기록</span></a></li>
-      <li><a href="/jogan/terms/"><b>용어</b><span>뉴스에 자주 나오는 경제·AI 용어 풀이</span></a></li>
-    </ul>
-  </section>
+  <!-- 견문록 아래의 코너가 조간이다. 코너 이름과 무엇을 하는지 한 문장을 두고,
+       흐름·기획·용어는 조간의 하위 칸으로 그 안에 둔다 -->
+  <section class="corner">
+    <div class="intro">
+      <h2 class="corner-name"><a href="/jogan/">조간<i>.</i></a></h2>
+      <p class="lede">매일 아침 경제·국제 뉴스를 기사 원문과 대조해 정리하고, 오래 볼 주제는 기획으로 따라갑니다.</p>
+    </div>
 
-  {today && front && (
-    <section class="corner">
-      <div class="corner-head">
-        <a class="corner-name" href="/jogan/">조간<i>.</i></a>
-        <span class="date">{fmtFull(today.data.pubDate)}</span>
+  <!-- 조간의 중심은 타임라인이다. 흐름 페이지(/jogan/flow/)의 두 부분, 날짜순 기록과 추적 중인 토픽을 줄여 보인다 -->
+  {timeline.length > 0 && (
+    <section class="block">
+      <div class="block-head"><h3>흐름</h3><a href="/jogan/flow/">흐름 전체 →</a></div>
+      <div class="flow">
+        <ol class="tl">
+          {timeline.map((p) => {
+            const d = fmtShort(p.data.pubDate);
+            const kind = kindOf(p)!;
+            return (
+              <li>
+                <a href={postUrl(p)}>
+                  <span class="meta">{d.md} {d.w} · {KIND_LABEL[kind]}{p.data.period && kind !== 'daily' ? ` ${fmtPeriod(p.data.period)}` : ''}</span>
+                  <b>{kind === 'weekly' ? titleTail(p.data.title) : headlineOf(p)}</b>
+                </a>
+              </li>
+            );
+          })}
+        </ol>
+        <div class="topics" aria-label="추적 중인 흐름">
+          <p class="topics-label">추적 중인 흐름<small>{fmtMonthDay(asOf)} 기준</small></p>
+          {tracking.topics.map((t) => (
+            <div class="topic">
+              <span class="tname"><i class={t.trend}></i>{t.name}</span>
+              <em>{t.status}</em>
+            </div>
+          ))}
+        </div>
       </div>
-      <h2 class="headline"><a href="/jogan/">{front.headline}</a></h2>
-      <dl class="desklines">
-        {front.desks.map((desk) => (
-          <>
-            <dt>{DESK_NAME[desk.key]}</dt>
-            <dd>{desk.items[0].title}. {firstSentence(desk.items[0].text)}</dd>
-          </>
-        ))}
-      </dl>
-      <a class="enter" href="/jogan/">오늘의 1면 보기 →</a>
     </section>
   )}
 
-  {recent.length > 0 && (
-    <section class="recent">
-      <h2>최근 글</h2>
-      {recent.map((p) => {
-        const d = fmtShort(p.data.pubDate);
-        const kind = kindOf(p);
-        return (
-          <a class="item" href={postUrl(p)}>
-            <time>{d.md} {d.w}</time>
-            {kind && <span class="kind">{KIND_LABEL[kind]}{p.data.period && <span class="period">{fmtPeriod(p.data.period)}</span>}</span>}
-            <span class="title">{headlineOf(p)}</span>
+  {features.length > 0 && (
+    <section class="block">
+      <div class="block-head"><h3>기획</h3><a href="/jogan/all/?type=feature">기획 전체 →</a></div>
+      <div class="cards">
+        {features.map((p) => (
+          <a class="card" href={postUrl(p)}>
+            <span class="meta">{fmtPeriod(p.data.period)}</span>
+            <b>{titleHead(p.data.title)}</b>
+            <span class="desc">{p.data.description}</span>
           </a>
-        );
-      })}
+        ))}
+      </div>
     </section>
   )}
 
-  <p class="about"><a href="/jogan/about/">조간 소개 →</a></p>
+  {terms.length > 0 && (
+    <section class="block">
+      <div class="block-head"><h3>최근 용어</h3><a href="/jogan/terms/">용어 전체 →</a></div>
+      <div class="terms">
+        {terms.map((t) => (
+          <a class="term" href={termUrl(t)}>
+            <b>{t.data.name}</b>
+            <span class="desc">{firstSentence(t.data.description)}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+  </section>
 </Base>
 
 <style>
-  /* 이름으로 찾아온 사람에게 무엇을 하는 곳인지 먼저 보인다. 그날 1면은 그 아래다 */
-  .intro { max-width: 760px; padding: 26px 0 0; }
-  .lede { margin: 0; font-size: 1.02rem; font-weight: 600; line-height: 1.6; }
-  .ways { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 24px; margin: 14px 0 0; padding: 0; list-style: none; }
-  .ways a { display: flex; align-items: baseline; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
-  .ways b { flex: none; font-size: 0.86rem; font-weight: 800; color: var(--accent); }
-  .ways span { font-size: 0.88rem; color: var(--muted); line-height: 1.5; }
-  .ways a:hover span { color: var(--text); }
-
-  .corner { max-width: 760px; padding: 34px 0 0; }
-  .corner-head { display: flex; align-items: baseline; gap: 12px; }
-  .corner-name { font-family: var(--serif); font-weight: 800; font-size: 1.3rem; }
+  /* 섹션마다 제목 한 줄과 글 몇 편만. 금색은 섹션 이름과 이동 링크에만 쓴다 */
+  .intro { max-width: 760px; padding-top: 26px; }
+  .corner-name { margin: 0 0 8px; font-family: var(--serif); font-weight: 800; font-size: 1.6rem; letter-spacing: -0.01em; }
   .corner-name i { font-style: normal; color: var(--accent); }
-  .date { font-size: 0.84rem; color: var(--muted); }
-  .headline { margin: 12px 0 0; font-family: var(--serif); font-weight: 800; font-size: clamp(1.4rem, 3.6vw, 1.9rem); line-height: 1.4; letter-spacing: -0.02em; }
-  .headline a:hover { color: var(--accent); }
-  .desklines { margin-top: 20px; }
-  .enter { display: inline-block; margin-top: 16px; font-weight: 700; font-size: 0.92rem; color: var(--accent); }
+  .corner-name a:hover { color: var(--accent); }
+  .lede { margin: 0; font-size: 1.02rem; font-weight: 600; line-height: 1.6; }
 
-  .recent { max-width: 760px; margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--accent); }
-  .recent h2 { margin: 0 0 6px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; color: var(--muted); }
-  .item { display: flex; align-items: baseline; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
-  .item time { flex: none; width: 58px; font-size: 0.82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-  .item .kind { flex: none; font-size: 0.76rem; font-weight: 800; color: var(--accent); letter-spacing: 0.04em; }
-  .item .period { margin-left: 8px; font-weight: 600; color: var(--text); letter-spacing: 0.02em; }
-  .item .title { font-family: var(--serif); font-weight: 700; font-size: 1.02rem; line-height: 1.45; }
-  .item:hover .title { color: var(--accent); }
-  .about { margin: 28px 0 0; font-size: 0.9rem; font-weight: 700; }
-  .about a:hover { color: var(--accent); }
+  .block { max-width: 760px; margin-top: 40px; }
+  .block-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .block-head h3 { margin: 0; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.08em; color: var(--accent); }
+  .block-head a { font-size: 0.84rem; font-weight: 700; color: var(--muted); }
+  .block-head a:hover { color: var(--accent); }
+
+  .meta { font-size: 0.86rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .desc { font-size: 0.94rem; line-height: 1.55; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+  .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; }
+  .card { display: flex; flex-direction: column; gap: 4px; padding: 16px 0; }
+  .card b { font-family: var(--serif); font-weight: 800; font-size: 1.12rem; line-height: 1.4; }
+  .card:hover b, .tl a:hover b, .term:hover b { color: var(--accent); }
+
+  /* 흐름: 왼쪽은 점과 세로선으로 잇는 날짜순 기록(흐름 페이지와 같은 모양), 오른쪽은 추적 중인 토픽 */
+  .flow { display: grid; grid-template-columns: minmax(0, 1fr) 230px; gap: 0 36px; }
+  .tl { position: relative; margin: 0; padding: 6px 0 0; list-style: none; }
+  .tl::before { content: ''; position: absolute; top: 20px; bottom: 20px; left: 5px; width: 2px; background: var(--border); }
+  .tl li { position: relative; padding-left: 28px; }
+  .tl li::before { content: ''; position: absolute; left: 0; top: 17px; width: 12px; height: 12px; border-radius: 50%; box-sizing: border-box; background: var(--bg); border: 2.5px solid var(--accent); }
+  .tl a { display: flex; flex-direction: column; gap: 3px; padding: 11px 0; }
+  .tl b { font-family: var(--serif); font-weight: 700; font-size: 1.02rem; line-height: 1.45; }
+  .topics { padding-top: 14px; }
+  .topics-label { margin: 0 0 6px; font-size: 0.8rem; font-weight: 800; color: var(--text); }
+  .topics-label small { margin-left: 8px; font-weight: 500; color: var(--muted); }
+  /* 칸이 좁아 이름과 상태를 나란히 두면 이름이 여러 줄로 꺾인다. 위아래로 쌓는다 */
+  .topic { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; padding: 10px 0; border-top: 1px solid var(--border); }
+  .tname { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.9rem; }
+  .tname i { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--up); }
+  .tname i.cool { background: var(--down); }
+  .tname i.flat { background: var(--strong); }
+  .topic em { flex: none; padding: 1px 8px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); font-style: normal; font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+
+  .terms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 24px; }
+  .term { display: flex; flex-direction: column; gap: 4px; padding: 14px 0; }
+  .term b { font-weight: 800; font-size: 0.98rem; }
 
   @media (max-width: 620px) {
-    .ways { grid-template-columns: 1fr; gap: 0; }
-    .corner { padding-top: 26px; }
-    .item { flex-wrap: wrap; gap: 2px 10px; }
-    .item .title { flex-basis: 100%; }
+    .cards, .terms, .flow { grid-template-columns: 1fr; }
+    /* 휴대폰은 흐름 페이지처럼 추적 중인 토픽을 기록 위에 둔다 */
+    .topics { order: -1; }
+    /* 휴대폰은 폭이 넉넉해 토픽 이름과 상태를 한 줄에 둔다 */
+    .topic { flex-direction: row; align-items: center; justify-content: space-between; padding: 9px 0; }
+    .card, .term { padding: 12px 0; border-bottom: 1px solid var(--border); }
+    /* 휴대폰에서는 기획 설명을 한 줄로, 흐름의 제목은 조간 헤드라인보다 가볍게 */
+    .card .desc { -webkit-line-clamp: 1; }
+    .tl b { font-size: 0.88rem; line-height: 1.4; }
+    .block { margin-top: 32px; }
   }
 </style>
