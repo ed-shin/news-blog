@@ -10,3 +10,6 @@
 # 날짜 없는 /jogan/today/ 는 오늘의 1면으로
 /jogan/today/ /jogan/ 302
 /jogan/today /jogan/ 302
+# 소개는 조간 소개라 조간 안으로 옮김 (2026-10-28)
+/about/ /jogan/about/ 301
+/about /jogan/about/ 301

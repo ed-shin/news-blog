@@ -41,10 +41,10 @@ const nav = corner === 'jogan'
       { href: '/jogan/flow/', label: '흐름', key: 'flow' },
       { href: '/jogan/all/', label: '전체', key: 'all' },
       { href: '/jogan/terms/', label: '용어', key: 'terms' },
+      { href: '/jogan/about/', label: '소개', key: 'about' },
     ]
   : [
       { href: '/jogan/', label: '조간', key: 'jogan' },
-      { href: '/about/', label: '소개', key: 'about' },
     ];
 // 조간 안의 오늘·흐름·전체는 제호 뒤에 현재 위치로 붙인다
 const crumb = crumbProp ?? (corner === 'jogan' ? nav.find((item) => item.key === active)?.label : undefined);
@@ -121,7 +121,7 @@ const crumb = crumbProp ?? (corner === 'jogan' ? nav.find((item) => item.key ===
       </main>
       <footer class="site-foot">
         <p class="links">
-          <a href="/">견문록</a> · <a href="/about/">소개</a> · <a href="/jogan/corrections/">정정 기록</a> ·
+          <a href="/">견문록</a> · <a href="/jogan/about/">조간 소개</a> · <a href="/jogan/corrections/">정정 기록</a> ·
           <a href="/rss.xml">RSS</a> ·
           <a href="https://github.com/ed-shin/news-blog" target="_blank" rel="noopener noreferrer">저장소</a>
         </p>
