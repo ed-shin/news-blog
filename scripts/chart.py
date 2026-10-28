@@ -345,6 +345,49 @@ def net_bars(values, labels, caption, alt, gap_after=None, gap_label='', unit='�
     return _figure(out, caption, alt)
 
 
+def pair_bars(series, labels, caption, alt, ticks, unit_note='단위: %'):
+    """같은 조사·같은 단위의 두 계열을 날짜(주)마다 나란히 막대로 그린다. 값은 % 변동률.
+    series = [(이름, 색 클래스 's1'·'s2', [값, ...]), (…)] — 첫 계열이 왼쪽 막대다.
+    ticks = 눈금 값 목록(0을 넣으면 기준선). 기획 「서울 아파트값」(2026-10)의 서울·강남구 주간 변동률에 처음 썼다."""
+    def fmt(v):
+        sign = '+' if v > 0 else '−' if v < 0 else ''
+        return f'{sign}{abs(v):.2f}%'
+    top, bottom = PAD['t'] + 24, H - PAD['b'] - 20       # 위는 범례, 아래는 음수 막대 값 자리
+    allv = [v for _, _, vals in series for v in vals] + [0]
+    lo, hi = min(allv), max(allv)
+    pad = (hi - lo) * 0.10
+    y_of = _scale(lo - pad, hi + pad, bottom - top, top, invert=True)
+    slot = (W - PAD['l'] - PAD['r']) / len(labels)
+    bw = round(slot * 0.30, 1)
+    gap = 4
+    cx = lambda i: PAD['l'] + slot * (i + 0.5)
+    out = []
+    for t in ticks:
+        y = round(y_of(t), 1)
+        out.append(f'<line class="{"zero" if t == 0 else "grid"}" x1="{PAD["l"]}" y1="{y}" x2="{W - PAD["r"]}" y2="{y}"/>')
+        label = '0' if t == 0 else ('+' if t > 0 else '−') + f'{abs(t):.1f}%'
+        out.append(f'<text class="tick" x="{PAD["l"] - 8}" y="{y + 4}" text-anchor="end">{label}</text>')
+    lx = PAD['l']
+    for name, cls, _ in series:
+        out.append(f'<rect class="bar {cls}" x="{lx}" y="{PAD["t"] - 14}" width="12" height="12" rx="2"/>')
+        out.append(f'<text class="legend" x="{lx + 18}" y="{PAD["t"] - 3}">{name}</text>')
+        lx += 18 + 14 * len(name) + 22
+    out.append(f'<text class="note" x="{W - PAD["r"]}" y="{PAD["t"] - 3}" text-anchor="end">{unit_note}</text>')
+    y0 = y_of(0)
+    for i, lab in enumerate(labels):
+        for k, (name, cls, vals) in enumerate(series):
+            v = vals[i]
+            x = round(cx(i) - bw - gap / 2 if k == 0 else cx(i) + gap / 2, 1)
+            y = y_of(v)
+            y1, y2 = (y, y0) if v >= 0 else (y0, y)
+            out.append(f'<g class="pt" data-tip="{escape(f"{lab} {name} {fmt(v)}")}"><rect class="bar {cls}" x="{x}" '
+                       f'y="{round(y1, 1)}" width="{bw}" height="{round(max(y2 - y1, 1.5), 1)}" rx="2"/></g>')
+            ty = round(y - 6, 1) if v >= 0 else round(y + 15, 1)
+            out.append(f'<text class="val" x="{round(x + bw / 2, 1)}" y="{ty}" text-anchor="middle">{fmt(v)}</text>')
+        out.append(f'<text class="tick" x="{round(cx(i), 1)}" y="{H - PAD["b"] + 22}" text-anchor="middle">{lab}</text>')
+    return _figure(out, caption, alt)
+
+
 def line_events(points, caption, alt, events, fmt=lambda v: f'{v:.2f}', base=None, base_label='',
                 tick_step=2, tick_fmt=lambda t: f'{t:g}'):
     """한 지표의 날짜별 추이에 사건 몇 개를 표시한다. points = [(라벨, 값), ...]
