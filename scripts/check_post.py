@@ -585,6 +585,10 @@ def visible_len(text):
 def check_readability(body):
     """긴 단락과 검증 과정 문구. 모두 경고이고, 원칙대로 고칠지는 읽고 판단한다.
     길이는 링크 주소를 뺀, 화면에 읽히는 글자로 잰다."""
+    # 회사 이름은 영어로 쓴다(2026-10-28 사용자 결정). 정정 기록의 "앤트로픽을 Anthropic으로"는 frontmatter라 여기 안 걸린다
+    for name in re.findall(r"앤트로픽|앤스로픽", body):
+        warn(f"회사 이름 '{name}'은 Anthropic으로 쓴다")
+        break
     for hit in INTENT_PATTERNS.finditer(body):
         around = body[max(0, hit.start() - 25):hit.end() + 10].replace("\n", " ")
         warn(f"상대의 의도를 짐작하는 말이 있다 — 본인이 밝혔거나 보도가 전한 것만 쓴다: '…{around}…'")
