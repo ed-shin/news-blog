@@ -38,7 +38,9 @@ fi
 
 # 진행 기록(읽은 파일·연 링크)은 따로 두고, 화면에는 마지막 보고만 낸다
 log="$out_dir/$(basename "$post" .md).log"
-codex exec -s read-only --ephemeral --color never -C "$root" -o "$out" "$prompt" </dev/null >"$log" 2>&1
+# 검수 모델은 GPT-6.1 Terra(2026-10-28 사용자 결정). Codex 기본 모델과 달라 따로 지정한다
+model="${GPT_REVIEW_MODEL:-gpt-6.1-terra}"
+codex exec -m "$model" -s read-only --ephemeral --color never -C "$root" -o "$out" "$prompt" </dev/null >"$log" 2>&1
 cat "$out"
 echo
 echo "(저장: $out · 진행 기록: $log)"
