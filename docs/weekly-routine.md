@@ -99,6 +99,7 @@ npm install --silent && npm run build && python3 scripts/linkcheck.py
 
 - 오류는 모두 고친다. 경고는 읽어 보고 판단한다. **검사를 통과하지 못하면 푸시하지 않는다.** 그날은 글을 올리지 말고 무엇이 막혔는지 보고한다.
 - 작성자는 `barney <jp.shin.kor@gmail.com>`로 고정한다. 커밋 메시지에는 그 주의 줄기, 차트, 일정 표에서 뺀 것을 적는다.
+- 명령은 `docs/desk-routine.md` 6절의 모양대로 한 줄씩 따로 실행한다. `git config`로 작성자를 정하고, 메시지를 저장소 밖 임시 파일에 쓴 뒤 `git add`, `git commit -F 파일`, `git push origin main` 순서다. `git -c`, `&&`로 잇기, 히어독은 쓰지 않는다. 푸시가 거절되면 `git pull --rebase origin main`을 한 뒤 다시 푸시한다.
 - 배포 확인은 **이번에 바뀐 문구**로 한다. `/jogan/weekly/M/`에서 제목의 특징적인 구절을 찾는다. 200이라는 것만으로는 옛 페이지일 수 있다.
 - 배포가 확인되면 `python3 scripts/indexnow.py src/content/blog/D-weekly.md`로 네이버·빙에 알린다. 실패해도 보고에 적고 넘어간다.
 

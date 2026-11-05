@@ -97,6 +97,17 @@ npm install --silent && npm run build && python3 scripts/linkcheck.py
 ## 6. 커밋과 배포 확인
 
 - 작성자는 `barney <jp.shin.kor@gmail.com>`로 고정한다. 커밋 메시지에는 무엇을 왜 고쳤는지 적는다.
+- 명령은 아래 모양으로 한 줄씩 따로 실행한다. 메시지는 저장소 밖 임시 파일에 먼저 쓴다. `git -c`, `&&`로 잇기, 히어독(`<<'EOF'`)은 쓰지 않는다. 그렇게 쓴 커밋 명령이 11/4·11/5 이틀 연속 확인 창에서 멈춰 글이 늦게 올라갔다(무엇이 걸렸는지는 기록에 없다).
+
+```bash
+git config user.name barney
+git config user.email jp.shin.kor@gmail.com
+git add src/content/blog/D-daily.md src/data/tracking.json
+git commit -F /tmp/commit-msg.txt
+git push origin main
+```
+
+- 푸시가 거절되면(그사이 다른 커밋이 올라온 경우) `git pull --rebase origin main`을 한 뒤 다시 푸시한다.
 - `main`에 푸시하면 Cloudflare가 1~3분 안에 배포한다.
 - 배포 확인은 **이번에 바뀐 문구**로 한다. 주소가 200을 준다는 것만으로는 옛 페이지일 수 있고, 엣지 캐시 때문에 이전 내용이 잠시 더 보인다. 예를 들어 오늘 헤드라인의 특징적인 구절을 잡아 확인한다.
 
