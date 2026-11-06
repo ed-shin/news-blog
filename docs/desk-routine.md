@@ -96,14 +96,11 @@ npm install --silent && npm run build && python3 scripts/linkcheck.py
 
 ## 6. 커밋과 배포 확인
 
-- 작성자는 `barney <jp.shin.kor@gmail.com>`로 고정한다. 커밋 메시지에는 무엇을 왜 고쳤는지 적는다.
-- 명령은 아래 모양으로 한 줄씩 따로 실행한다. 메시지는 저장소 밖 임시 파일에 먼저 쓴다. `git -c`, `&&`로 잇기, 히어독(`<<'EOF'`)은 쓰지 않는다. 그렇게 쓴 커밋 명령이 11/4·11/5 이틀 연속 확인 창에서 멈춰 글이 늦게 올라갔다(무엇이 걸렸는지는 기록에 없다).
+- 작성자는 `scripts/commit.sh`가 `barney`로 고정한다. 커밋 메시지에는 무엇을 왜 고쳤는지 적고, 저장소 밖 임시 파일에 먼저 쓴다.
+- 명령에 개인 이메일을 직접 쓰지 않는다. 이메일이 든 명령(`git -c user.email=…`, `curl -A "… 이메일"`)이 11/4~11/6 사흘 연속 확인 창에서 멈춰 글이 올라가지 못했다. 기사나 공식 자료를 받을 때 User-Agent 같은 요청 내용에도 이메일을 넣지 않는다. 막히는 페이지는 WebFetch나 다른 고정 주소로 연다.
 
 ```bash
-git config user.name barney
-git config user.email jp.shin.kor@gmail.com
-git add src/content/blog/D-daily.md src/data/tracking.json
-git commit -F /tmp/commit-msg.txt
+scripts/commit.sh /tmp/commit-msg.txt src/content/blog/D-daily.md src/data/tracking.json
 git push origin main
 ```
 
