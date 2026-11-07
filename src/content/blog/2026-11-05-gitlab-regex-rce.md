@@ -1,35 +1,39 @@
 ---
 title: "GitLab 취약점 CVE-2026-97229·110264 정리"
-description: "GitLab이 10월 12일과 21일, 인증 없이도 서버에서 코드를 실행할 수 있다고 밝힌 결함 두 개(CVE-2026-97229·110264)를 고쳤다. 97229는 29일 미국 CISA의 실제 악용 목록에 올랐고, 11월 1일 집계로 110264에 취약한 서버는 1만 1,300대가 넘었다. 어느 판으로 올려야 하는지, 직접 빌드한 GitLab은 왜 Ruby까지 올려야 하는지 정리했다."
+description: "GitLab이 10월 12일과 21일, 인증 없이도 서버에서 코드를 실행할 수 있다고 밝힌 결함 두 개(CVE-2026-97229·110264)를 고쳤다. 97229는 29일 미국 CISA의 실제 악용 목록에 올랐고, 11월 1일 집계로 110264에 취약한 서버는 1만 1,300대가 넘었다. 어느 버전으로 올려야 하는지, 직접 빌드한 GitLab은 왜 Ruby까지 올려야 하는지 정리했다."
 pubDate: 2026-11-05
+updatedDate: 2026-11-07
+corrections:
+  - date: 2026-11-07
+    text: "소프트웨어 버전을 '판'으로 적은 표기가 부자연스러워 '버전'으로 바꿨다. 사실과 숫자는 바뀌지 않았다."
 tags: ["기획", "테크"]
 searchTitle: "GitLab 취약점 CVE-2026-97229·110264 정리 — 영향 버전과 패치 방법 | 견문록"
 period: { from: 2026-10-12, to: 2026-11-02 }
 highlights:
   - { label: "심각도", value: "10.0 / 10", note: "두 결함 모두 GitLab 판정(CVSS 3.1)" }
-  - { label: "고친 판", value: "19.5.1", note: "19.4.3·19.3.6 등, 10월 21일" }
+  - { label: "고친 버전", value: "19.5.1", note: "19.4.3·19.3.6 등, 10월 21일" }
   - { label: "아직 취약한 서버", value: "1만 1,300여 대", note: "110264 기준, Shadowserver 11월 1일" }
 ---
 
 ## 먼저 요점만
 
 1. **GitLab은 10월에 인증 없이도 서버에서 코드를 실행할 수 있다고 밝힌 결함 두 개를 고쳤다.** 12일에 CVE-2026-97229를, 21일에 CVE-2026-110264를 고쳤고, 둘 다 취약점 심각도 점수(CVSS)를 10점 만점에 10.0으로 매겼다.
-2. **회사 서버에 직접 설치한 GitLab이라면 21일에 나온 판으로 올려야 한다.** 19.5.1, 19.4.3, 19.3.6 등이고, 12일 판은 97229만 고쳤다. 공식 패키지가 아니라 따로 구한 Ruby로 돌린다면 Ruby도 올려야 하며, GitLab.com 이용자는 할 일이 없다.
+2. **회사 서버에 직접 설치한 GitLab이라면 21일에 나온 버전으로 올려야 한다.** 19.5.1, 19.4.3, 19.3.6 등이고, 12일 버전은 97229만 고쳤다. 공식 패키지가 아니라 따로 구한 Ruby로 돌린다면 Ruby도 올려야 하며, GitLab.com 이용자는 할 일이 없다.
 3. **97229는 10월 29일 미국 CISA의 실제 악용 목록에 올랐다.** 11월 1일 Shadowserver 집계로 97229에 취약한 서버는 1,000대, 110264에 취약한 서버는 1만 1,300대가 넘었다.
 
 ## 영향 범위
 
-**직접 설치해 운영하는 GitLab만 해당한다.** GitLab은 회사가 코드를 보관하고 빌드·시험·배포를 자동으로 돌리는(CI/CD) 개발 플랫폼으로, 회사 서버에 직접 설치해 쓰는 곳이 많다. [GitLab 공지](https://docs.gitlab.com/releases/patches/patch-release-gitlab-19-4-2-released/)에 따르면 GitLab.com은 이미 고친 판으로 돌고 있고, 전용 클라우드인 GitLab Dedicated는 공지를 내기 전에 내부 판으로 고쳤다.
+**직접 설치해 운영하는 GitLab만 해당한다.** GitLab은 회사가 코드를 보관하고 빌드·시험·배포를 자동으로 돌리는(CI/CD) 개발 플랫폼으로, 회사 서버에 직접 설치해 쓰는 곳이 많다. [GitLab 공지](https://docs.gitlab.com/releases/patches/patch-release-gitlab-19-4-2-released/)에 따르면 GitLab.com은 이미 고친 버전으로 돌고 있고, 전용 클라우드인 GitLab Dedicated는 공지를 내기 전에 내부 버전으로 고쳤다.
 
-영향을 받는 판은 두 결함이 다르다. 97229는 19.2~19.4 가운데 19.2.8, 19.3.5, 19.4.2보다 낮은 판이 대상이다. 반면 110264는 [GitLab 공지](https://docs.gitlab.com/releases/patches/patch-release-gitlab-19-5-1-released/)에 따르면 7.0 이후의 거의 모든 판대가 대상이고, 판대마다 21일에 나온 판보다 낮으면 취약하다.
+영향을 받는 버전은 두 결함이 다르다. 97229는 19.2~19.4 가운데 19.2.8, 19.3.5, 19.4.2보다 낮은 버전이 대상이다. 반면 110264는 [GitLab 공지](https://docs.gitlab.com/releases/patches/patch-release-gitlab-19-5-1-released/)에 따르면 7.0 이후의 거의 모든 버전대가 대상이고, 버전대마다 21일에 나온 버전보다 낮으면 취약하다.
 
 인증이 정말 필요 없는지는 보는 쪽마다 다르다. GitLab은 97229로 특정 조건에서 인증 없이 코드를 실행할 수 있었다고 했지만, 97229를 재현한 보안업체 [Rapid7](https://www.rapid7.com/blog/post/etr-cve-2026-97229-critical-unauthenticated-remote-code-execution-in-gitlab/)은 공격하려면 저장소에 악성 CI/CD 설정을 심을 방법이 있어야 한다고 봤다. 다만 누구나 가입해 프로젝트를 만들 수 있는 서버라면 새로 가입한 계정으로 그 조건을 채울 수 있다고 덧붙였는데, 실제로 [Alpine Linux](https://alpinelinux.org/posts/gitlab-security-incident-cve-2026-97229/)의 GitLab을 노린 것도 새로 가입한 계정이었다.
 
-## 올릴 판
+## 올릴 버전
 
-**21일에 나온 판으로 올린다.** 12일 판(19.4.2·19.3.5·19.2.8)은 97229만 고쳤으므로, 110264까지 막으려면 21일 판이 필요하다.
+**21일에 나온 버전으로 올린다.** 12일 버전(19.4.2·19.3.5·19.2.8)은 97229만 고쳤으므로, 110264까지 막으려면 21일 버전이 필요하다.
 
-| 쓰는 판대 | 두 결함을 고친 최소 판 |
+| 현재 버전대 | 두 결함을 고친 최소 버전 |
 |---|---|
 | 19.5 | 19.5.1 |
 | 19.4 | 19.4.3 |
@@ -38,17 +42,17 @@ highlights:
 | 19.1 | 19.1.9 |
 | 19.0 | 19.0.10 |
 | 18.11 | 18.11.13 |
-| 7.0~18.10 | 같은 판대의 고친 판 없음 |
+| 7.0~18.10 | 같은 버전대의 고친 버전 없음 |
 
-*출처: [GitLab 21일 공지](https://docs.gitlab.com/releases/patches/patch-release-gitlab-19-5-1-released/). 같은 판대에서 이 번호 이상이면 두 결함이 고쳐져 있다. 7.0~18.10도 110264의 영향을 받으므로 위 판 가운데 하나로 올려야 하고, 따로 구한 Ruby를 쓴다면 Ruby 판도 확인한다.*
+*출처: [GitLab 21일 공지](https://docs.gitlab.com/releases/patches/patch-release-gitlab-19-5-1-released/). 같은 버전대에서 이 번호 이상이면 두 결함이 고쳐져 있다. 7.0~18.10도 110264의 영향을 받으므로 위 버전 가운데 하나로 올려야 하고, 따로 구한 Ruby를 쓴다면 Ruby 버전도 확인한다.*
 
-판 번호는 끝자리까지 확인한다. [GitLab 공지](https://docs.gitlab.com/releases/patches/patch-release-gitlab-19-4-2-released/)에 따르면 19.3.4는 Ona 연동을 켠 경우 병합 요청 화면에 버그가 있어 19.3.5에서 고쳤는데, [Alpine](https://alpinelinux.org/posts/gitlab-security-incident-cve-2026-97229/)은 13일 19.3.5가 아닌 19.3.4로 올렸고 공격을 받을 때도 97229가 고쳐지지 않은 19.3.4였다.
+버전 번호는 끝자리까지 확인한다. [GitLab 공지](https://docs.gitlab.com/releases/patches/patch-release-gitlab-19-4-2-released/)에 따르면 19.3.4는 Ona 연동을 켠 경우 병합 요청 화면에 버그가 있어 19.3.5에서 고쳤는데, [Alpine](https://alpinelinux.org/posts/gitlab-security-incident-cve-2026-97229/)은 13일 19.3.5가 아닌 19.3.4로 올렸고 공격을 받을 때도 97229가 고쳐지지 않은 19.3.4였다.
 
 업데이트하는 동안 서비스가 멈출 수 있다. [GitLab](https://docs.gitlab.com/releases/patches/patch-release-gitlab-19-5-1-released/)은 서버 한 대로 운영하면 데이터베이스 변경이 끝나야 GitLab이 다시 뜨므로 멈추고, 여러 대로 나눠 운영하면 무중단 절차로 멈추지 않고 올릴 수 있다고 안내했다.
 
 ### 직접 빌드했다면 Ruby도
 
-**공식 패키지가 아닌 Ruby로 GitLab을 돌린다면 GitLab만 올려서는 막히지 않는다.** 두 결함은 GitLab이 쓰는 프로그래밍 언어 Ruby의 정규식 엔진에 있고, GitLab은 그 수정을 자기 공식 리눅스 패키지와 컨테이너 이미지에 넣은 Ruby에만 적용했다. 그래서 소스로 설치했거나 직접 만든 이미지로 돌린다면 [GitLab 공지](https://docs.gitlab.com/releases/patches/patch-release-gitlab-19-5-1-released/)대로 Ruby도 3.3.13, 3.4.12, 4.0.9 이상으로 올려야 하고, [Ruby](https://www.ruby-lang.org/en/news/2026/10/23/regexp-fixes-for-gitlab-cves/)는 이 판들을 10월 23일 냈다.
+**공식 패키지가 아닌 Ruby로 GitLab을 돌린다면 GitLab만 올려서는 막히지 않는다.** 두 결함은 GitLab이 쓰는 프로그래밍 언어 Ruby의 정규식 엔진에 있고, GitLab은 그 수정을 자기 공식 리눅스 패키지와 컨테이너 이미지에 넣은 Ruby에만 적용했다. 그래서 소스로 설치했거나 직접 만든 이미지로 돌린다면 [GitLab 공지](https://docs.gitlab.com/releases/patches/patch-release-gitlab-19-5-1-released/)대로 Ruby도 3.3.13, 3.4.12, 4.0.9 이상으로 올려야 하고, [Ruby](https://www.ruby-lang.org/en/news/2026/10/23/regexp-fixes-for-gitlab-cves/)는 이 버전들을 10월 23일 냈다.
 
 이 함정에 실제로 빠진 곳이 있다. [Alpine](https://alpinelinux.org/posts/gitlab-security-incident-cve-2026-97229/)은 22일 GitLab을 19.3.6으로 올렸지만 표준 Ruby를 쓰는 자체 이미지라 결함이 그대로 남았고, Ruby 3.3.13을 넣은 이미지는 27일에야 다시 냈다.
 
@@ -62,7 +66,7 @@ highlights:
 
 ## 실제 공격
 
-**97229는 고친 판이 나온 지 17일 만에 실제 악용 목록에 올랐다.** 미국 사이버보안·인프라보안청([CISA](https://www.cisa.gov/news-events/alerts/2026/10/29/cisa-adds-two-known-exploited-vulnerabilities-catalog))은 10월 29일 실제 악용 증거를 근거로 97229를 '악용이 확인된 취약점' 목록(KEV)에 올렸다. 누가 공격했는지는 밝히지 않았다.
+**97229는 고친 버전이 나온 지 17일 만에 실제 악용 목록에 올랐다.** 미국 사이버보안·인프라보안청([CISA](https://www.cisa.gov/news-events/alerts/2026/10/29/cisa-adds-two-known-exploited-vulnerabilities-catalog))은 10월 29일 실제 악용 증거를 근거로 97229를 '악용이 확인된 취약점' 목록(KEV)에 올렸다. 누가 공격했는지는 밝히지 않았다.
 
 공격받은 곳이 경위를 직접 밝힌 사례도 있다. 리눅스 배포판 [Alpine Linux](https://alpinelinux.org/posts/gitlab-security-incident-cve-2026-97229/)에 따르면 20~21일 새로 가입한 계정이 조작한 CI 설정을 보내 97229를 노렸고, 공격은 성공 직전까지 갔다. Alpine은 성공한 증거는 찾지 못했지만 배제할 수 없어 서버를 처음부터 다시 만들었고, 배포 패키지와 21일 릴리스에는 변조 흔적이 없다고 밝혔다.
 
@@ -70,7 +74,7 @@ highlights:
 
 아직 고치지 않은 서버도 많다. 인터넷 서버를 살피는 비영리 단체 [Shadowserver](https://x.com/Shadowserver/status/2116995373264756914)는 11월 1일 매일 보는 GitLab 서버 약 3만 9,000대 가운데 97229에 취약한 서버가 1,000대, 110264에 취약한 서버가 1만 1,300대를 넘는다고 집계했다. 110264는 아직 KEV에 오르지 않았다.
 
-**해설:** 고친 판이 나와도 서버가 취약한 채 남는 까닭을 Alpine의 경우가 보여 준다. 처음에는 번호가 하나 낮은 19.3.4로 올렸고, 다음에는 GitLab을 19.3.6으로 올렸지만 Ruby가 그대로여서 결함이 남았다. 직접 빌드해 운영한다면 GitLab 판 번호와 함께 Ruby 판도 확인해야 하는 이유다.
+**해설:** 고친 버전이 나와도 서버가 취약한 채 남는 까닭을 Alpine의 경우가 보여 준다. 처음에는 번호가 하나 낮은 19.3.4로 올렸고, 다음에는 GitLab을 19.3.6으로 올렸지만 Ruby가 그대로여서 결함이 남았다. 직접 빌드해 운영한다면 GitLab 버전 번호와 함께 Ruby 버전도 확인해야 하는 이유다.
 
 ## 결함의 원리
 
