@@ -2,6 +2,10 @@
 title: "AI 모델 출시 — 10월 14~28일"
 description: "10월 14일부터 28일까지 DeepSeek, 문샷AI, OpenAI가 AI 모델을 하나씩 새로 냈다. DeepSeek V4.1 Flash 1017, Kimi K3.1 Pro, GPT-6.1 Terra를 발표일·쓸 수 있는 곳·값·가중치 공개 여부로 나란히 놓고, OpenAI가 Terra를 사이버보안 'Critical'로 다룬다는 회사 판정의 뜻과 외부 기관의 평가를 측정 조건과 함께 정리했다."
 pubDate: 2026-10-29
+updatedDate: 2026-11-07
+corrections:
+  - date: 2026-11-07
+    text: "소프트웨어·평가 지수의 버전을 '판'으로 적은 표기가 부자연스러워 '버전'으로 바꿨다. 사실과 숫자는 바뀌지 않았다."
 tags: ["기획", "테크"]
 period: { from: 2026-10-14, to: 2026-10-28 }
 highlights:
@@ -14,7 +18,7 @@ highlights:
 
 1. **10월 17일부터 26일 사이 DeepSeek, 문샷AI, OpenAI가 모델을 하나씩 새로 냈다.** DeepSeek V4.1 Flash 1017, Kimi K3.1 Pro, GPT-6.1 Terra이고, 100만 토큰당 출력 값은 1.20달러, 10달러, 5달러다. 가중치를 내려받을 수 있는 것은 MIT 라이선스로 푼 DeepSeek 하나이고, 문샷AI는 11월 4일까지 풀겠다고 했다.
 2. **OpenAI는 Terra를 사이버보안에서 'Critical'로 다룬다고 밝혔다.** OpenAI가 자체 위험 기준의 두 단계 가운데 위 단계로 내린 판정이고, 외부 기관이 매긴 등급은 아니다. DeepSeek와 문샷AI의 발표와 모델 카드에는 이런 등급이 없다.
-3. **27일 외부 평가의 판이 바뀌자 같은 모델의 점수가 달라졌다.** Artificial Analysis가 지능 지수를 5판으로 바꾸면서 Kimi K3.1 Pro는 55에서 46이 됐다. 점수는 어느 판, 어떤 설정에서 쟀는지와 함께 봐야 한다.
+3. **27일 외부 평가의 버전이 바뀌자 같은 모델의 점수가 달라졌다.** Artificial Analysis가 지능 지수를 5 버전으로 바꾸면서 Kimi K3.1 Pro는 55에서 46이 됐다. 점수는 어느 버전, 어떤 설정에서 쟀는지와 함께 봐야 한다.
 
 9월 1일~10월 13일에 나온 모델은 [OpenAI·Anthropic·Google 9~10월 새 모델 출시](/jogan/feature/ai-models-september-october/)에 정리했다. 이 글은 그 뒤 조간 일일 글에 실린 범용 모델 셋을 같은 항목으로 다루고, 음성 모델 묶음인 미스트랄의 Voxtral 3([10월 21일 일일](/jogan/daily/2026-10-21/#tech))처럼 음성·이미지 전용 모델은 뺐다.
 
@@ -32,7 +36,7 @@ highlights:
 
 ## 10/17 — DeepSeek V4.1 Flash 1017
 
-**[DeepSeek](https://api-docs.deepseek.com/news/news261017/)는 17일 V4.1 Flash를 새 판 1017로 바꾸고, 가중치를 MIT 라이선스로 공개했다.** 9월 10일 낸 V4.1 Flash를 고친 판으로 웹과 앱, API에 바로 나왔고, [변경 기록](https://api-docs.deepseek.com/updates)에 따르면 API 호출 방법과 값은 그대로다. [허깅페이스 모델 카드](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017)는 이를 V4.1 Flash의 작은 업데이트라고 부르며, 작업 시간과 출력 길이를 줄여 같은 일을 더 적은 비용으로 끝낼 수 있다고 적었다.
+**[DeepSeek](https://api-docs.deepseek.com/news/news261017/)는 17일 V4.1 Flash를 새 버전 1017로 바꾸고, 가중치를 MIT 라이선스로 공개했다.** 9월 10일 낸 V4.1 Flash를 고친 버전으로 웹과 앱, API에 바로 나왔고, [변경 기록](https://api-docs.deepseek.com/updates)에 따르면 API 호출 방법과 값은 그대로다. [허깅페이스 모델 카드](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017)는 이를 V4.1 Flash의 작은 업데이트라고 부르며, 작업 시간과 출력 길이를 줄여 같은 일을 더 적은 비용으로 끝낼 수 있다고 적었다.
 
 가중치는 매개변수 약 7,630억 개 규모로 [허깅페이스](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017)에서 내려받을 수 있고, MIT 라이선스는 상업적 사용과 수정·재배포를 허용한다. API 값은 [DeepSeek 가격표](https://api-docs.deepseek.com/quick_start/pricing)에서 100만 토큰당 입력 0.30달러·출력 1.20달러인데, 평일 혼잡 시간의 값이고 그 밖의 시간과 주말·중국 공휴일에는 절반이다.
 
@@ -40,7 +44,7 @@ highlights:
 
 **[문샷AI](https://www.kimi.ai/blog/kimi-k3-1-pro)는 24일(베이징 시간) Kimi K3.1 Pro를 내놓고, 전체 가중치는 11월 4일까지 공개하겠다고 밝혔다.** Kimi K3를 더 많은 연산으로 후속 학습한 K3.1 시리즈의 첫 모델이고, [문샷AI](https://x.com/Kimi_Moonshot/status/2113680701770068067)에 따르면 전체 매개변수 2조 8,000억 개 가운데 한 번에 1,040억 개만 쓰는 전문가 혼합(MoE) 구조다.
 
-같은 날부터 Kimi.ai와 모바일 앱, 데스크톱 앱 Kimi Work, 코딩 도구 Kimi Code, API에서 쓸 수 있고, 회사가 2~3배 빠르다고 한 Highspeed 판도 함께 나왔다. [Kimi API 가격표](https://platform.kimi.ai/docs/pricing/chat)로 100만 토큰당 입력 2달러·출력 10달러여서 직전 Kimi K3(3달러·15달러)보다 3분의 1 낮고, Highspeed는 4달러·20달러다. 가중치는 28일까지 [허깅페이스](https://huggingface.co/moonshotai) 문샷AI 저장소에 올라오지 않았고, 공개할 때 붙일 라이선스도 밝히지 않았다.
+같은 날부터 Kimi.ai와 모바일 앱, 데스크톱 앱 Kimi Work, 코딩 도구 Kimi Code, API에서 쓸 수 있고, 회사가 2~3배 빠르다고 한 Highspeed 버전도 함께 나왔다. [Kimi API 가격표](https://platform.kimi.ai/docs/pricing/chat)로 100만 토큰당 입력 2달러·출력 10달러여서 직전 Kimi K3(3달러·15달러)보다 3분의 1 낮고, Highspeed는 4달러·20달러다. 가중치는 28일까지 [허깅페이스](https://huggingface.co/moonshotai) 문샷AI 저장소에 올라오지 않았고, 공개할 때 붙일 라이선스도 밝히지 않았다.
 
 ## 10/26 — GPT-6.1 Terra
 
@@ -62,22 +66,22 @@ ChatGPT Work와 Codex에서는 Plus·Pro·Enterprise·Edu 이용자가 쓸 수 �
 
 ## 외부 평가
 
-**Artificial Analysis가 27일 지능 지수를 5판으로 바꾸자, 같은 모델의 점수가 하루 사이 달라졌다.** 아래는 회사가 아닌 Artificial Analysis, Vals, ARC Prize가 직접 잰 결과다.
+**Artificial Analysis가 27일 지능 지수를 5 버전으로 바꾸자, 같은 모델의 점수가 하루 사이 달라졌다.** 아래는 회사가 아닌 Artificial Analysis, Vals, ARC Prize가 직접 잰 결과다.
 
-| 모델 | Artificial Analysis 지능 지수(4.3판) | Artificial Analysis 지능 지수(5판) | Vals 지수 2.2판 | ARC-AGI-2 |
+| 모델 | Artificial Analysis 지능 지수(4.3 버전) | Artificial Analysis 지능 지수(5 버전) | Vals 지수 2.2 버전 | ARC-AGI-2 |
 |---|---|---|---|---|
 | DeepSeek V4.1 Flash 1017 | 45 | 32 | 61.26% ±1.05 | 78.1% |
 | Kimi K3.1 Pro | 55 | 46 | 62.52% ±1.14 | — |
 | GPT-6.1 Terra | 48 | — | 60.17% ±1.03 | — |
 
-- **Artificial Analysis 지능 지수:** 여러 평가를 묶은 점수다. 4.3판은 그 전까지 쓰던 판이고, 27일 나온 5판은 평가 아홉 개를 지식 업무·코딩·과학·일반에 25%씩 나눠 묶었으며 60%를 문제나 답을 공개하지 않은 시험으로 잰다. DeepSeek와 Terra는 가장 높은 추론 설정(max)에서 쟀고 Kimi는 설정 표기가 없다([Kimi 4.3판](https://artificialanalysis.ai/articles/kimi-k3-1-pro-launch-benchmarks), [DeepSeek 4.3판](https://web.archive.org/web/20261026042325/https://artificialanalysis.ai/models/deepseek-v4-1-flash-1017), [Terra 4.3판](https://web.archive.org/web/20261026185011/https://artificialanalysis.ai/models/gpt-6-1-terra), [5판 발표](https://artificialanalysis.ai/articles/artificial-analysis-intelligence-index-v5)). 5판 점수는 발표 글에 실린 것만 적었다.
+- **Artificial Analysis 지능 지수:** 여러 평가를 묶은 점수다. 4.3 버전은 그 전까지 쓰던 버전이고, 27일 나온 5 버전은 평가 아홉 개를 지식 업무·코딩·과학·일반에 25%씩 나눠 묶었으며 60%를 문제나 답을 공개하지 않은 시험으로 잰다. DeepSeek와 Terra는 가장 높은 추론 설정(max)에서 쟀고 Kimi는 설정 표기가 없다([Kimi 4.3 버전](https://artificialanalysis.ai/articles/kimi-k3-1-pro-launch-benchmarks), [DeepSeek 4.3 버전](https://web.archive.org/web/20261026042325/https://artificialanalysis.ai/models/deepseek-v4-1-flash-1017), [Terra 4.3 버전](https://web.archive.org/web/20261026185011/https://artificialanalysis.ai/models/gpt-6-1-terra), [5 버전 발표](https://artificialanalysis.ai/articles/artificial-analysis-intelligence-index-v5)). 5 버전 점수는 발표 글에 실린 것만 적었다.
 - **설정과 오차:** max는 모델이 답하기 전에 가장 오래 추론하게 하는 설정이고, ± 뒤의 표준오차는 점수가 표본에 따라 흔들릴 수 있는 폭이다.
-- **Vals 지수:** 금융·코딩·법률·세무 업무에서 AI가 여러 단계를 해내는 능력을 재고, 미국 경제에서 각 분야가 차지하는 비중대로 점수를 합친다. 10월 19일 나온 2.2판이고, 세 모델 모두 max 설정이며 ±는 표준오차다([Vals](https://web.archive.org/web/20261027221121/https://www.vals.ai/benchmarks/vals_index), [DeepSeek](https://www.vals.ai/models/deepseek_deepseek-v4.1-flash-1017)·[Kimi](https://www.vals.ai/models/kimi_kimi-k3.1-pro)·[Terra](https://www.vals.ai/models/openai_gpt-6.1-terra)).
+- **Vals 지수:** 금융·코딩·법률·세무 업무에서 AI가 여러 단계를 해내는 능력을 재고, 미국 경제에서 각 분야가 차지하는 비중대로 점수를 합친다. 10월 19일 나온 2.2 버전이고, 세 모델 모두 max 설정이며 ±는 표준오차다([Vals](https://web.archive.org/web/20261027221121/https://www.vals.ai/benchmarks/vals_index), [DeepSeek](https://www.vals.ai/models/deepseek_deepseek-v4.1-flash-1017)·[Kimi](https://www.vals.ai/models/kimi_kimi-k3.1-pro)·[Terra](https://www.vals.ai/models/openai_gpt-6.1-terra)).
 - **ARC-AGI-2:** 처음 보는 퍼즐의 규칙을 찾아내는 시험이다. [ARC Prize](https://x.com/arcprize/status/2113318031954764273)가 22일 비공개 시험 세트(Semi-Private)로 검증해 낸 DeepSeek의 max 설정 점수이고, Terra와 Kimi의 결과는 28일까지 나오지 않았다([결과](https://arcprize.org/results/deepseek-v4-1-flash-1017)).
 
-5판은 새 평가 둘(FrontierCode 2.0, Terminal-Bench-Science)을 넣고 GDPval-AA·SciCode·AA-LCR을 뺐는데, 공개 가중치 모델과 비공개 모델의 거리도 이 판에서 달라졌다. [Artificial Analysis](https://artificialanalysis.ai/articles/kimi-k3-1-pro-launch-benchmarks)는 Kimi 출시 당일, 4.3판에서 공개 가중치 모델 1위와 비공개 모델 1위의 차이가 12점인데 Kimi 가중치가 풀리면 3점으로 준다고 했다. 그런데 Kimi를 넣어 다시 잰 [5판](https://artificialanalysis.ai/articles/artificial-analysis-intelligence-index-v5)에서는 그 차이가 12점이었다. [10월 24일 일일](/jogan/daily/2026-10-24/#tech)에 실은 55점과 '3점'은 4.3판 기준이고, [직전 기획](/jogan/feature/ai-models-september-october/)에 실은 점수(9월 7일 바뀐 판)도 5판 점수와 바로 견줄 수 없다.
+5 버전은 새 평가 둘(FrontierCode 2.0, Terminal-Bench-Science)을 넣고 GDPval-AA·SciCode·AA-LCR을 뺐는데, 공개 가중치 모델과 비공개 모델의 거리도 이 버전에서 달라졌다. [Artificial Analysis](https://artificialanalysis.ai/articles/kimi-k3-1-pro-launch-benchmarks)는 Kimi 출시 당일, 4.3 버전에서 공개 가중치 모델 1위와 비공개 모델 1위의 차이가 12점인데 Kimi 가중치가 풀리면 3점으로 준다고 했다. 그런데 Kimi를 넣어 다시 잰 [5 버전](https://artificialanalysis.ai/articles/artificial-analysis-intelligence-index-v5)에서는 그 차이가 12점이었다. [10월 24일 일일](/jogan/daily/2026-10-24/#tech)에 실은 55점과 '3점'은 4.3 버전 기준이고, [직전 기획](/jogan/feature/ai-models-september-october/)에 실은 점수(9월 7일 바뀐 버전)도 5 버전 점수와 바로 견줄 수 없다.
 
-같은 판 안에서도 설정에 따라 점수가 갈린다. [ARC Prize 결과](https://arcprize.org/results/deepseek-v4-1-flash-1017)를 보면 DeepSeek는 max에서 78.1%였지만, high(68.6%)는 오히려 low(73.6%)보다 낮았다.
+같은 버전 안에서도 설정에 따라 점수가 갈린다. [ARC Prize 결과](https://arcprize.org/results/deepseek-v4-1-flash-1017)를 보면 DeepSeek는 max에서 78.1%였지만, high(68.6%)는 오히려 low(73.6%)보다 낮았다.
 
 [Vals](https://web.archive.org/web/20261027221121/https://www.vals.ai/benchmarks/vals_index) 지수 시험을 한 번 치르는 데 든 값도 모델마다 달라서, DeepSeek 0.66달러, Terra 2.92달러, Kimi 6.44달러였다.
 
@@ -90,4 +94,4 @@ ChatGPT Work와 Codex에서는 Plus·Pro·Enterprise·Edu 이용자가 쓸 수 �
 - **ARC Prize가 Terra와 Kimi K3.1 Pro의 결과를 내는지.**
   [ARC Prize](https://x.com/arcprize/status/2113318031954764273)는 22일 DeepSeek V4.1 Flash 1017의 ARC-AGI-2 결과를 냈지만, Terra와 Kimi K3.1 Pro의 결과는 28일까지 없다.
   ARC Prize 결과 페이지에 두 모델이 오르는지, 어떤 추론 설정으로 검증했는지 보면 된다.
-  오르면 세 모델을 같은 시험의 같은 검증 세트로 나란히 놓을 수 있고, 오르지 않으면 ARC-AGI-2에서는 세 모델을 함께 견줄 수 없고, 셋을 나란히 놓을 수 있는 외부 평가는 Artificial Analysis 4.3판과 Vals로 남는다.
+  오르면 세 모델을 같은 시험의 같은 검증 세트로 나란히 놓을 수 있고, 오르지 않으면 ARC-AGI-2에서는 세 모델을 함께 견줄 수 없고, 셋을 나란히 놓을 수 있는 외부 평가는 Artificial Analysis 4.3 버전과 Vals로 남는다.
