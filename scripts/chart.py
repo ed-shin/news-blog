@@ -299,13 +299,16 @@ def net_bars(values, labels, caption, alt, gap_after=None, gap_label='', unit='�
     """날마다 산 금액에서 판 금액을 뺀 값(순매수)을 0 위아래 막대로 그린다.
     values = [억 원 단위 값, ...] (양수 = 순매수, 음수 = 순매도). 1조 원이 넘으면 조 단위로 적는다.
     gap_after = i 를 주면 i번째와 다음 막대 사이에 쉰 날(연휴)을 점선과 gap_label로 표시한다.
+    쉰 날이 여럿이면 gap_after에 [i, j, ...] 목록을 준다.
+    값을 확인하지 못한 날은 None으로 두면 막대 없이 "—"만 적는다(0으로 그리지 않는다).
     색은 순매수 --series-1(금색), 순매도 --series-2(보라). 빨강·파랑은 등락 표시라 쓰지 않는다."""
     def fmt(v):
         sign = '+' if v > 0 else '−' if v < 0 else ''
         a = abs(v)
         return f'{sign}{a / 10000:.1f}조' if a >= 10000 else f'{sign}{a:,.0f}억'
     top, bottom = PAD['t'] + 24, H - PAD['b'] - 20       # 위는 범례, 아래는 음수 막대 값 자리
-    lo, hi = min(min(values), 0), max(max(values), 0)
+    known = [v for v in values if v is not None]
+    lo, hi = min(min(known), 0), max(max(known), 0)
     pad = (hi - lo) * 0.12
     y_of = _scale(lo - pad, hi + pad, bottom - top, top, invert=True)
     slot = (W - PAD['l'] - PAD['r']) / len(values)
@@ -329,6 +332,10 @@ def net_bars(values, labels, caption, alt, gap_after=None, gap_label='', unit='�
     out.append(f'<text class="note" x="{W - PAD["r"]}" y="{PAD["t"] - 3}" text-anchor="end">단위: {unit}</text>')
     y0 = y_of(0)
     for i, (v, lab) in enumerate(zip(values, labels)):
+        if v is None:
+            out.append(f'<text class="val" x="{x_of(i)}" y="{round(y0 - 6, 1)}" text-anchor="middle">—</text>')
+            out.append(f'<text class="tick" x="{x_of(i)}" y="{H - PAD["b"] + 22}" text-anchor="middle">{lab}</text>')
+            continue
         y = y_of(v)
         y1, y2 = (y, y0) if v >= 0 else (y0, y)
         cls = 's1' if v >= 0 else 's2'
@@ -337,8 +344,9 @@ def net_bars(values, labels, caption, alt, gap_after=None, gap_label='', unit='�
         ty = round(y - 6, 1) if v >= 0 else round(y + 15, 1)
         out.append(f'<text class="val" x="{x_of(i)}" y="{ty}" text-anchor="middle">{fmt(v)}</text>')
         out.append(f'<text class="tick" x="{x_of(i)}" y="{H - PAD["b"] + 22}" text-anchor="middle">{lab}</text>')
-    if gap_after is not None:
-        gx = round(PAD['l'] + slot * (gap_after + 1), 1)
+    gaps = [] if gap_after is None else [gap_after] if isinstance(gap_after, int) else list(gap_after)
+    for g in gaps:
+        gx = round(PAD['l'] + slot * (g + 1), 1)
         out.append(f'<line class="mark" x1="{gx}" y1="{top - 6}" x2="{gx}" y2="{H - PAD["b"] + 6}"/>')
         if gap_label:
             out.append(f'<text class="note" x="{gx}" y="{top - 10}" text-anchor="middle">{gap_label}</text>')
