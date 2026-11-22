@@ -73,9 +73,15 @@ const dayLabel = today ? `${fmtMonthDay(today.data.pubDate)}자` : '';
             <ul>
               {front.schedule.map((s) => (
                 <li>
-                  <span class="when">{s.when}</span>
-                  <a href={s.url} target="_blank" rel="noopener noreferrer">{s.title}</a>
-                  {s.prev && <span class="prev">지난번 {s.prev}</span>}
+                  {(() => {
+                    // "11/17(화) 22:30" → 날짜와 시각을 두 줄 칩으로. 시각이 공지되지 않은 일정은 날짜만
+                    const m = s.when.match(/^(.*?)\s+(\d{1,2}:\d{2})$/);
+                    return <span class="when"><b>{m ? m[1] : s.when}</b>{m && <i>{m[2]}</i>}</span>;
+                  })()}
+                  <span class="what">
+                    <a href={s.url} target="_blank" rel="noopener noreferrer">{s.title}</a>
+                    {s.prev && <span class="prev">지난번 {s.prev}</span>}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -110,7 +116,7 @@ const dayLabel = today ? `${fmtMonthDay(today.data.pubDate)}자` : '';
     <div class="flow">
       {longreads.map((p) => (
         <div class="longread">
-          <h3>{KIND_LABEL[kindOf(p)!]}{p.data.period && <span class="period">{fmtPeriod(p.data.period)}</span>}</h3>
+          <h3><span class={`ktype k-${kindOf(p)}`}>{KIND_LABEL[kindOf(p)!]}</span>{p.data.period && <span class="period">{fmtPeriod(p.data.period)}</span>}</h3>
           <a href={postUrl(p)}>{p.data.title}</a>
           <p>{p.data.description}</p>
         </div>
@@ -133,7 +139,7 @@ const dayLabel = today ? `${fmtMonthDay(today.data.pubDate)}자` : '';
   .hero { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 56px; padding: 30px 0; border-bottom: 1px solid var(--border); line-height: 1.6; }
   .block { padding: 14px 0; border-top: 1px solid var(--border); }
   .block:first-child { padding-top: 0; border-top: 0; }
-  .hero h1 { margin: 0; font-family: var(--serif); font-weight: 800; font-size: clamp(1.22rem, 2vw, 1.45rem); line-height: 1.42; letter-spacing: -0.02em; }
+  .hero h1 { margin: 0; font-family: var(--serif); font-weight: 800; font-size: clamp(1.45rem, 3vw, 1.9rem); line-height: 1.38; letter-spacing: -0.02em; color: var(--text); }
   .hero h1 a:hover { color: var(--accent); }
   .apara { margin: 0; font-size: 0.97rem; line-height: 1.8; }
   .apara + .apara { margin-top: 12px; }
@@ -147,12 +153,16 @@ const dayLabel = today ? `${fmtMonthDay(today.data.pubDate)}자` : '';
   .sched-h { margin: 0 0 8px; padding-bottom: 7px; border-bottom: 1.5px solid var(--accent); font-size: 0.88rem; font-weight: 800; letter-spacing: 0.04em; color: var(--accent); }
   .sched-h span { margin-left: 8px; font-size: 0.78rem; font-weight: 500; letter-spacing: 0; color: var(--muted); }
   .sched ul { list-style: none; margin: 0; padding: 0; }
-  .sched li { padding: 9px 0; border-bottom: 1px solid var(--border); line-height: 1.45; }
+  /* 일정 한 줄: 위 주요 지표 표처럼 칸 없이 줄로 나누고, 왼쪽에 날짜(위)와 시각(아래)을 둔다 */
+  .sched li { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 10px; align-items: baseline; padding: 9px 0; border-bottom: 1px solid var(--border); line-height: 1.45; }
   .sched li:last-child { border-bottom: 0; }
-  .sched .when { display: block; font-size: 0.8rem; font-weight: 700; color: var(--bright); font-variant-numeric: tabular-nums; }
-  .sched a { font-size: 0.92rem; color: var(--text); }
+  .sched .when { display: flex; flex-direction: column; font-variant-numeric: tabular-nums; }
+  .sched .when b { font-size: 0.86rem; font-weight: 700; color: var(--text); }
+  .sched .when i { font-family: var(--mono); font-style: normal; font-size: 0.78rem; font-weight: 700; color: var(--muted); }
+  .sched .what { min-width: 0; }
+  .sched a { display: block; font-size: 0.9rem; font-weight: 600; color: var(--text); }
   .sched a:hover { color: var(--accent); }
-  .sched .prev { display: block; margin-top: 2px; font-size: 0.8rem; color: var(--muted); }
+  .sched .prev { display: block; margin-top: 2px; font-size: 0.78rem; color: var(--muted); }
   .market caption { caption-side: top; text-align: left; padding: 0 0 9px; font-size: 0.88rem; font-weight: 800; letter-spacing: 0.04em; color: var(--accent); }
   .market caption span { margin-left: 8px; font-size: 0.78rem; font-weight: 500; letter-spacing: 0; color: var(--muted); }
   .market th { padding: 0 0 7px; border-bottom: 1.5px solid var(--accent); font-size: 0.72rem; font-weight: 600; color: var(--muted); text-align: right; }
@@ -166,7 +176,7 @@ const dayLabel = today ? `${fmtMonthDay(today.data.pubDate)}자` : '';
   .desks { margin-top: 10px; padding: 6px 0 8px; line-height: 1.6; }
   .row { display: grid; grid-template-columns: 160px 1fr 1fr; gap: 0 36px; padding: 22px 0; border-top: 1px solid var(--border); }
   .row:first-child { border-top: 0; }
-  .row h2 { margin: 0; font-family: var(--serif); font-weight: 700; font-size: 18px; line-height: 1.3; letter-spacing: -0.01em; color: var(--accent); }
+  .row h2 { margin: 0; font-family: var(--sans); font-weight: 700; font-size: 18px; line-height: 1.3; letter-spacing: -0.01em; color: var(--accent); }
   .row h2 .num { display: block; margin-bottom: 4px; font: 800 0.78rem var(--sans); letter-spacing: 0.14em; color: var(--muted); }
   .row h2 a:hover { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1.5px; }
   .item h3 { margin: 0 0 5px; font-size: 1.02rem; font-weight: 700; line-height: 1.45; }

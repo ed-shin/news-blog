@@ -64,7 +64,106 @@ function rehypeEditorial() {
     });
   };
 
-  return (tree) => visit(tree);
+  // 데스크 섹션(금리~그 외)과 다음에 볼 것은 제목 아래 본문을 카드(div.desk-card)로 묶고,
+  // 카드 끝에 그 섹션이 링크한 외부 출처를 한 줄로 모은다(문장 속 링크는 그대로 둔다)
+  const DESK = new Set(['rates', 'market', 'energy', 'geo', 'tech', 'etc', 'next']);
+  const sources = (nodes) => {
+    const byLabel = new Map();   // 링크 글자 → 기사 주소들(같은 주소는 한 번만)
+    const walk = (n) => {
+      if (n.type !== 'element') return;
+      if (n.tagName === 'a' && n.properties?.target === '_blank') {
+        const label = textOf(n).trim();
+        const href = n.properties.href;
+        if (label) {
+          const list = byLabel.get(label) ?? [];
+          if (!list.includes(href)) list.push(href);
+          byLabel.set(label, list);
+        }
+      }
+      (n.children ?? []).forEach(walk);
+    };
+    nodes.forEach(walk);
+    return [...byLabel];
+  };
+  // 다음에 볼 것: 원고는 항목마다 굵은 첫 줄(무엇을 볼지) 아래 세 줄(확인된 것·볼 것·갈리는 방향)을
+  // 줄을 나눠 쓰는데, 마크다운에서는 한 문단으로 붙는다. 줄마다 행으로 나누고 이름표를 붙인다.
+  const WATCH = ['확인된 것', '볼 것', '갈리는 방향'];
+  const watchItems = (nodes) => {
+    const walk = (n) => {
+      if (n.type !== 'element') return;
+      if (n.tagName === 'li') {
+        const lines = [[]];
+        for (const c of n.children) {
+          if (c.type === 'text' && c.value.includes('\n')) {
+            c.value.split('\n').forEach((part, i) => {
+              if (i) lines.push([]);
+              if (part) lines[lines.length - 1].push({ type: 'text', value: part });
+            });
+          } else lines[lines.length - 1].push(c);
+        }
+        const rows = lines.filter((l) => l.some((c) => c.type !== 'text' || c.value.trim()));
+        if (rows.length >= 2) {
+          const labeled = rows.length === 4;
+          n.children = rows.map((row, i) => (i === 0
+            ? { type: 'element', tagName: 'div', properties: { className: ['watch-q'] }, children: row }
+            : { type: 'element', tagName: 'div', properties: { className: ['watch-row'] }, children: [
+                ...(labeled ? [span('watch-label', WATCH[i - 1])] : []),
+                { type: 'element', tagName: 'span', properties: { className: ['watch-text'] }, children: row },
+              ] }));
+        }
+        return;
+      }
+      (n.children ?? []).forEach(walk);
+    };
+    nodes.forEach(walk);
+  };
+  const card = (h2, body) => {
+    if (h2.properties?.id === 'next') watchItems(body);
+    const src = sources(body);
+    const children = [...body];
+    if (src.length) {
+      const link = (href, value) =>
+        ({ type: 'element', tagName: 'a', properties: { href, target: '_blank', rel: ['noopener', 'noreferrer'] }, children: [{ type: 'text', value }] });
+      const items = src.flatMap(([label, hrefs], i) => [
+        ...(i ? [{ type: 'text', value: ', ' }] : []),
+        link(hrefs[0], label),
+        ...hrefs.slice(1).flatMap((href, k) => [{ type: 'text', value: ' · ' }, link(href, String(k + 2))]),
+      ]);
+      children.push({ type: 'element', tagName: 'p', properties: { className: ['desk-src'] }, children: [
+        { type: 'element', tagName: 'span', properties: { className: ['desk-src-chip'] }, children: [span('desk-src-label', '출처: '), ...items] },
+      ] });
+    }
+    return [h2, { type: 'element', tagName: 'div', properties: { className: ['desk-card'] }, children }];
+  };
+  const group = (tree) => {
+    const out = [];
+    let cur = null;
+    const close = () => { if (cur && !cur.plain) cur.section.children = card(cur.h2, cur.body); cur = null; };
+    for (const node of tree.children) {
+      if (node.type === 'element' && node.tagName === 'h2') {
+        close();
+        const id = node.properties?.id;
+        if (id === 'summary' || id === 'numbers') {
+          const section = { type: 'element', tagName: 'section', properties: { className: [`${id}-card`] }, children: [node] };
+          out.push(section);
+          cur = { section, plain: true };
+          continue;
+        }
+        if (DESK.has(id)) {
+          const section = { type: 'element', tagName: 'section', properties: { className: ['desk', `desk-${id}`] }, children: [] };
+          out.push(section);
+          cur = { section, h2: node, body: [] };
+          continue;
+        }
+      }
+      if (cur?.plain) cur.section.children.push(node);
+      else (cur ? cur.body : out).push(node);
+    }
+    close();
+    tree.children = out;
+  };
+
+  return (tree) => { visit(tree); group(tree); };
 }
 
 // 용어 파일을 읽는다. 자동 링크와 사이트맵 갱신일에 쓴다

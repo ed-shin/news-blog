@@ -27,7 +27,7 @@ const asOf = new Date(`${tracking.asOf}T00:00:00Z`);
           return (
             <article class="entry" data-type={kind}>
               <div class="when"><span>{fmtMonthDay(post.data.pubDate)}</span><span>{fmtWeekday(post.data.pubDate)}</span></div>
-              <span class="type">{KIND_LABEL[kind]}{post.data.period && <span class="period">{fmtPeriod(post.data.period)}</span>}</span>
+              <span class={`type t-${kind}`}>{KIND_LABEL[kind]}{post.data.period && <span class="period">{fmtPeriod(post.data.period)}</span>}</span>
               <h2><a href={url}>{headlineOf(post)}</a></h2>
               {front ? (
                 <>
@@ -52,7 +52,7 @@ const asOf = new Date(`${tracking.asOf}T00:00:00Z`);
                   {post.data.highlights && (
                     <div class="nums hl">
                       {post.data.highlights.map((h) => (
-                        <div class="num"><span>{h.label}</span><b>{h.value}</b>{h.note && <i class="note">{h.note}</i>}</div>
+                        <div class="num"><span>{h.label}</span><b class={direction(h.value.replace(/^약\s*/, '')).cls}>{h.value}</b>{h.note && <i class="note">{h.note}</i>}</div>
                       ))}
                     </div>
                   )}
@@ -94,9 +94,13 @@ const asOf = new Date(`${tracking.asOf}T00:00:00Z`);
   .timeline::before { content: ''; position: absolute; top: 0; bottom: 0; left: 7px; width: 2px; background: var(--border); }
   .entry { position: relative; padding-left: 36px; margin-bottom: 44px; }
   .entry[hidden] { display: none; }
-  .entry::before { content: ''; position: absolute; left: 0; top: 6px; width: 16px; height: 16px; border-radius: 50%; background: var(--bg); border: 3px solid var(--accent); }
+  /* 원(16px, 테두리 포함)의 가운데를 세로선(7~9px)의 가운데 8px에 맞춘다. 가상 요소는 전역 border-box가 걸리지 않아 따로 준다 */
+  .entry::before { content: ''; box-sizing: border-box; position: absolute; left: 0; top: 6px; width: 16px; height: 16px; border-radius: 50%; background: var(--bg); border: 3px solid var(--accent); }
   .when { display: flex; align-items: center; gap: 8px; font-size: 0.84rem; color: var(--muted); }
   .type { font-size: 0.74rem; font-weight: 700; color: var(--accent); letter-spacing: 0.04em; }
+  /* 일일은 금색 그대로, 주간 흐름·기획은 글자색만 다르게 */
+  .type.t-weekly { color: var(--k-weekly); }
+  .type.t-feature { color: var(--k-feature); }
   .type .period { margin-left: 8px; color: var(--text); letter-spacing: 0.02em; }
   .entry h2 { font-family: var(--serif); font-weight: 800; font-size: clamp(1.35rem, 5vw, 1.65rem); line-height: 1.4; letter-spacing: -0.02em; margin: 8px 0 10px; }
   .entry h2 a:hover { color: var(--accent); }
@@ -113,11 +117,21 @@ const asOf = new Date(`${tracking.asOf}T00:00:00Z`);
     .nums { grid-template-columns: repeat(6, 1fr); }
     .nums:has(> .num:nth-child(7)) { grid-template-columns: repeat(4, 1fr); }
   }
-  .num { padding: 9px 12px; border-radius: 10px; background: var(--surface); font-variant-numeric: tabular-nums; }
-  .num span { display: block; font-size: 0.72rem; color: var(--muted); }
-  .num b { font-size: 0.98rem; white-space: nowrap; }
-  .num i { display: block; font-style: normal; font-size: 0.76rem; font-weight: 700; white-space: nowrap; }
-  .num i.note { font-weight: 600; color: var(--muted); white-space: normal; line-height: 1.45; }
+  /* 숫자 칸은 훑어보는 보조 정보라 제목·요약보다 낮게 둔다(시선: 제목 → 요약 → 숫자, Sol 검토 2026-11-22).
+     값은 본문색이고, 색은 일일 지표의 작은 등락에만 쓴다 */
+  .nums { gap: 8px; margin-top: 12px; }
+  .num { padding: 8px 10px; background: var(--surface); border-radius: 6px; font-variant-numeric: tabular-nums; }
+  .num span { display: block; font-size: 0.72rem; font-weight: 500; color: var(--muted); }
+  .num b { display: block; font-size: 0.94rem; font-weight: 700; line-height: 1.4; color: var(--text); white-space: nowrap; }
+  .num i { display: block; font-style: normal; font-size: 0.74rem; font-weight: 500; white-space: nowrap; }
+  .nums:not(.hl) .num i.up { color: var(--up); }
+  .nums:not(.hl) .num i.down { color: var(--down); }
+  .nums.hl .num { padding: 9px 12px; }
+  .nums.hl .num b { font-size: 1rem; }
+  /* 기획·주간 숫자: 마이너스는 파랑, 플러스는 빨강(사이트 등락 색). "약 −13조 원"처럼 앞의 '약'은 건너뛰고 부호를 본다 */
+  .nums.hl .num b.up { color: var(--up); }
+  .nums.hl .num b.down { color: var(--down); }
+  .num i.note { margin-top: 4px; font-size: 0.76rem; font-weight: 400; line-height: 1.5; color: var(--muted); white-space: normal; }
 
   .topic { display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; padding: 12px 0; border-top: 1px solid var(--border); }
   .side-label + .topic { border-top: 1.5px solid var(--muted); }

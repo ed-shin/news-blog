@@ -1,5 +1,5 @@
 ---
-name: "MCP(모델 컨텍스트 프로토콜)"
+name: "MCP(Model Context Protocol)"
 title: "MCP란? 뜻과 구성 요소"
 description: "AI 앱이 바깥의 도구와 자료를 같은 방식으로 연결하게 해 주는 공개 표준이다. 도구를 내놓는 서버를 한 번 만들면 MCP를 지원하는 여러 앱에서 쓸 수 있다. 연결 규격일 뿐, 모델을 어떻게 쓸지는 앱이 정한다."
 category: "테크"

@@ -59,26 +59,49 @@ const jsonLd = [
     ],
   },
 ];
+const titleText = kind ? headlineOf(post) : post.data.title;
+const titleParts = kind === 'daily' ? titleText.split(/(?<=…)\s+/) : [titleText];
 ---
 <Base title={post.data.title} fullTitle={searchTitleOf(post)} description={post.data.description} ogType="article" image={image} jsonLd={jsonLd} corner={kind ? 'jogan' : undefined}>
+  <article class="post-wrap">
+    {withToc && (
+        <header class="post-head">
+          {kind && (
+            <p class="blabel">
+              <span class={`ktype k-${kind}`}>{KIND_LABEL[kind]}</span><span class:list={['dl', { period }]}>{period ? fmtPeriod(period) : fmtFull(post.data.pubDate)}</span>
+              {kind === 'daily' && post.data.front && <a class="to-front" href={frontUrl(post)}>이날 1면 보기 →</a>}
+            </p>
+          )}
+          <h1><span class:list={{ marker: kind }}>{titleParts.map((t, n) => n ? <Fragment><br />{t}</Fragment> : t)}</span></h1>
+          <p class="dek">{post.data.description}</p>
+          {(showPubDate || post.data.updatedDate) && (
+            <p class="byline">
+              {showPubDate && <time datetime={post.data.pubDate.toISOString().slice(0, 10)}>{fmtFull(post.data.pubDate)}</time>}
+              {post.data.updatedDate && <span>수정 {fmtFull(post.data.updatedDate)}</span>}
+            </p>
+          )}
+        </header>
+    )}
   <div class:list={['post-layout', { layout: withToc }]}>
-    <article class="post">
-      <header class="post-head">
-        {kind && (
-          <p class="blabel">
-            {KIND_LABEL[kind]}<span class:list={['dl', { period }]}>{period ? fmtPeriod(period) : fmtFull(post.data.pubDate)}</span>
-            {kind === 'daily' && post.data.front && <a class="to-front" href={frontUrl(post)}>이날 1면 보기 →</a>}
-          </p>
-        )}
-        <h1><span class:list={{ marker: kind }}>{kind ? headlineOf(post) : post.data.title}</span></h1>
-        <p class="dek">{post.data.description}</p>
-        {(showPubDate || post.data.updatedDate) && (
-          <p class="byline">
-            {showPubDate && <time datetime={post.data.pubDate.toISOString().slice(0, 10)}>{fmtFull(post.data.pubDate)}</time>}
-            {post.data.updatedDate && <span>수정 {fmtFull(post.data.updatedDate)}</span>}
-          </p>
-        )}
-      </header>
+    <div class="post">
+      {!withToc && (
+        <header class="post-head">
+          {kind && (
+            <p class="blabel">
+              <span class={`ktype k-${kind}`}>{KIND_LABEL[kind]}</span><span class:list={['dl', { period }]}>{period ? fmtPeriod(period) : fmtFull(post.data.pubDate)}</span>
+              {kind === 'daily' && post.data.front && <a class="to-front" href={frontUrl(post)}>이날 1면 보기 →</a>}
+            </p>
+          )}
+          <h1><span class:list={{ marker: kind }}>{titleParts.map((t, n) => n ? <Fragment><br />{t}</Fragment> : t)}</span></h1>
+          <p class="dek">{post.data.description}</p>
+          {(showPubDate || post.data.updatedDate) && (
+            <p class="byline">
+              {showPubDate && <time datetime={post.data.pubDate.toISOString().slice(0, 10)}>{fmtFull(post.data.pubDate)}</time>}
+              {post.data.updatedDate && <span>수정 {fmtFull(post.data.updatedDate)}</span>}
+            </p>
+          )}
+        </header>
+      )}
 
       {withToc && (
         <nav class="toc-chips" aria-label="차례">
@@ -119,7 +142,7 @@ const jsonLd = [
         </p>
         {kind ? <a class="back" href="/jogan/all/">← 조간 전체 보기</a> : <a class="back" href="/">← 견문록 홈</a>}
       </footer>
-    </article>
+    </div>
 
     {withToc && (
       <aside class="side toc" aria-label="차례">
@@ -132,6 +155,7 @@ const jsonLd = [
       </aside>
     )}
   </div>
+  </article>
 </Base>
 
 <script>

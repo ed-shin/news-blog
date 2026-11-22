@@ -14,12 +14,14 @@ const groups = TERM_CATEGORIES.map((c) => ({ c, items: terms.filter((t) => t.dat
 >
   <article class="post">
     <header class="post-head">
-      <p class="blabel">용어</p>
-      <h1>뉴스를 읽는 말</h1>
-      <p class="dek">조간 글에 자주 나오는 용어를 한 쪽씩 풀었습니다. 글 속 점선 밑줄을 누르면 이 페이지들로 옵니다.</p>
+      <h1>용어</h1>
+      <div class="filters" role="group" aria-label="분야">
+        <button type="button" data-f="all" class="on">전체 <small>{terms.length}</small></button>
+        {groups.map((g) => <button type="button" data-f={g.c}>{g.c} <small>{g.items.length}</small></button>)}
+      </div>
     </header>
     {groups.map((g) => (
-      <section class="term-group">
+      <section class="term-group" data-c={g.c}>
         <h2>{g.c}</h2>
         <ul>
           {g.items.map((t) => (
@@ -31,8 +33,26 @@ const groups = TERM_CATEGORIES.map((c) => ({ c, items: terms.filter((t) => t.dat
   </article>
 </Base>
 
+<script>
+  // 분야 탭. 자바스크립트가 없으면 모든 분야가 그대로 보인다. ?c=금리 로 바로 열 수 있다
+  const buttons = [...document.querySelectorAll<HTMLButtonElement>('.filters button')];
+  const groups = [...document.querySelectorAll<HTMLElement>('.term-group')];
+  function show(c: string) {
+    if (c !== 'all' && !groups.some((g) => g.dataset.c === c)) c = 'all';
+    buttons.forEach((b) => b.classList.toggle('on', b.dataset.f === c));
+    groups.forEach((g) => { g.hidden = !(c === 'all' || g.dataset.c === c); });
+    const url = new URL(location.href);
+    if (c === 'all') url.searchParams.delete('c'); else url.searchParams.set('c', c);
+    history.replaceState(null, '', url);
+  }
+  buttons.forEach((b) => b.addEventListener('click', () => show(b.dataset.f ?? 'all')));
+  show(new URLSearchParams(location.search).get('c') ?? 'all');
+</script>
+
 <style>
+  .post-head .filters { margin: 18px 0 0; }
   .term-group { margin: 0 0 34px; }
+  .term-group[hidden] { display: none; }
   .term-group h2 { margin: 0 0 10px; font-size: 0.88rem; font-weight: 800; letter-spacing: 0.04em; color: var(--accent); }
   .term-group ul { list-style: none; margin: 0; padding: 0; }
   .term-group li { padding: 13px 0; border-bottom: 1px solid var(--border); line-height: 1.55; }

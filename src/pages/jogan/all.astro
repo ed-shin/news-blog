@@ -39,7 +39,7 @@ const tags = [...tagCounts].sort((a, b) => b[1] - a[1]);
                 <a class="row" href={postUrl(post)} data-type={kind} data-tags={topicsOf(post).join(' ')}>
                   <time datetime={post.data.pubDate.toISOString().slice(0, 10)}><b>{d.md}</b> {d.w}</time>
                   <div class="body">
-                    <span class="kind">{KIND_LABEL[kind]}{post.data.period && <span class="period">{fmtPeriod(post.data.period)}</span>}</span>
+                    <span class="kind"><span class={`ktype k-${kind}`}>{KIND_LABEL[kind]}</span>{post.data.period && <span class="period">{fmtPeriod(post.data.period)}</span>}</span>
                     <h3>{headlineOf(post)}</h3>
                     <p>{post.data.description}</p>
                   </div>
@@ -99,13 +99,13 @@ const tags = [...tagCounts].sort((a, b) => b[1] - a[1]);
 </script>
 
 <style>
-  .month { display: flex; justify-content: space-between; align-items: baseline; margin: 26px 0 0; padding-bottom: 8px; border-bottom: 1.5px solid var(--muted); font-family: var(--serif); font-weight: 800; font-size: 1.05rem; }
+  .month { display: flex; justify-content: space-between; align-items: baseline; margin: 26px 0 0; padding-bottom: 8px; border-bottom: 1.5px solid var(--muted); font-family: var(--sans); font-weight: 800; font-size: 1.05rem; }
   .month small { font: 600 0.8rem var(--sans); color: var(--muted); }
   .month-block[hidden], .row[hidden] { display: none; }
   .row { display: grid; grid-template-columns: 78px minmax(0, 1fr); gap: 0 18px; padding: 18px 0; border-bottom: 1px solid var(--border); }
   .row time { font-size: 0.84rem; color: var(--muted); padding-top: 2px; }
   .row time b { display: block; font-size: 1rem; color: var(--text); font-variant-numeric: tabular-nums; }
-  .row .kind { font-size: 0.76rem; font-weight: 800; color: var(--accent); letter-spacing: 0.04em; }
+  .row .kind { display: flex; align-items: center; font-size: 0.76rem; font-weight: 700; color: var(--muted); letter-spacing: 0.02em; }
   .row .period { margin-left: 8px; font-weight: 600; color: var(--text); letter-spacing: 0.02em; }
   .row h3 { margin: 3px 0 0; font-family: var(--serif); font-weight: 700; font-size: 1.12rem; line-height: 1.45; letter-spacing: -0.01em; }
   .row p { margin: 6px 0 0; font-size: 0.9rem; line-height: 1.65; color: var(--muted); }

@@ -29,7 +29,7 @@ const items = posts
           <li>
             <time datetime={isoDate(it.date)}>{fmtFull(it.date)}</time>
             <a class="which" href={postUrl(it.post)}>
-              {kindOf(it.post) && <span class="kind">{KIND_LABEL[kindOf(it.post)!]}</span>}
+              {kindOf(it.post) && <span class={`kind ktype k-${kindOf(it.post)}`}>{KIND_LABEL[kindOf(it.post)!]}</span>}
               {headlineOf(it.post)}
             </a>
             <p>{it.text}</p>
@@ -47,7 +47,7 @@ const items = posts
   .corrections .list li { padding: 18px 0; border-top: 1px solid var(--border); }
   .corrections time { display: block; font-size: 0.78rem; letter-spacing: 0.04em; color: var(--muted); }
   .corrections .which { display: block; margin: 4px 0 8px; font-weight: 700; }
-  .corrections .kind { margin-right: 8px; font-size: 0.75rem; font-weight: 600; color: var(--accent); }
+  .corrections .kind { margin-right: 8px; }
   .corrections .list p { margin: 0; color: var(--muted); }
   .corrections .empty { color: var(--muted); }
 </style>

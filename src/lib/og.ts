@@ -21,7 +21,7 @@ const FONTS = [
 const ICON = `data:image/png;base64,${readFileSync(join(process.cwd(), 'public/apple-touch-icon.png')).toString('base64')}`;
 
 // 사이트 토큰(global.css)과 같은 색
-const C = { bg: '#141414', glow: '#262626', text: '#ece6d6', muted: '#a9a9a9', border: '#2e2e2e', accent: '#e2b457', up: '#ff7f6e', down: '#83b3ff' };
+const C = { bg: '#f8f7f4', glow: '#f1ede5', text: '#181b20', bright: '#181b20', muted: '#646f82', border: '#e2ddd4', accent: '#b87b18', up: '#dc2626', down: '#2563eb' };
 
 // 1면 지표 여섯 개 가운데 카드에 싣는 넷. 이름은 일일 글 front.markets와 같아야 한다
 const CARD_MARKETS = ['코스피', '원/달러', '미 10년물', '브렌트'];
@@ -67,7 +67,7 @@ function layout({ kind, when, headline, sub, stats, asOf, term }: Card): Node {
 
   const main = box({ flexDirection: 'column', gap: 18, flexGrow: 1, justifyContent: 'center' },
     box({ width: 56, height: 5, background: C.accent, borderRadius: 3 }),
-    words(headline, { fontFamily: 'Hahmlet', fontWeight: 800, fontSize: headlineSize(headline, term), lineHeight: 1.28, color: '#fff', letterSpacing: -0.5 }),
+    words(headline, { fontFamily: 'Hahmlet', fontWeight: 800, fontSize: headlineSize(headline, term), lineHeight: 1.28, color: C.bright, letterSpacing: -0.5 }),
     sub ? words(sub, { fontFamily: 'Pretendard', fontWeight: 500, fontSize: term ? 30 : 32, lineHeight: 1.5, color: term ? C.text : C.muted }) : null);
 
   const valueSize = (v: string, n: number) => ([...v].length > 9 ? (n > 3 ? 26 : 30) : (n > 3 ? 32 : 36));
