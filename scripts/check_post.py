@@ -41,6 +41,7 @@ INTENT_PATTERNS = re.compile(r"협상용|노림수|떠보기|속셈|엄포용|�
 
 # 읽기 쉬운 길이. 넘으면 할 말이 둘인지, 결론을 받치지 않는 사실이 섞였는지 본다
 PARA_MAX = 350          # 본문 단락
+ATTRIB_MAX = 2          # 한 섹션의 "~에 따르면" (매체 이름은 주어·꾸밈말로 녹인다, CLAUDE.md 편집 원칙 9)
 LIST_LINE_MAX = 350     # 목록 항목의 한 줄 (다음에 볼 것은 세 갈래를 줄 나눠 쓴다)
 LIST_ITEM_MAX = 700     # 목록 항목 하나 전체
 # 문장 끝 괄호 출처 "…했다([뉴스핌](…))." 출처는 문장의 매체 이름에 건다(docs/post-format.md 4절).
@@ -514,6 +515,14 @@ def check_body(body, pub):
             warn(f"내부 링크 형식이 낯설다 → {href} (예: /jogan/daily/2026-09-18/#rates)")
         elif m.group(1) == "daily" and m.group(3) and m.group(3) not in section_ids:
             err(f"일일 글 섹션 주소는 {sorted(section_ids)} 중 하나 → {href}")
+
+    # "~에 따르면"이 한 섹션에 몰리면 문장마다 같은 머리가 붙어 읽기가 무겁다(2026-11-24 사용자 지적)
+    for sec in re.split(r"^(?=## )", body, flags=re.M):
+        title = sec.split("\n", 1)[0].removeprefix("## ").strip()
+        n = sec.count("에 따르면")
+        if n > ATTRIB_MAX:
+            warn(f"'## {title}'에 '~에 따르면'이 {n}번이다({ATTRIB_MAX}번 안) — 매체 이름을 주어나 꾸밈말로 녹인다. "
+                 "예: '[이투데이]가 전한 외국인 순매도는', '[미 재무부] 고시 10년물은', '[한국은행] 집계로', 같은 기사를 이어 쓰면 '같은 기사에서'")
 
     links = re.findall(r"\]\((https?://[^)\s]+)\)", body)
     if not links:
