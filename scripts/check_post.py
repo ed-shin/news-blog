@@ -516,6 +516,16 @@ def check_body(body, pub):
         elif m.group(1) == "daily" and m.group(3) and m.group(3) not in section_ids:
             err(f"일일 글 섹션 주소는 {sorted(section_ids)} 중 하나 → {href}")
 
+    # 섹션 소제목은 그 섹션의 가장 큰 사건을 담는다. 장소·대상을 늘어놓은 것은 제목이 아니다(2026-11-25 사용자 지적).
+    # 나열로 보는 것: 쉼표로 셋 이상 늘어놓은 것, 또는 꾸밈 없는 이름("걸프", "핀란드만과 폴란드")이 섞인 둘 이상.
+    # 숫자 속 쉼표(5,000)는 나누지 않고, "엇갈린 서울과 뉴욕"처럼 꾸밈이 붙은 구절은 이름으로 보지 않는다
+    for label, sub in re.findall(r"^## (.+?) — (.+)$", body, re.M):
+        items = [x.strip() for x in re.split(r",\s+", sub) if x.strip()]
+        bare = [x for x in items if re.fullmatch(r"[^\s,]{1,8}|[^\s,]+(?:와|과) [^\s,]+", x)]
+        if len(items) >= 3 or (len(items) >= 2 and bare) or (len(items) == 1 and re.fullmatch(r"[^\s,]+(?:와|과) [^\s,]+", sub)):
+            warn(f"'## {label} — {sub}' 소제목이 나열이다 — 그 섹션의 가장 큰 사건 하나를 무엇이 어떻게 됐는지로 쓴다"
+                 "(예: '90달러 아래로 내려간 브렌트'). 나머지 사건은 본문 굵은 첫 문장이 받는다")
+
     # "~에 따르면"이 한 섹션에 몰리면 문장마다 같은 머리가 붙어 읽기가 무겁다(2026-11-24 사용자 지적)
     for sec in re.split(r"^(?=## )", body, flags=re.M):
         title = sec.split("\n", 1)[0].removeprefix("## ").strip()
